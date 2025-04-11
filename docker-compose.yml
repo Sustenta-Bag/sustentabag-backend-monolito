@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # Serviço da aplicação
+  sacola-service:
+    build: .
+    container_name: sacola-service
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=sacola_service
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres_password
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - postgres
+    networks:
+      - sacola-network
+
+  # Serviço do banco de dados PostgreSQL
+  postgres:
+    image: postgres:14-alpine
+    container_name: sacola-postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=sacola_service
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sacola-network
+
+  # PgAdmin para administração do banco de dados (opcional)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: sacola-pgadmin
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@email.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - sacola-network
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  sacola-network:
+    driver: bridge

@@ -1,27 +1,54 @@
 {
-  "name": "node-boilerplate",
+  "name": "sacola-service",
   "version": "1.0.0",
-  "type": "module",
+  "description": "Microservice for bag management with DDD architecture",
+  "main": "src/index.js",
+  "type": "commonjs",
   "scripts": {
-    "start": "node src/server",
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
     "start:watch": "node --watch src/server",
     "swagger": "node src/swagger",
-    "swagger:watch": "node --watch src/swagger"
+    "swagger:watch": "node --watch src/swagger",
+    "test": "jest",
+    "test:watch": "jest --watchAll",
+    "test:coverage": "jest --coverage"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sustenta-Bag/sacola-service.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sustenta-Bag/sacola-service/issues"
+  },
+  "homepage": "https://github.com/Sustenta-Bag/sacola-service#readme",
   "dependencies": {
     "compression": "1.8.0",
-    "cors": "2.8.5",
-    "dotenv": "16.4.7",
-    "express": "4.21.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
     "helmet": "8.0.0",
     "http-status": "2.1.0",
     "jsonwebtoken": "9.0.2",
     "mongoose": "8.10.1",
     "morgan": "1.10.0",
-    "swagger-ui-express": "5.0.1",
+    "pg": "^8.14.1",
+    "sequelize": "^6.37.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "yup": "1.6.1"
   },
   "devDependencies": {
+    "jest": "^29.7.0",
+    "mockdate": "^3.0.5",
+    "nodemon": "^3.1.9",
+    "sinon": "^20.0.0",
+    "sqlite3": "^5.1.7",
+    "supertest": "^7.1.0",
     "swagger-autogen": "2.23.7"
   }
 }
