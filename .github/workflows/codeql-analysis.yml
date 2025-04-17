@@ -9,57 +9,73 @@ on:
     - cron: '0 0 * * 1'  # Executar à meia-noite nas segundas-feiras
 
 jobs:
-  check-advanced-security:
-    name: Verificar GitHub Advanced Security
+  security-check:
+    name: Verificação de Segurança
     runs-on: ubuntu-latest
-    outputs:
-      available: ${{ steps.check.outputs.available }}
     steps:
-      - name: Verificar disponibilidade do Advanced Security
-        id: check
-        # Esta etapa tenta determinar se o Advanced Security está disponível
-        # Vamos definir como verdadeiro para repositórios públicos e continuar de qualquer forma
+      - name: Checkout do repositório
+        uses: actions/checkout@v3
+        
+      - name: Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Instalar dependências
+        run: npm ci
+        
+      - name: Verificar vulnerabilidades com npm audit
+        run: npm audit --production || echo "Vulnerabilidades encontradas, mas continuando"
+        
+      - name: Verificar status do Advanced Security
+        id: advanced-security
         run: |
+          echo "Verificando status do GitHub Advanced Security"
           if [ "${{ github.event.repository.private }}" == "false" ]; then
-            echo "Advanced Security está disponível para repositórios públicos"
+            echo "Repositório público - Advanced Security disponível"
             echo "available=true" >> $GITHUB_OUTPUT
           else
-            echo "Repositório é privado, verificando Advanced Security..."
-            echo "available=true" >> $GITHUB_OUTPUT
-            # Nota: Ainda retornamos true, mas o Advanced Security irá falhar elegantemente se não estiver disponível
+            echo "Repositório privado - Advanced Security pode requerer licença"
+            echo "available=false" >> $GITHUB_OUTPUT
+            echo "Para habilitar o GitHub Advanced Security:"
+            echo "1. Acesse Settings > Security > Code security and analysis"
+            echo "2. Ative 'GitHub Advanced Security'"
+            echo "3. Em repositórios privados, isso pode ter custo adicional"
           fi
-
-  analyze:
-    name: Analisar Código
-    needs: check-advanced-security
-    if: needs.check-advanced-security.outputs.available == 'true'
+        
+  # Job condicional - só executa se o Advanced Security estiver disponível
+  codeql-analysis:
+    name: Análise CodeQL
+    needs: security-check
+    if: always() && needs.security-check.outputs.available == 'true'
     runs-on: ubuntu-latest
     permissions:
+      security-events: write
       actions: read
       contents: read
-      security-events: write
-
+      
     strategy:
       fail-fast: false
       matrix:
         language: [ 'javascript' ]
-
+        
     steps:
-    - name: Checkout do repositório
-      uses: actions/checkout@v3
-
-    - name: Inicializar CodeQL
-      uses: github/codeql-action/init@v3
-      continue-on-error: true
-      with:
-        languages: ${{ matrix.language }}
-
-    - name: Construir automaticamente
-      uses: github/codeql-action/autobuild@v3
-      continue-on-error: true
-
-    - name: Realizar Análise CodeQL
-      uses: github/codeql-action/analyze@v3
-      continue-on-error: true
-      with:
-        category: "/language:${{matrix.language}}" 
+      - name: Checkout do repositório
+        uses: actions/checkout@v3
+        
+      - name: Inicializar CodeQL
+        uses: github/codeql-action/init@v3
+        continue-on-error: true
+        with:
+          languages: ${{ matrix.language }}
+          
+      - name: Construir automaticamente
+        uses: github/codeql-action/autobuild@v3
+        continue-on-error: true
+        
+      - name: Realizar Análise CodeQL
+        uses: github/codeql-action/analyze@v3
+        continue-on-error: true
+        with:
+          category: "/language:${{matrix.language}}" 
