@@ -1,14 +1,12 @@
-const request = require('supertest');
-const express = require('express');
-const BagController = require('../../../src/application/interfaces/controllers/BagController');
-const BagService = require('../../../src/application/services/BagService');
-const { setupRoutes } = require('../../../src/application/interfaces/routes');
+import request from 'supertest';
+import express from 'express';
+import BagController from '../../../src/presentation/controllers/BagController.js';
+import BagService from '../../../src/application/services/BagService.js';
+import { setupRoutes } from '../../../src/infrastructure/routes/index.js';
 
-// Mock do controlador
-jest.mock('../../../src/application/interfaces/controllers/BagController');
+jest.mock('../../../src/presentation/controllers/BagController.js');
 
-// Mock dos middlewares
-jest.mock('../../../src/application/interfaces/middleware/bagValidation', () => ({
+jest.mock('../../../src/presentation/middleware/bagValidation.js', () => ({
   validateBagInput: jest.fn((req, res, next) => next()),
   validateStatusUpdate: jest.fn((req, res, next) => next()),
   validateCreateBag: jest.fn((req, res, next) => next()),
@@ -21,10 +19,8 @@ describe('Bag Routes', () => {
   let app;
   
   beforeEach(() => {
-    // Limpar todos os mocks
     jest.clearAllMocks();
     
-    // Mock das implementações dos métodos do controlador
     BagController.prototype.createBag = jest.fn((req, res) => {
       return res.status(201).json({ id: 1, type: 'Doce', price: 10.99 });
     });
@@ -57,7 +53,6 @@ describe('Bag Routes', () => {
       return res.json({ id: req.params.id, status: req.body.status });
     });
     
-    // Criar uma aplicação Express para testes
     app = express();
     app.use(express.json());
     setupRoutes(app);

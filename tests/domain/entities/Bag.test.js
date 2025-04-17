@@ -4,13 +4,11 @@ describe('Bag Entity', () => {
   const mockDate = new Date('2025-04-10T10:00:00Z');
   
   beforeAll(() => {
-    // Mock da data global para os testes
     global.Date = jest.fn(() => mockDate);
     global.Date.now = jest.fn(() => mockDate.getTime());
   });
 
   afterAll(() => {
-    // Restaurar a implementação original da data
     global.Date = Date;
   });
 
@@ -36,7 +34,7 @@ describe('Bag Entity', () => {
     const updatedBag = bag.updateStatus(0);
     
     expect(updatedBag.status).toBe(0);
-    expect(updatedBag).toBe(bag); // Verifica se retorna a mesma instância
+    expect(updatedBag).toBe(bag); 
   });
 
   test('deve atualizar o preço da sacola corretamente', () => {

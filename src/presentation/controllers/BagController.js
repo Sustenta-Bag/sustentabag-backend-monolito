@@ -1,4 +1,4 @@
-const AppError = require('../../../infrastructure/errors/AppError');
+import AppError from '../../infrastructure/errors/AppError.js';
 
 class BagController {
   constructor(bagService) {
@@ -82,4 +82,4 @@ class BagController {
   }
 }
 
-module.exports = BagController;
+export default BagController;

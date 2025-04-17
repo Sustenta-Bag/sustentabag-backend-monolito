@@ -1,14 +1,14 @@
-const express = require('express');
-const BagController = require('../controllers/BagController');
-const BagService = require('../../services/BagService');
-const PostgresBagRepository = require('../../../infrastructure/repositories/PostgresBagRepository');
-const { 
+import express from 'express';
+import BagController from '../controllers/BagController.js';
+import BagService from '../../application/services/BagService.js';
+import PostgresBagRepository from '../../infrastructure/repositories/PostgresBagRepository.js';
+import { 
   validateCreateBag, 
   validateUpdateBag, 
   validateBagId, 
   validateCompanyId,
   validateStatusUpdate
-} = require('../middleware/bagValidation');
+} from '../middleware/bagValidation.js';
 
 /**
  * @swagger
@@ -17,17 +17,22 @@ const {
  *   description: Gerenciamento de sacolas ecológicas
  */
 
-const setupRoutes = (app) => {
-  const router = express.Router();
-  
-  // Dependency injection
-  const bagRepository = new PostgresBagRepository();
+/**
+ * Configura as rotas para o módulo de Bags
+ * @param {Object} router - Router do Express para adicionar as rotas
+ * @param {Object} options - Opções de configuração
+ * @param {Object} options.bagRepository - Repositório de sacolas (opcional)
+ */
+export const setupRoutes = (router, options = {}) => {
+  const bagRepository = options.bagRepository || new PostgresBagRepository();
   const bagService = new BagService(bagRepository);
   const bagController = new BagController(bagService);
 
+  const routePrefix = '/bags';
+  
   /**
    * @swagger
-   * /bags:
+   * /api/bags:
    *   post:
    *     summary: Criar uma nova sacola
    *     tags: [Sacolas]
@@ -62,11 +67,11 @@ const setupRoutes = (app) => {
    *       400:
    *         description: Dados inválidos
    */
-  router.post('/bags', validateCreateBag, bagController.createBag.bind(bagController));
+  router.post(`${routePrefix}`, validateCreateBag, bagController.createBag.bind(bagController));
   
   /**
    * @swagger
-   * /bags:
+   * /api/bags:
    *   get:
    *     summary: Listar todas as sacolas
    *     tags: [Sacolas]
@@ -76,11 +81,11 @@ const setupRoutes = (app) => {
    *       500:
    *         description: Erro do servidor
    */
-  router.get('/bags', bagController.getAllBags.bind(bagController));
+  router.get(`${routePrefix}`, bagController.getAllBags.bind(bagController));
   
   /**
    * @swagger
-   * /bags/{id}:
+   * /api/bags/{id}:
    *   get:
    *     summary: Obter detalhes de uma sacola
    *     tags: [Sacolas]
@@ -97,11 +102,11 @@ const setupRoutes = (app) => {
    *       404:
    *         description: Sacola não encontrada
    */
-  router.get('/bags/:id', validateBagId, bagController.getBag.bind(bagController));
+  router.get(`${routePrefix}/:id`, validateBagId, bagController.getBag.bind(bagController));
   
   /**
    * @swagger
-   * /bags/{id}:
+   * /api/bags/{id}:
    *   put:
    *     summary: Atualizar informações de uma sacola
    *     tags: [Sacolas]
@@ -140,11 +145,11 @@ const setupRoutes = (app) => {
    *       400:
    *         description: Dados inválidos
    */
-  router.put('/bags/:id', validateUpdateBag, bagController.updateBag.bind(bagController));
+  router.put(`${routePrefix}/:id`, validateUpdateBag, bagController.updateBag.bind(bagController));
   
   /**
    * @swagger
-   * /bags/{id}:
+   * /api/bags/{id}:
    *   delete:
    *     summary: Remover uma sacola
    *     tags: [Sacolas]
@@ -161,11 +166,11 @@ const setupRoutes = (app) => {
    *       404:
    *         description: Sacola não encontrada
    */
-  router.delete('/bags/:id', validateBagId, bagController.deleteBag.bind(bagController));
+  router.delete(`${routePrefix}/:id`, validateBagId, bagController.deleteBag.bind(bagController));
 
   /**
    * @swagger
-   * /company/{companyId}/bags:
+   * /api/company/{companyId}/bags:
    *   get:
    *     summary: Listar todas as sacolas de uma empresa
    *     tags: [Sacolas]
@@ -182,11 +187,11 @@ const setupRoutes = (app) => {
    *       500:
    *         description: Erro do servidor
    */
-  router.get('/company/:companyId/bags', validateCompanyId, bagController.getBagsByCompany.bind(bagController));
+  router.get(`/company/:companyId${routePrefix}`, validateCompanyId, bagController.getBagsByCompany.bind(bagController));
 
   /**
    * @swagger
-   * /company/{companyId}/bags/active:
+   * /api/company/{companyId}/bags/active:
    *   get:
    *     summary: Listar sacolas ativas de uma empresa
    *     tags: [Sacolas]
@@ -203,11 +208,11 @@ const setupRoutes = (app) => {
    *       500:
    *         description: Erro do servidor
    */
-  router.get('/company/:companyId/bags/active', validateCompanyId, bagController.getActiveBagsByCompany.bind(bagController));
+  router.get(`/company/:companyId${routePrefix}/active`, validateCompanyId, bagController.getActiveBagsByCompany.bind(bagController));
 
   /**
    * @swagger
-   * /bags/{id}/status:
+   * /api/bags/{id}/status:
    *   patch:
    *     summary: Alterar o status de uma sacola
    *     tags: [Sacolas]
@@ -239,10 +244,5 @@ const setupRoutes = (app) => {
    *       400:
    *         description: Dados inválidos
    */
-  router.patch('/bags/:id/status', validateStatusUpdate, bagController.changeBagStatus.bind(bagController));
-
-  // Apply routes to app with prefix
-  app.use('/api', router);
+  router.patch(`${routePrefix}/:id/status`, validateStatusUpdate, bagController.changeBagStatus.bind(bagController));
 };
-
-module.exports = { setupRoutes };

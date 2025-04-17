@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   testEnvironment: 'node',
   coveragePathIgnorePatterns: [
     '/node_modules/'
@@ -10,5 +10,8 @@ module.exports = {
   testMatch: [
     '<rootDir>/tests/**/*.test.js'
   ],
-  verbose: true
+  verbose: true,
+  transform: {
+    '^.+\\.jsx?$': 'babel-jest'
+  }
 };

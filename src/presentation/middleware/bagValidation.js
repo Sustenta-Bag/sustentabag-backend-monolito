@@ -1,10 +1,10 @@
-const { body, param } = require('express-validator');
-const { handleValidationErrors } = require('./errorHandler');
+import { body, param } from 'express-validator';
+import { handleValidationErrors } from './errorHandler.js';
 
 /**
  * Validações para criação de sacolas
  */
-const validateCreateBag = [
+export const validateCreateBag = [
   body('type')
     .isIn(['Doce', 'Salgada', 'Mista'])
     .withMessage('Tipo da sacola deve ser Doce, Salgada ou Mista'),
@@ -27,14 +27,13 @@ const validateCreateBag = [
     .isIn([0, 1])
     .withMessage('Status deve ser 0 (inativo) ou 1 (ativo)'),
 
-  // Aplica o middleware de validação após as regras
   handleValidationErrors
 ];
 
 /**
  * Validações para atualização de sacolas
  */
-const validateUpdateBag = [
+export const validateUpdateBag = [
   body('type')
     .optional()
     .isIn(['Doce', 'Salgada', 'Mista'])
@@ -60,52 +59,40 @@ const validateUpdateBag = [
     .isIn([0, 1])
     .withMessage('Status deve ser 0 (inativo) ou 1 (ativo)'),
 
-  // Aplica o middleware de validação após as regras
   handleValidationErrors
 ];
 
 /**
  * Validação do parâmetro ID da sacola
  */
-const validateBagId = [
+export const validateBagId = [
   param('id')
     .isInt({ min: 1 })
     .withMessage('ID da sacola deve ser um número inteiro positivo'),
 
-  // Aplica o middleware de validação após as regras
   handleValidationErrors
 ];
 
 /**
  * Validação do parâmetro ID da empresa
  */
-const validateCompanyId = [
+export const validateCompanyId = [
   param('companyId')
     .isInt({ min: 1 })
     .withMessage('ID da empresa deve ser um número inteiro positivo'),
 
-  // Aplica o middleware de validação após as regras
   handleValidationErrors
 ];
 
 /**
  * Validações específicas para alteração de status
  */
-const validateStatusUpdate = [
+export const validateStatusUpdate = [
   body('status')
     .exists()
     .withMessage('Status é obrigatório')
     .isIn([0, 1])
     .withMessage('Status deve ser 0 (inativo) ou 1 (ativo)'),
 
-  // Aplica o middleware de validação após as regras
   handleValidationErrors
 ];
-
-module.exports = {
-  validateCreateBag,
-  validateUpdateBag,
-  validateBagId,
-  validateCompanyId,
-  validateStatusUpdate
-};

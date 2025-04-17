@@ -1,29 +1,23 @@
-const { Sequelize } = require('sequelize');
-const request = require('supertest');
-const { app } = require('../../src/index');
-const BagModel = require('../../src/infrastructure/database/models/BagModel');
+import { Sequelize } from 'sequelize';
+import request from 'supertest';
+import { app } from '../../src/app.js';
+import BagModel from '../../src/domain/models/BagModel.js';
 
-// Configuração do banco de dados de teste com SQLite em memória
 const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: ':memory:',
   logging: false
 });
 
-// Inicialização dos modelos no banco de testes
 const setupModels = async () => {
-  // Registramos os modelos na instância do Sequelize de teste
   BagModel.init(sequelize);
   
-  // Sobrescrevemos a instância do modelo para os testes
-  // Isso garante que as consultas durante os testes usem a conexão SQLite
   const originalFindByPk = BagModel.findByPk;
   const originalCreate = BagModel.create;
   const originalFindAll = BagModel.findAll;
   const originalUpdate = BagModel.update;
   const originalDestroy = BagModel.destroy;
 
-  // Preservamos os métodos originais para restauração posterior
   BagModel._originalMethods = {
     findByPk: originalFindByPk,
     create: originalCreate,
@@ -33,11 +27,9 @@ const setupModels = async () => {
   };
 };
 
-// Função para configurar o banco de dados de teste
 const setupDatabase = async () => {
   try {
     await setupModels();
-    // Sincroniza os modelos com o banco de dados (força a recriação das tabelas)
     await sequelize.sync({ force: true });
     console.log('Modelos sincronizados com banco de dados de teste em memória.');
   } catch (error) {
@@ -46,17 +38,14 @@ const setupDatabase = async () => {
   }
 };
 
-// Função para limpar o banco de dados entre os testes
 const clearDatabase = async () => {
   try {
-    // Limpa todas as tabelas entre os testes
     await sequelize.truncate({ cascade: true });
   } catch (error) {
     console.error('Erro ao limpar banco de dados de teste:', error);
   }
 };
 
-// Função para encerrar a conexão com o banco após os testes
 const teardownDatabase = async () => {
   try {
     await sequelize.close();
@@ -66,12 +55,11 @@ const teardownDatabase = async () => {
   }
 };
 
-// Retorna um cliente de teste para fazer requisições HTTP
 const getTestClient = () => {
   return request(app);
 };
 
-module.exports = {
+export {
   sequelize,
   setupDatabase,
   clearDatabase,

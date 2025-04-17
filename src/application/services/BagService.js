@@ -1,5 +1,5 @@
-const Bag = require('../../domain/entities/Bag');
-const AppError = require('../../infrastructure/errors/AppError');
+import Bag from '../../domain/entities/Bag.js';
+import AppError from '../../infrastructure/errors/AppError.js';
 
 class BagService {
   constructor(bagRepository) {
@@ -47,12 +47,10 @@ class BagService {
   }
 
   async changeBagStatus(id, status) {
-    // Converte boolean para número, se necessário
     if (typeof status === 'boolean') {
       status = status ? 1 : 0;
     }
     
-    // Valida status
     if (status !== 0 && status !== 1) {
       throw new AppError(
         'Status inválido. Deve ser 0 (inativo) ou 1 (ativo)', 
@@ -69,4 +67,4 @@ class BagService {
   }
 }
 
-module.exports = BagService;
+export default BagService;

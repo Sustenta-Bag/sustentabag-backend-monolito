@@ -5,18 +5,15 @@ describe('E2E Tests - Bag API Endpoints', () => {
   let createdBagId;
   const testCompanyId = 1;
 
-  // Executa antes de todos os testes
   beforeAll(async () => {
     await setupDatabase();
     request = getTestClient();
   });
 
-  // Limpa o banco de dados entre os testes
   beforeEach(async () => {
     await clearDatabase();
   });
 
-  // Fecha a conexão após todos os testes
   afterAll(async () => {
     await teardownDatabase();
   });
@@ -36,7 +33,6 @@ describe('E2E Tests - Bag API Endpoints', () => {
         .send(bagData)
         .expect(201);
 
-      // Guardamos o ID para usar em outros testes
       createdBagId = response.body.id;
 
       expect(response.body).toHaveProperty('id');
@@ -47,9 +43,8 @@ describe('E2E Tests - Bag API Endpoints', () => {
 
     test('deve retornar erro 400 quando dados são inválidos', async () => {
       const invalidBagData = {
-        // type está faltando
-        price: -5, // preço negativo, inválido
-        companyId: 'abc' // deve ser um número
+        price: -5, 
+        companyId: 'abc'
       };
 
       const response = await request
@@ -64,7 +59,6 @@ describe('E2E Tests - Bag API Endpoints', () => {
 
   describe('GET /api/bags', () => {
     test('deve retornar lista de sacolas', async () => {
-      // Primeiro criamos uma sacola
       const bagData = {
         type: 'Salgada',
         price: 12.99,
@@ -77,7 +71,6 @@ describe('E2E Tests - Bag API Endpoints', () => {
         .post('/api/bags')
         .send(bagData);
 
-      // Depois obtemos a lista
       const response = await request
         .get('/api/bags')
         .expect(200);
@@ -91,7 +84,6 @@ describe('E2E Tests - Bag API Endpoints', () => {
 
   describe('GET /api/bags/:id', () => {
     test('deve retornar uma sacola por ID', async () => {
-      // Primeiro criamos uma sacola
       const bagData = {
         type: 'Mista',
         price: 18.99,
@@ -106,7 +98,6 @@ describe('E2E Tests - Bag API Endpoints', () => {
 
       const bagId = createResponse.body.id;
 
-      // Depois buscamos por ID
       const response = await request
         .get(`/api/bags/${bagId}`)
         .expect(200);
@@ -127,7 +118,6 @@ describe('E2E Tests - Bag API Endpoints', () => {
 
   describe('PUT /api/bags/:id', () => {
     test('deve atualizar uma sacola existente', async () => {
-      // Primeiro criamos uma sacola
       const bagData = {
         type: 'Doce',
         price: 10.99,
@@ -142,7 +132,6 @@ describe('E2E Tests - Bag API Endpoints', () => {
 
       const bagId = createResponse.body.id;
 
-      // Depois atualizamos
       const updateData = {
         price: 14.99,
         description: 'Sacola atualizada'
@@ -156,13 +145,12 @@ describe('E2E Tests - Bag API Endpoints', () => {
       expect(response.body).toHaveProperty('id', bagId);
       expect(response.body.price).toBe(updateData.price);
       expect(response.body.description).toBe(updateData.description);
-      expect(response.body.type).toBe(bagData.type); // Mantido do original
+      expect(response.body.type).toBe(bagData.type);
     });
   });
 
   describe('DELETE /api/bags/:id', () => {
     test('deve excluir uma sacola existente', async () => {
-      // Primeiro criamos uma sacola
       const bagData = {
         type: 'Salgada',
         price: 11.99,
@@ -177,12 +165,10 @@ describe('E2E Tests - Bag API Endpoints', () => {
 
       const bagId = createResponse.body.id;
 
-      // Depois excluímos
       await request
         .delete(`/api/bags/${bagId}`)
-        .expect(204); // No content
+        .expect(204);
 
-      // Verificamos se realmente foi excluída
       await request
         .get(`/api/bags/${bagId}`)
         .expect(404);
@@ -191,7 +177,6 @@ describe('E2E Tests - Bag API Endpoints', () => {
 
   describe('GET /api/company/:companyId/bags', () => {
     test('deve retornar sacolas de uma empresa específica', async () => {
-      // Criamos duas sacolas para a mesma empresa
       const bagData1 = {
         type: 'Doce',
         price: 10.99,
@@ -221,20 +206,18 @@ describe('E2E Tests - Bag API Endpoints', () => {
 
   describe('GET /api/company/:companyId/bags/active', () => {
     test('deve retornar apenas sacolas ativas de uma empresa', async () => {
-      // Criamos uma sacola ativa
       const activeBag = {
         type: 'Doce',
         price: 10.99,
         companyId: testCompanyId,
-        status: 1 // Ativa
+        status: 1
       };
 
-      // Criamos uma sacola inativa
       const inactiveBag = {
         type: 'Salgada',
         price: 12.99,
         companyId: testCompanyId,
-        status: 0 // Inativa
+        status: 0 
       };
 
       await request.post('/api/bags').send(activeBag);
@@ -252,32 +235,6 @@ describe('E2E Tests - Bag API Endpoints', () => {
 
   describe('PATCH /api/bags/:id/status', () => {
     test('deve alterar o status de uma sacola', async () => {
-      // Primeiro criamos uma sacola
-      const bagData = {
-        type: 'Doce',
-        price: 10.99,
-        companyId: testCompanyId,
-        status: 1 // Ativa
-      };
-
-      const createResponse = await request
-        .post('/api/bags')
-        .send(bagData);
-
-      const bagId = createResponse.body.id;
-
-      // Agora alteramos o status para inativa
-      const response = await request
-        .patch(`/api/bags/${bagId}/status`)
-        .send({ status: 0 })
-        .expect(200);
-
-      expect(response.body).toHaveProperty('id', bagId);
-      expect(response.body.status).toBe(0);
-    });
-
-    test('deve retornar erro 400 se status for inválido', async () => {
-      // Primeiro criamos uma sacola
       const bagData = {
         type: 'Doce',
         price: 10.99,
@@ -291,10 +248,32 @@ describe('E2E Tests - Bag API Endpoints', () => {
 
       const bagId = createResponse.body.id;
 
-      // Agora tentamos com um status inválido
+      const response = await request
+        .patch(`/api/bags/${bagId}/status`)
+        .send({ status: 0 })
+        .expect(200);
+
+      expect(response.body).toHaveProperty('id', bagId);
+      expect(response.body.status).toBe(0);
+    });
+
+    test('deve retornar erro 400 se status for inválido', async () => {
+      const bagData = {
+        type: 'Doce',
+        price: 10.99,
+        companyId: testCompanyId,
+        status: 1
+      };
+
+      const createResponse = await request
+        .post('/api/bags')
+        .send(bagData);
+
+      const bagId = createResponse.body.id;
+
       await request
         .patch(`/api/bags/${bagId}/status`)
-        .send({ status: 2 }) // Status inválido
+        .send({ status: 2 }) 
         .expect(400);
     });
   });

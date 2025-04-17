@@ -1,11 +1,11 @@
 class Bag {
   constructor(id, type, price, description, companyId, status = 1, createdAt = new Date()) {
     this.id = id;
-    this.type = type; // ENUM: 'Doce', 'Salgada', 'Mista'
-    this.price = price; // Float
+    this.type = type;
+    this.price = price; 
     this.description = description;
-    this.companyId = companyId; // ID da empresa (vem de outro microserviço)
-    this.status = status; // 0 = inativo, 1 = ativo
+    this.companyId = companyId; 
+    this.status = status;
     this.createdAt = createdAt;
   }
 
@@ -35,4 +35,4 @@ class Bag {
   }
 }
 
-module.exports = Bag;
+export default Bag;

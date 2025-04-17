@@ -1,102 +1,73 @@
-const BagRepository = require('../../domain/repositories/BagRepository');
-const Bag = require('../../domain/entities/Bag');
-const BagModel = require('../database/models/BagModel');
+import BagRepository from './BagRepository.js';
+import Bag from '../../domain/entities/Bag.js';
+import BagModel from '../../domain/models/BagModel.js';
 
 class PostgresBagRepository extends BagRepository {
+  constructor(bagModel = BagModel) {
+    super();
+    this.BagModel = bagModel;
+  }
+
   async create(bagData) {
-    const bagRecord = await BagModel.create(bagData);
-    return new Bag(
-      bagRecord.id,
-      bagRecord.type,
-      bagRecord.price,
-      bagRecord.description,
-      bagRecord.companyId,
-      bagRecord.status,
-      bagRecord.createdAt
-    );
+    const bagRecord = await this.BagModel.create(bagData);
+    return this._mapToDomainEntity(bagRecord);
   }
 
   async findById(id) {
-    const bagRecord = await BagModel.findByPk(id);
+    const bagRecord = await this.BagModel.findByPk(id);
     if (!bagRecord) return null;
     
-    return new Bag(
-      bagRecord.id,
-      bagRecord.type,
-      bagRecord.price,
-      bagRecord.description,
-      bagRecord.companyId,
-      bagRecord.status,
-      bagRecord.createdAt
-    );
+    return this._mapToDomainEntity(bagRecord);
   }
 
   async findAll() {
-    const bagRecords = await BagModel.findAll();
-    return bagRecords.map(record => new Bag(
-      record.id,
-      record.type,
-      record.price,
-      record.description,
-      record.companyId,
-      record.status,
-      record.createdAt
-    ));
+    const bagRecords = await this.BagModel.findAll();
+    return bagRecords.map(record => this._mapToDomainEntity(record));
   }
 
   async update(id, bagData) {
-    // Primeiro atualiza o registro
-    await BagModel.update(bagData, {
+    await this.BagModel.update(bagData, {
       where: { id }
     });
     
-    // Depois recupera o registro atualizado
-    const bagRecord = await BagModel.findByPk(id);
+    const bagRecord = await this.BagModel.findByPk(id);
     if (!bagRecord) return null;
 
-    return new Bag(
-      bagRecord.id,
-      bagRecord.type,
-      bagRecord.price,
-      bagRecord.description,
-      bagRecord.companyId,
-      bagRecord.status,
-      bagRecord.createdAt
-    );
+    return this._mapToDomainEntity(bagRecord);
   }
 
   async delete(id) {
-    const deleted = await BagModel.destroy({
+    const deleted = await this.BagModel.destroy({
       where: { id }
     });
     return deleted > 0;
   }
 
   async findByCompanyId(companyId) {
-    const bagRecords = await BagModel.findAll({
+    const bagRecords = await this.BagModel.findAll({
       where: { companyId }
     });
     
-    return bagRecords.map(record => new Bag(
-      record.id,
-      record.type,
-      record.price,
-      record.description,
-      record.companyId,
-      record.status,
-      record.createdAt
-    ));
+    return bagRecords.map(record => this._mapToDomainEntity(record));
   }
 
   async findActiveByCompanyId(companyId) {
-    const bagRecords = await BagModel.findAll({
+    const bagRecords = await this.BagModel.findAll({
       where: { 
         companyId,
         status: 1
       }
     });
     
-    return bagRecords.map(record => new Bag(
+    return bagRecords.map(record => this._mapToDomainEntity(record));
+  }
+  
+  /**
+   * Mapeia um registro do modelo para uma entidade de domínio
+   * @private
+   */
+  _mapToDomainEntity(record) {
+    return new Bag(
       record.id,
       record.type,
       record.price,
@@ -104,8 +75,8 @@ class PostgresBagRepository extends BagRepository {
       record.companyId,
       record.status,
       record.createdAt
-    ));
+    );
   }
 }
 
-module.exports = PostgresBagRepository;
+export default PostgresBagRepository;

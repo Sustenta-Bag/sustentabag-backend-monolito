@@ -28,4 +28,4 @@ class BagRepository {
   }
 }
 
-module.exports = BagRepository;
+export default BagRepository;

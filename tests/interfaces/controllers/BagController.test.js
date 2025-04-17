@@ -1,9 +1,8 @@
-const BagController = require('../../../src/application/interfaces/controllers/BagController');
-const BagService = require('../../../src/application/services/BagService');
-const AppError = require('../../../src/infrastructure/errors/AppError');
-const Bag = require('../../../src/domain/entities/Bag');
+import BagController from '../../../src/presentation/controllers/BagController.js';
+import BagService from '../../../src/application/services/BagService.js';
+import AppError from '../../../src/infrastructure/errors/AppError.js';
+import Bag from '../../../src/domain/entities/Bag.js';
 
-// Mock do serviço
 const mockBagService = {
   createBag: jest.fn(),
   getBag: jest.fn(),
@@ -15,7 +14,6 @@ const mockBagService = {
   changeBagStatus: jest.fn()
 };
 
-// Mock para objetos de requisição e resposta
 const mockRequest = () => {
   const req = {};
   req.body = jest.fn().mockReturnValue(req);
@@ -31,7 +29,6 @@ const mockResponse = () => {
   return res;
 };
 
-// Mock para a função next
 const mockNext = jest.fn();
 
 describe('BagController', () => {
@@ -41,13 +38,10 @@ describe('BagController', () => {
   let next;
 
   beforeEach(() => {
-    // Limpar todos os mocks antes de cada teste
     jest.clearAllMocks();
     
-    // Inicializar o controller com o serviço mockado
     bagController = new BagController(mockBagService);
     
-    // Inicializar request, response e next para cada teste
     req = mockRequest();
     res = mockResponse();
     next = mockNext;
@@ -253,7 +247,7 @@ describe('BagController', () => {
 
     test('deve retornar status 400 quando o status não for fornecido', async () => {
       req.params.id = '1';
-      req.body = {}; // status não fornecido
+      req.body = {};
 
       await bagController.changeBagStatus(req, res, next);
 

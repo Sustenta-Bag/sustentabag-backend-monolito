@@ -1,7 +1,6 @@
 const BagService = require('../../../src/application/services/BagService');
 const Bag = require('../../../src/domain/entities/Bag');
 
-// Mock do repositório
 const mockBagRepository = {
   create: jest.fn(),
   findById: jest.fn(),
@@ -18,10 +17,8 @@ describe('BagService', () => {
   let bagService;
 
   beforeEach(() => {
-    // Limpar todos os mocks antes de cada teste
     jest.clearAllMocks();
     
-    // Inicializar o serviço com o repositório mockado
     bagService = new BagService(mockBagRepository);
   });
 

@@ -1,57 +1,66 @@
-const { Sequelize } = require('sequelize');
-const BagModel = require('./models/BagModel');
+import { Sequelize } from 'sequelize';
+import dotenv from 'dotenv';
 
-const sequelize = new Sequelize(
-  process.env.POSTGRES_DB || 'sacola_service',
-  process.env.POSTGRES_USER || 'postgres',
-  process.env.POSTGRES_PASSWORD || 'postgres',
-  {
-    host: process.env.POSTGRES_HOST || 'localhost',
-    dialect: 'postgres',
-    port: process.env.POSTGRES_PORT || 5432,
-    logging: process.env.NODE_ENV !== 'production',
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    }
+dotenv.config();
+
+const dbName = process.env.DB_NAME || 'sustentabag';
+const dbUser = process.env.DB_USER || 'postgres';
+const dbPassword = process.env.DB_PASSWORD || 'postgres';
+const dbHost = process.env.DB_HOST || 'localhost';
+const dbPort = process.env.DB_PORT || 5432;
+const dbSchema = process.env.DB_SCHEMA || 'public';
+
+export const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
+  host: dbHost,
+  port: dbPort,
+  dialect: 'postgres',
+  schema: dbSchema,
+  logging: process.env.NODE_ENV !== 'production',
+  define: {
+    timestamps: true,
+    underscored: true
+  },
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000
   }
-);
+});
 
-// Inicialização dos modelos
-const initModels = () => {
-  BagModel.init(sequelize);
-  // Aqui você pode inicializar outros modelos, se existirem
-};
-
-const connectDatabase = async () => {
+/**
+ * Estabelece conexão com o banco de dados
+ * @returns {Promise<boolean>} true se a conexão foi estabelecida com sucesso
+ */
+export const connectDatabase = async () => {
   try {
     await sequelize.authenticate();
-    console.log('Conectado ao PostgreSQL com sucesso');
-    
-    // Inicializa os modelos após a autenticação
-    initModels();
-    
+    console.log('Conexão com o PostgreSQL estabelecida com sucesso.');
+    return true;
   } catch (error) {
-    console.error('Erro na conexão com PostgreSQL:', error);
-    process.exit(1);
+    console.error('Não foi possível conectar ao PostgreSQL:', error);
+    throw error;
   }
 };
 
-const syncDatabase = async () => {
+/**
+ * Sincroniza os modelos com o banco de dados
+ * @param {boolean} force Se true, recria todas as tabelas
+ * @returns {Promise<boolean>} true se os modelos foram sincronizados com sucesso
+ */
+export const syncDatabase = async (force = false) => {
   try {
-    await sequelize.sync({ alter: process.env.NODE_ENV === 'development' });
-    console.log('Banco de dados sincronizado com sucesso');
+    await sequelize.sync({ force });
+    console.log('Modelos sincronizados com o banco de dados.');
+    return true;
   } catch (error) {
-    console.error('Erro na sincronização do banco de dados:', error);
-    process.exit(1);
+    console.error('Erro ao sincronizar modelos:', error);
+    throw error;
   }
 };
 
-module.exports = { 
-  sequelize, 
+export default {
+  sequelize,
   connectDatabase,
-  syncDatabase,
-  initModels
-};
+  syncDatabase
+}; 

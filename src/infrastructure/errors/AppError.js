@@ -18,7 +18,6 @@ class AppError extends Error {
     this.details = details;
     this.timestamp = new Date().toISOString();
     
-    // Captura a stack trace para fornecer informações de depuração úteis
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, this.constructor);
     }
@@ -103,4 +102,4 @@ class AppError extends Error {
   }
 }
 
-module.exports = AppError;
+export default AppError;

@@ -1,7 +1,11 @@
-const { Model, DataTypes } = require('sequelize');
+import { Model, DataTypes } from 'sequelize';
 
 class BagModel extends Model {
   static init(sequelizeInstance) {
+    if (!sequelizeInstance) {
+      throw new Error('É necessário fornecer uma instância do Sequelize para inicializar o modelo BagModel');
+    }
+    
     super.init({
       id: {
         type: DataTypes.INTEGER,
@@ -10,7 +14,7 @@ class BagModel extends Model {
         field: 'idSacola'
       },
       type: {
-        type: DataTypes.STRING, // Usando STRING em vez de ENUM para compatibilidade com SQLite
+        type: DataTypes.STRING, 
         allowNull: false,
         field: 'tipo',
         validate: {
@@ -33,7 +37,7 @@ class BagModel extends Model {
         field: 'idEmpresa'
       },
       status: {
-        type: DataTypes.INTEGER, // Usando INTEGER em vez de SMALLINT para compatibilidade com SQLite
+        type: DataTypes.INTEGER,
         defaultValue: 1,
         allowNull: false,
         field: 'status',
@@ -54,12 +58,19 @@ class BagModel extends Model {
     }, {
       sequelize: sequelizeInstance,
       tableName: 'sacolas',
-      timestamps: true
+      timestamps: true,
+      schema: process.env.DB_SCHEMA || 'public' 
     });
     
     return this;
   }
+  
+  /**
+   * Define associações com outros modelos no monolito
+   * @param {Object} models - Objeto contendo todos os modelos do monolito
+   */
+  static associate(models) {
+  }
 }
 
-// Exportar a classe ao invés da instância do modelo
-module.exports = BagModel;
+export default BagModel;

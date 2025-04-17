@@ -2,7 +2,6 @@ const { handleValidationErrors, errorHandler } = require('../../../src/applicati
 const AppError = require('../../../src/infrastructure/errors/AppError');
 const { validationResult } = require('express-validator');
 
-// Mock do express-validator
 jest.mock('express-validator', () => ({
   validationResult: jest.fn()
 }));
@@ -21,7 +20,6 @@ describe('Error Handler Middleware', () => {
   
   describe('handleValidationErrors', () => {
     test('deve chamar next() quando não há erros de validação', () => {
-      // Simula validationResult sem erros
       validationResult.mockReturnValue({
         isEmpty: jest.fn().mockReturnValue(true),
         array: jest.fn().mockReturnValue([])
@@ -35,7 +33,6 @@ describe('Error Handler Middleware', () => {
     });
     
     test('deve retornar status 400 e erros formatados quando houver erros de validação', () => {
-      // Simula erros de validação
       const mockValidationErrors = [
         { param: 'type', msg: 'Tipo inválido' },
         { param: 'price', msg: 'Preço deve ser positivo' }
@@ -110,9 +107,7 @@ describe('Error Handler Middleware', () => {
     });
     
     test('deve incluir detalhes do erro em ambiente não-produção', () => {
-      // Salvar o NODE_ENV original
       const originalNodeEnv = process.env.NODE_ENV;
-      // Definir ambiente para desenvolvimento
       process.env.NODE_ENV = 'development';
       
       const error = new Error('Detalhes do erro');
@@ -128,7 +123,6 @@ describe('Error Handler Middleware', () => {
         })
       );
       
-      // Restaurar NODE_ENV original
       process.env.NODE_ENV = originalNodeEnv;
     });
   });

@@ -2,13 +2,11 @@ const PostgresBagRepository = require('../../../src/infrastructure/repositories/
 const BagModel = require('../../../src/infrastructure/database/models/BagModel');
 const Bag = require('../../../src/domain/entities/Bag');
 
-// Mock do Sequelize Model
 jest.mock('../../../src/infrastructure/database/models/BagModel');
 
 describe('PostgresBagRepository', () => {
   let postgresBagRepository;
   
-  // Dados de exemplo para testes
   const mockBagData = {
     id: 1,
     type: 'Doce',
@@ -19,7 +17,6 @@ describe('PostgresBagRepository', () => {
     createdAt: new Date('2025-04-10T10:00:00Z')
   };
   
-  // Mock de retorno do Sequelize
   const mockBagRecord = {
     id: mockBagData.id,
     type: mockBagData.type,
@@ -93,8 +90,8 @@ describe('PostgresBagRepository', () => {
       const updateData = { price: 15.99 };
       const updatedRecord = { ...mockBagRecord, price: 15.99 };
       
-      BagModel.update.mockResolvedValue([1]); // 1 linha atualizada
-      BagModel.findByPk.mockResolvedValue(updatedRecord);
+      BagModel.update.mockResolvedValue([1]);
+      BagModel.findByPk.mockResolvedValue(updatedRecord)
 
       const result = await postgresBagRepository.update(1, updateData);
 
@@ -107,8 +104,8 @@ describe('PostgresBagRepository', () => {
     test('deve retornar null quando a sacola não existir', async () => {
       const updateData = { price: 15.99 };
       
-      BagModel.update.mockResolvedValue([1]); // simulando atualização bem-sucedida
-      BagModel.findByPk.mockResolvedValue(null); // mas a sacola não existe mais
+      BagModel.update.mockResolvedValue([1]); 
+      BagModel.findByPk.mockResolvedValue(null);
 
       const result = await postgresBagRepository.update(999, updateData);
 
@@ -120,7 +117,7 @@ describe('PostgresBagRepository', () => {
 
   describe('delete', () => {
     test('deve excluir uma sacola existente', async () => {
-      BagModel.destroy.mockResolvedValue(1); // 1 linha excluída
+      BagModel.destroy.mockResolvedValue(1);
 
       const result = await postgresBagRepository.delete(1);
 
@@ -129,7 +126,7 @@ describe('PostgresBagRepository', () => {
     });
 
     test('deve retornar false quando a sacola não existir', async () => {
-      BagModel.destroy.mockResolvedValue(0); // 0 linhas excluídas
+      BagModel.destroy.mockResolvedValue(0);
 
       const result = await postgresBagRepository.delete(999);
 
@@ -154,7 +151,7 @@ describe('PostgresBagRepository', () => {
 
   describe('findActiveByCompanyId', () => {
     test('deve encontrar sacolas ativas por ID da empresa', async () => {
-      const mockRecords = [mockBagRecord]; // Apenas sacolas ativas
+      const mockRecords = [mockBagRecord]; 
       BagModel.findAll.mockResolvedValue(mockRecords);
 
       const result = await postgresBagRepository.findActiveByCompanyId(2);

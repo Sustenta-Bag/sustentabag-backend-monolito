@@ -6,9 +6,9 @@ import {
   createUser,
   editUser,
   deleteUser,
-} from "../controllers/userController.js";
+} from "../../presentation/controllers/userController.js";
 
-import validator from "../middlewares/validator.js";
+import validator from "../../presentation/middleware/validator.js";
 import schema from "./userValidator.js";
 
 const router = Router();

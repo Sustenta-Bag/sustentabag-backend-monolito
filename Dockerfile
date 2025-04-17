@@ -1,19 +1,33 @@
-FROM node:18-alpine3.19
+FROM node:18-alpine AS build
 
-# Cria diretório de trabalho
-WORKDIR /usr/src/app
+# Diretório de trabalho
+WORKDIR /app
 
-# Copia os arquivos de dependência
+# Copiar apenas arquivos de dependências para aproveitar o cache do Docker
 COPY package*.json ./
 
-# Instala as dependências
-RUN npm install --production
+# Instalar dependências
+RUN npm ci --only=production
 
-# Copia o código-fonte
-COPY . .
+# Estágio de produção
+FROM node:18-alpine
 
-# Expõe a porta que a aplicação usa
-EXPOSE 3000
+# Definir variáveis de ambiente
+ENV NODE_ENV=production
+ENV PORT=4041
 
-# Comando para iniciar a aplicação
+# Diretório de trabalho
+WORKDIR /app
+
+# Copiar apenas as dependências do estágio de build
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/package*.json ./
+
+# Copiar código-fonte
+COPY src ./src
+
+# Expor a porta da aplicação
+EXPOSE 4041
+
+# Executar a aplicação
 CMD ["node", "src/index.js"]
