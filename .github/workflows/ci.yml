@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  test:
+    name: Testes
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v3
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Executar testes
+        run: npm run test
+
+      - name: Gerar relatório de cobertura
+        run: npm run test:coverage:unit:html
+
+      - name: Salvar relatório de cobertura
+        uses: actions/upload-artifact@v3
+        with:
+          name: relatorio-cobertura
+          path: coverage/
+          retention-days: 7 

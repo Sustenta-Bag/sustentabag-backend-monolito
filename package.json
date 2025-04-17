@@ -10,9 +10,14 @@
     "start:watch": "node --watch src/server.js",
     "swagger": "node src/swagger.js",
     "swagger:watch": "node --watch src/swagger.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js tests/unit",
+    "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js tests/integration",
+    "test:all": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watchAll",
-    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+    "test:coverage:html": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --coverageReporters=html",
+    "test:coverage:unit:html": "node --experimental-vm-modules node_modules/jest/bin/jest.js tests/unit --coverage --coverageReporters=html",
+    "coverage:open": "node open-coverage.js"
   },
   "repository": {
     "type": "git",

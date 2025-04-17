@@ -1,5 +1,8 @@
 # SustentaBag Backend Monolito
 
+[![CI](https://github.com/Sustenta-Bag/sustentabag-backend-monolito/actions/workflows/ci.yml/badge.svg)](https://github.com/Sustenta-Bag/sustentabag-backend-monolito/actions/workflows/ci.yml)
+[![Análise de Segurança](https://github.com/Sustenta-Bag/sustentabag-backend-monolito/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/Sustenta-Bag/sustentabag-backend-monolito/actions/workflows/codeql-analysis.yml)
+
 Sistema backend monolítico para gerenciamento de sacolas ecológicas utilizando arquitetura DDD (Domain-Driven Design).
 
 ## Descrição
@@ -46,6 +49,13 @@ src/
       ├── middleware/       # Middlewares
       ├── routes/           # Rotas da API
       └── routes/helper/    # Funções auxiliares para rotas
+tests/
+  ├── unit/                 # Testes unitários
+  │   ├── domain/           # Testes para o domínio
+  │   ├── application/      # Testes para a aplicação
+  │   └── infrastructure/   # Testes para a infraestrutura
+  └── integration/          # Testes de integração
+      └── api/              # Testes para os endpoints da API
 ```
 
 ## Configuração
@@ -157,6 +167,94 @@ npm run test         # Executa os testes
 npm run test:watch   # Executa os testes em modo watch
 npm run test:coverage # Verifica a cobertura dos testes
 ```
+
+## Testes
+
+O projeto utiliza Jest para testes unitários e de integração:
+
+### Estrutura de Testes
+
+- **Testes Unitários**: Testam componentes individuais como entidades, serviços e repositórios
+- **Testes de Integração**: Testam a interação entre componentes, como as APIs (em desenvolvimento)
+
+### Executando Testes
+
+```bash
+# Executar testes unitários
+npm test
+
+# Executar testes de integração (em implementação)
+npm run test:integration
+
+# Executar todos os testes
+npm run test:all
+
+# Executar testes em modo watch (durante desenvolvimento)
+npm run test:watch
+
+# Verificar a cobertura de testes
+npm run test:coverage
+
+# Gerar relatório de cobertura HTML para testes
+npm run test:coverage:html
+
+# Gerar relatório de cobertura HTML apenas para testes unitários
+npm run test:coverage:unit:html
+```
+
+### Relatórios de Cobertura HTML
+
+Os relatórios de cobertura HTML fornecem uma visualização detalhada da cobertura de testes do projeto, facilitando a identificação de áreas que precisam de melhorias.
+
+Para acessar os relatórios:
+
+1. Execute um dos comandos de cobertura HTML: `npm run test:coverage:html` ou `npm run test:coverage:unit:html`
+2. Use o comando `npm run coverage:open` para abrir automaticamente o relatório no navegador
+   ou abra manualmente o arquivo `coverage/index.html` no seu navegador
+3. Navegue pelos diretórios para verificar a cobertura de código específica
+
+O relatório HTML inclui:
+- Métricas de cobertura por arquivo e diretório
+- Código fonte com destaque de linhas testadas e não testadas
+- Resumo da cobertura de instruções, branches, funções e linhas
+
+```bash
+# Gerar e abrir o relatório de cobertura em um único comando
+npm run test:coverage:unit:html && npm run coverage:open
+```
+
+### Estratégia de Testes
+
+1. **Testes de Entidades**: Validam o comportamento das entidades de domínio
+2. **Testes de Serviços**: Validam a lógica de negócio nos serviços da aplicação
+3. **Testes de Repositórios**: Validam as operações de persistência
+4. **Testes de API**: Validam as requisições HTTP e respostas (em implementação)
+
+**Nota**: Os testes de integração para a API estão em desenvolvimento e serão implementados em versões futuras.
+
+## CI/CD Pipeline
+
+O projeto conta com pipelines de integração contínua (CI) usando GitHub Actions.
+
+### Pipelines Disponíveis
+
+1. **CI Pipeline (`ci.yml`)**: 
+   - Executa em cada push ou pull request para as branches principais
+   - Roda os testes unitários
+   - Gera relatórios de cobertura de código
+
+2. **Análise de Segurança (`codeql-analysis.yml`)**:
+   - Executa análise de segurança usando GitHub CodeQL
+   - Detecta vulnerabilidades de segurança no código
+   - Executa automaticamente em pushes, pull requests e semanalmente
+
+### Configuração
+
+Para configurar a pipeline em seu próprio repositório GitHub:
+
+1. Certifique-se de que o repositório está no GitHub
+2. Habilite o GitHub Actions em Settings → Actions → General
+3. Os workflows serão executados automaticamente quando você enviar código para o repositório
 
 ## Contribuindo
 
