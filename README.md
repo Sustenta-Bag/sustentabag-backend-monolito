@@ -239,14 +239,15 @@ O projeto conta com pipelines de integração contínua (CI) usando GitHub Actio
 ### Pipelines Disponíveis
 
 1. **CI Pipeline (`ci.yml`)**: 
-   - Executa em cada push ou pull request para as branches principais
+   - Executa em cada push para as branches principais (main, master, develop) e branches de feature (feature/*)
+   - Executa em pull requests para as branches principais
    - Roda os testes unitários
    - Gera relatórios de cobertura de código
 
 2. **Análise de Segurança (`codeql-analysis.yml`)**:
    - Executa análise de segurança usando GitHub CodeQL
    - Detecta vulnerabilidades de segurança no código
-   - Executa automaticamente em pushes, pull requests e semanalmente
+   - Executa em pushes para branches principais e de feature, pull requests, e semanalmente
 
 ### Configuração
 

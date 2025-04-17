@@ -2,9 +2,9 @@ name: "Análise de Segurança"
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [ main, master, develop, feature/* ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, master, develop ]
   schedule:
     - cron: '0 0 * * 1'  # Executar à meia-noite nas segundas-feiras
 
