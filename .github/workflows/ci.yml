@@ -1,4 +1,4 @@
-name: CI
+name: "CI Pipeline"
 
 on:
   push:
@@ -8,31 +8,31 @@ on:
 
 jobs:
   test:
-    name: Testes
+    name: Testes Unitários
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout do código
+      - name: Checkout do repositório
         uses: actions/checkout@v3
-
+        
       - name: Configurar Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
+          node-version: '18'
           cache: 'npm'
-
+          
       - name: Instalar dependências
         run: npm ci
-
+        
       - name: Executar testes
-        run: npm run test
-
-      - name: Gerar relatório de cobertura
-        run: npm run test:coverage:unit:html
-
-      - name: Salvar relatório de cobertura
+        run: npm test
+        
+      - name: Gerar relatório de cobertura de código
+        run: npm run test:coverage
+        
+      - name: Publicar relatório de cobertura
         uses: actions/upload-artifact@v3
         with:
-          name: relatorio-cobertura
+          name: coverage-report
           path: coverage/
           retention-days: 7 

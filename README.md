@@ -243,19 +243,34 @@ O projeto conta com pipelines de integração contínua (CI) usando GitHub Actio
    - Executa em pull requests para as branches principais
    - Roda os testes unitários
    - Gera relatórios de cobertura de código
+   - **Funciona em:** Repositórios públicos e privados
 
 2. **Análise de Segurança (`codeql-analysis.yml`)**:
    - Executa análise de segurança usando GitHub CodeQL
    - Detecta vulnerabilidades de segurança no código
    - Executa em pushes para branches principais e de feature, pull requests, e semanalmente
+   - **Funciona melhor em:** Repositórios públicos (gratuito) ou privados com GitHub Enterprise
+   - **Comportamento em repositórios privados sem Enterprise:** Tentará executar, mas não publicará resultados se o Advanced Security não estiver habilitado
 
-### Configuração
+3. **Verificação de Qualidade de Código (`lint.yml`)**:
+   - Verifica a qualidade do código usando ESLint
+   - Complemento ao CodeQL, oferecendo verificações de qualidade básicas
+   - Executa em todas as branches de feature e pull requests
+   - **Funciona em:** Repositórios públicos e privados
 
-Para configurar a pipeline em seu próprio repositório GitHub:
+### Configuração para Diferentes Tipos de Repositórios
 
-1. Certifique-se de que o repositório está no GitHub
-2. Habilite o GitHub Actions em Settings → Actions → General
-3. Os workflows serão executados automaticamente quando você enviar código para o repositório
+#### Para Repositórios Públicos
+Todos os workflows funcionam sem configuração adicional. O GitHub Advanced Security está habilitado gratuitamente.
+
+#### Para Repositórios Privados
+- O workflow de testes (`ci.yml`) e o linting (`lint.yml`) funcionam normalmente
+- O workflow de análise de segurança (`codeql-analysis.yml`) será executado, mas:
+  - Não publicará resultados sem GitHub Advanced Security
+  - Não impedirá outros workflows de funcionarem
+
+#### Para Repositórios em Organizações
+Para organizações com GitHub Enterprise, o administrador pode habilitar o Advanced Security para todos os repositórios nas configurações da organização.
 
 ## Contribuindo
 
