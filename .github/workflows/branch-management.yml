@@ -112,13 +112,18 @@ jobs:
             PR_NUMBER="${{ github.event.pull_request.number }}"
             MESSAGE="PR #${PR_NUMBER}: ${PR_TITLE}"
           else
-            # Usar última mensagem de commit
-            MESSAGE=$(git log -1 --pretty=%B)
+            # Usar última mensagem de commit, mas sanitizando para evitar problemas
+            # Remover caracteres problemáticos e limitar a 100 caracteres
+            MESSAGE=$(git log -1 --pretty=%s | sed 's/["\r\n]//g' | head -c 100)
+            
+            # Adicionar sufixo indicando commit
+            MESSAGE="Commit: ${MESSAGE}"
           fi
           
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "message=$MESSAGE" >> "$GITHUB_OUTPUT"
-          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          # Escrever saídas de forma segura
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "message=${MESSAGE}" >> "$GITHUB_OUTPUT"
+          echo "branch=${BRANCH}" >> "$GITHUB_OUTPUT"
       
       - name: Criar tag automática
         run: |
