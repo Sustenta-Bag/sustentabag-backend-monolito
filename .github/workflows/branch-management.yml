@@ -139,6 +139,9 @@ jobs:
           git tag -a "$TAG" -m "$MESSAGE"
           git push origin "$TAG"
           
+          # Salvar tag para uso posterior
+          echo "CREATED_TAG=$TAG" >> $GITHUB_ENV
+          
           echo "### ✅ Tag criada com sucesso" >> "$GITHUB_STEP_SUMMARY"
           echo "- Tag: $TAG" >> "$GITHUB_STEP_SUMMARY"
           echo "- Mensagem: $MESSAGE" >> "$GITHUB_STEP_SUMMARY"
@@ -192,4 +195,17 @@ jobs:
           
           if [[ "$BRANCH" == "develop" ]]; then
             echo "Esta tag será promovida automaticamente para a main se os testes passarem." >> "$GITHUB_STEP_SUMMARY"
-          fi 
+          fi
+      
+      - name: Acionar promoção automática (se for develop)
+        if: steps.branch.outputs.branch == 'develop'
+        run: |
+          TAG="${{ steps.generate-tag.outputs.tag }}"
+          
+          echo "### 🚀 Acionando promoção automática" >> "$GITHUB_STEP_SUMMARY"
+          echo "Iniciando workflow de promoção automática para a tag $TAG" >> "$GITHUB_STEP_SUMMARY"
+          
+          # Acionar o workflow auto-promote manualmente via API
+          gh workflow run auto-promote.yml -f dev_tag=$TAG
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

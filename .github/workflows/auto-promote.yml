@@ -5,15 +5,21 @@ on:
   push:
     tags:
       - 'dev-*'
+      
+  # Trigger quando uma tag é criada via API ou interface web
+  create:
   
-  # Opcional: Trigger quando workflow de testes concluir com sucesso
+  # Opcional: Trigger quando workflow de branch-management concluir com sucesso
   workflow_run:
-    workflows: ["CI Pipeline"]
+    workflows: ["Fluxo de Branches e Tags", "CI Pipeline"]
     types:
       - completed
-      - requested
     branches:
       - develop
+  
+  # Trigger diário às 00:00 para verificar se há mudanças
+  schedule:
+    - cron: '0 0 * * *'
   
   # Opção manual para casos específicos
   workflow_dispatch:
@@ -36,8 +42,10 @@ jobs:
   check-tests:
     name: Verificar Status dos Testes
     runs-on: ubuntu-latest
-    # Pular se for trigger manual ou por tag
-    if: github.event_name == 'workflow_run'
+    # Pular se for trigger manual, por tag ou por agendamento
+    if: |
+      github.event_name == 'workflow_run' && 
+      github.event.workflow.name == 'CI Pipeline'
     steps:
       - name: Verificar se testes passaram
         if: github.event.workflow_run.conclusion != 'success'
@@ -54,7 +62,7 @@ jobs:
     if: |
       always() && 
       (needs.check-tests.result == 'success' || needs.check-tests.result == 'skipped') &&
-      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
+      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' || github.event.workflow.name == 'Fluxo de Branches e Tags')
     runs-on: ubuntu-latest
     
     steps:
