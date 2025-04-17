@@ -1,0 +1,76 @@
+services:
+  # Banco de dados PostgreSQL
+  db:
+    image: postgres:14-alpine
+    container_name: sustentabag-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=sacola_service
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sustentabag-network
+
+  # API da Sustentabag
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sustentabag-api
+    restart: unless-stopped
+    ports:
+      - "4041:4041"
+    environment:
+      - NODE_ENV=production
+      - PORT=4041
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=sacola_service
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_SCHEMA=public
+      - JWT_SECRET=sustentabag_secret_key
+      - JWT_EXPIRATION=24h
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - sustentabag-network
+
+  # Ferramenta de administração do banco de dados
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: sustentabag-pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@sustentabag.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - db
+    networks:
+      - sustentabag-network
+
+volumes:
+  postgres_data:
+    name: sustentabag-postgres-data
+  pgadmin_data:
+    name: sustentabag-pgadmin-data
+
+networks:
+  sustentabag-network:
+    name: sustentabag-network
+    driver: bridge

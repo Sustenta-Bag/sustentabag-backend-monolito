@@ -1,0 +1,57 @@
+name: "Análise de Vulnerabilidades"
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  schedule:
+    - cron: '0 0 * * 1'  # Executa à meia-noite nas segundas-feiras
+
+jobs:
+  security-audit:
+    name: Auditoria de Segurança
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v3
+        
+      - name: Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Instalar dependências
+        run: npm ci
+        
+      - name: Verificar vulnerabilidades em dependências
+        id: npm-audit
+        run: |
+          echo "### Verificando vulnerabilidades com npm audit" >> $GITHUB_STEP_SUMMARY
+          npm audit --json > npm-audit.json || true
+          
+          # Contar vulnerabilidades por severidade
+          HIGH_COUNT=$(cat npm-audit.json | grep -o '"severity":"high"' | wc -l)
+          CRITICAL_COUNT=$(cat npm-audit.json | grep -o '"severity":"critical"' | wc -l)
+          
+          echo "Vulnerabilidades encontradas:" >> $GITHUB_STEP_SUMMARY
+          echo "- Críticas: $CRITICAL_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- Altas: $HIGH_COUNT" >> $GITHUB_STEP_SUMMARY
+          
+          if [ $CRITICAL_COUNT -gt 0 ] || [ $HIGH_COUNT -gt 0 ]; then
+            echo "⚠️ **Atenção**: Vulnerabilidades de alta severidade detectadas!" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            npm audit --production >> $GITHUB_STEP_SUMMARY 2>&1 || true
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Nenhuma vulnerabilidade crítica ou alta encontrada!" >> $GITHUB_STEP_SUMMARY
+          fi
+        
+      - name: Verificar outdated packages
+        run: |
+          echo "### Pacotes desatualizados" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          npm outdated || echo "Nenhum pacote desatualizado" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY 

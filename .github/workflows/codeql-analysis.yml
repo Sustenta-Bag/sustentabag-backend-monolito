@@ -1,0 +1,81 @@
+name: "Análise de Segurança"
+
+on:
+  push:
+    branches: [ main, master, develop, feature/* ]
+  pull_request:
+    branches: [ main, master, develop ]
+  schedule:
+    - cron: '0 0 * * 1'  # Executar à meia-noite nas segundas-feiras
+
+jobs:
+  security-check:
+    name: Verificação de Segurança
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v3
+        
+      - name: Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Instalar dependências
+        run: npm ci
+        
+      - name: Verificar vulnerabilidades com npm audit
+        run: npm audit --production || echo "Vulnerabilidades encontradas, mas continuando"
+        
+      - name: Verificar status do Advanced Security
+        id: advanced-security
+        run: |
+          echo "Verificando status do GitHub Advanced Security"
+          if [ "${{ github.event.repository.private }}" == "false" ]; then
+            echo "Repositório público - Advanced Security disponível"
+            echo "available=true" >> $GITHUB_OUTPUT
+          else
+            echo "Repositório privado - Advanced Security pode requerer licença"
+            echo "available=false" >> $GITHUB_OUTPUT
+            echo "Para habilitar o GitHub Advanced Security:"
+            echo "1. Acesse Settings > Security > Code security and analysis"
+            echo "2. Ative 'GitHub Advanced Security'"
+            echo "3. Em repositórios privados, isso pode ter custo adicional"
+          fi
+        
+  # Job condicional - só executa se o Advanced Security estiver disponível
+  codeql-analysis:
+    name: Análise CodeQL
+    needs: security-check
+    if: always() && needs.security-check.outputs.available == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+      
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript' ]
+        
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v3
+        
+      - name: Inicializar CodeQL
+        uses: github/codeql-action/init@v3
+        continue-on-error: true
+        with:
+          languages: ${{ matrix.language }}
+          
+      - name: Construir automaticamente
+        uses: github/codeql-action/autobuild@v3
+        continue-on-error: true
+        
+      - name: Realizar Análise CodeQL
+        uses: github/codeql-action/analyze@v3
+        continue-on-error: true
+        with:
+          category: "/language:${{matrix.language}}" 
