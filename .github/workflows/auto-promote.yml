@@ -1,0 +1,239 @@
+name: "Promoção Automática para Main"
+
+on:
+  # Trigger automático quando uma tag de develop é criada
+  push:
+    tags:
+      - 'dev-*'
+  
+  # Opcional: Trigger quando workflow de testes concluir com sucesso
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types:
+      - completed
+      - requested
+    branches:
+      - develop
+  
+  # Opção manual para casos específicos
+  workflow_dispatch:
+    inputs:
+      dev_tag:
+        description: 'Tag da develop para promover (ex: dev-012)'
+        required: false
+        default: ''
+      version:
+        description: 'Versão para tag de release (ex: 1.2.3)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # Job 1: Verificar status dos testes
+  check-tests:
+    name: Verificar Status dos Testes
+    runs-on: ubuntu-latest
+    # Pular se for trigger manual ou por tag
+    if: github.event_name == 'workflow_run'
+    steps:
+      - name: Verificar se testes passaram
+        if: github.event.workflow_run.conclusion != 'success'
+        run: |
+          echo "::error::Os testes não passaram. Promoção automática abortada."
+          echo "### ❌ Promoção automática cancelada" >> $GITHUB_STEP_SUMMARY
+          echo "Os testes na pipeline CI não passaram. A promoção para main foi abortada." >> $GITHUB_STEP_SUMMARY
+          exit 1
+
+  # Job 2: Promover alterações da develop para a main
+  auto-promote:
+    name: Promover para Main
+    needs: [check-tests]
+    if: |
+      always() && 
+      (needs.check-tests.result == 'success' || needs.check-tests.result == 'skipped') &&
+      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Configurar identidade Git
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+      
+      - name: Determinar tag da develop
+        id: get-dev-tag
+        run: |
+          # Prioridade:
+          # 1. Tag especificada no workflow_dispatch
+          # 2. Tag que acionou o evento
+          # 3. Última tag da develop
+          
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ -n "${{ github.event.inputs.dev_tag }}" ]; then
+            # Tag especificada manualmente
+            DEV_TAG="${{ github.event.inputs.dev_tag }}"
+          elif [ "${{ github.event_name }}" == "push" ]; then
+            # Evento acionado por tag
+            DEV_TAG="${{ github.ref_name }}"
+          else
+            # Buscar última tag da develop
+            DEV_TAG=$(git tag -l "dev-*" | sort -V | tail -n 1)
+          fi
+          
+          if [ -z "$DEV_TAG" ]; then
+            echo "::error::Nenhuma tag da develop encontrada para promoção"
+            echo "### ❌ Promoção cancelada" >> $GITHUB_STEP_SUMMARY
+            echo "Nenhuma tag da develop encontrada para promoção" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+          
+          # Verificar se a tag existe
+          git fetch --tags
+          if ! git tag | grep -q "^$DEV_TAG$"; then
+            echo "::error::Tag '$DEV_TAG' não encontrada no repositório"
+            echo "### ❌ Tag não encontrada" >> $GITHUB_STEP_SUMMARY
+            echo "A tag '$DEV_TAG' não existe no repositório" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+          
+          echo "dev_tag=$DEV_TAG" >> $GITHUB_OUTPUT
+          echo "Tag da develop para promoção: $DEV_TAG" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Verificar se há mudanças para promover
+        id: check-changes
+        run: |
+          git fetch origin develop
+          git fetch origin main
+          
+          # Verificar se develop está à frente da main
+          git checkout develop
+          git pull origin develop
+          
+          # Comparar develop com main
+          AHEAD=$(git rev-list --count origin/main..origin/develop)
+          
+          if [ "$AHEAD" -eq "0" ]; then
+            echo "no_changes=true" >> $GITHUB_OUTPUT
+            echo "### ℹ️ Não há mudanças para promover" >> $GITHUB_STEP_SUMMARY
+            echo "A branch develop está sincronizada com a main. Não há mudanças para promover." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "no_changes=false" >> $GITHUB_OUTPUT
+            echo "### ✅ Há mudanças para promover" >> $GITHUB_STEP_SUMMARY
+            echo "A branch develop está $AHEAD commit(s) à frente da main." >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: Gerar versão para release
+        id: generate-version
+        if: steps.check-changes.outputs.no_changes != 'true'
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ -n "${{ github.event.inputs.version }}" ]; then
+            # Usar versão fornecida pelo usuário
+            VERSION="${{ github.event.inputs.version }}"
+            if [[ ! $VERSION == v* ]]; then
+              VERSION="v$VERSION"
+            fi
+          else
+            # Gerar versão automática baseada na última tag de release
+            LATEST_TAG=$(git tag -l "v*" | grep -v "dev-" | sort -V | tail -n 1)
+            
+            if [ -z "$LATEST_TAG" ]; then
+              # Se não houver tag, começar com v1.0.0
+              VERSION="v1.0.0"
+            else
+              # Extrair números da versão
+              MAJOR=$(echo $LATEST_TAG | sed -E 's/v([0-9]+)\.([0-9]+)\.([0-9]+).*/\1/')
+              MINOR=$(echo $LATEST_TAG | sed -E 's/v([0-9]+)\.([0-9]+)\.([0-9]+).*/\2/')
+              PATCH=$(echo $LATEST_TAG | sed -E 's/v([0-9]+)\.([0-9]+)\.([0-9]+).*/\3/')
+              
+              # Incrementar patch
+              PATCH=$((PATCH + 1))
+              VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+            fi
+          fi
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Versão gerada para release: $VERSION" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Promover para main
+        if: steps.check-changes.outputs.no_changes != 'true'
+        run: |
+          DEV_TAG="${{ steps.get-dev-tag.outputs.dev_tag }}"
+          VERSION="${{ steps.generate-version.outputs.version }}"
+          
+          # Checkout da main
+          git checkout main
+          git pull origin main
+          
+          # Fazer merge da develop para main
+          echo "Mergeando develop (tag $DEV_TAG) para main como $VERSION"
+          git merge --no-ff origin/develop -m "Merge da develop (tag $DEV_TAG) para release $VERSION"
+          
+          # Criar tag de versão
+          git tag -a "$VERSION" -m "Release $VERSION (promovida da tag $DEV_TAG)"
+          
+          # Push das mudanças
+          git push origin main
+          git push origin "$VERSION"
+          
+          echo "### ✅ Main atualizada com sucesso" >> $GITHUB_STEP_SUMMARY
+          echo "- Tag da develop: $DEV_TAG" >> $GITHUB_STEP_SUMMARY
+          echo "- Nova tag de release: $VERSION" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Gerar changelog
+        if: steps.check-changes.outputs.no_changes != 'true'
+        id: changelog
+        run: |
+          VERSION="${{ steps.generate-version.outputs.version }}"
+          DEV_TAG="${{ steps.get-dev-tag.outputs.dev_tag }}"
+          
+          # Obter última tag de release para comparar alterações
+          PREV_VERSION_TAG=$(git tag -l "v*" | grep -v "dev-" | sort -V | tail -n 2 | head -n 1)
+          
+          echo "### Changelog da versão $VERSION" > changelog.md
+          echo "" >> changelog.md
+          
+          if [ -n "$PREV_VERSION_TAG" ] && [ "$PREV_VERSION_TAG" != "$VERSION" ]; then
+            echo "Alterações desde $PREV_VERSION_TAG:" >> changelog.md
+            git log --pretty=format:"- %s (%an)" $PREV_VERSION_TAG..HEAD >> changelog.md
+          else
+            echo "Primeiro lançamento oficial" >> changelog.md
+            git log --pretty=format:"- %s (%an)" >> changelog.md
+          fi
+          
+          cat changelog.md >> $GITHUB_STEP_SUMMARY
+      
+      - name: Criar GitHub Release
+        if: steps.check-changes.outputs.no_changes != 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.generate-version.outputs.version }}
+          name: Release ${{ steps.generate-version.outputs.version }}
+          body_path: changelog.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Notificar equipe sobre promoção
+        if: steps.check-changes.outputs.no_changes != 'true'
+        run: |
+          VERSION="${{ steps.generate-version.outputs.version }}"
+          DEV_TAG="${{ steps.get-dev-tag.outputs.dev_tag }}"
+          
+          echo "### 🚀 Promoção concluída com sucesso" >> $GITHUB_STEP_SUMMARY
+          echo "As mudanças da tag $DEV_TAG foram promovidas para main como versão $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "Uma release foi criada no GitHub: https://github.com/${{ github.repository }}/releases/tag/$VERSION" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Notificar que não há mudanças
+        if: steps.check-changes.outputs.no_changes == 'true'
+        run: |
+          echo "### ℹ️ Não houve promoção" >> $GITHUB_STEP_SUMMARY
+          echo "Não foram encontradas mudanças para promover da develop para a main" >> $GITHUB_STEP_SUMMARY 
