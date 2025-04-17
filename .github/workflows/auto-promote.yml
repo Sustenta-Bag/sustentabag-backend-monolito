@@ -43,8 +43,8 @@ jobs:
         if: github.event.workflow_run.conclusion != 'success'
         run: |
           echo "::error::Os testes não passaram. Promoção automática abortada."
-          echo "### ❌ Promoção automática cancelada" >> $GITHUB_STEP_SUMMARY
-          echo "Os testes na pipeline CI não passaram. A promoção para main foi abortada." >> $GITHUB_STEP_SUMMARY
+          echo "### ❌ Promoção automática cancelada" >> "$GITHUB_STEP_SUMMARY"
+          echo "Os testes na pipeline CI não passaram. A promoção para main foi abortada." >> "$GITHUB_STEP_SUMMARY"
           exit 1
 
   # Job 2: Promover alterações da develop para a main
@@ -90,8 +90,8 @@ jobs:
           
           if [ -z "$DEV_TAG" ]; then
             echo "::error::Nenhuma tag da develop encontrada para promoção"
-            echo "### ❌ Promoção cancelada" >> $GITHUB_STEP_SUMMARY
-            echo "Nenhuma tag da develop encontrada para promoção" >> $GITHUB_STEP_SUMMARY
+            echo "### ❌ Promoção cancelada" >> "$GITHUB_STEP_SUMMARY"
+            echo "Nenhuma tag da develop encontrada para promoção" >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
           
@@ -99,13 +99,13 @@ jobs:
           git fetch --tags
           if ! git tag | grep -q "^$DEV_TAG$"; then
             echo "::error::Tag '$DEV_TAG' não encontrada no repositório"
-            echo "### ❌ Tag não encontrada" >> $GITHUB_STEP_SUMMARY
-            echo "A tag '$DEV_TAG' não existe no repositório" >> $GITHUB_STEP_SUMMARY
+            echo "### ❌ Tag não encontrada" >> "$GITHUB_STEP_SUMMARY"
+            echo "A tag '$DEV_TAG' não existe no repositório" >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
           
-          echo "dev_tag=$DEV_TAG" >> $GITHUB_OUTPUT
-          echo "Tag da develop para promoção: $DEV_TAG" >> $GITHUB_STEP_SUMMARY
+          echo "dev_tag=$DEV_TAG" >> "$GITHUB_OUTPUT"
+          echo "Tag da develop para promoção: $DEV_TAG" >> "$GITHUB_STEP_SUMMARY"
       
       - name: Verificar se há mudanças para promover
         id: check-changes
@@ -121,13 +121,13 @@ jobs:
           AHEAD=$(git rev-list --count origin/main..origin/develop)
           
           if [ "$AHEAD" -eq "0" ]; then
-            echo "no_changes=true" >> $GITHUB_OUTPUT
-            echo "### ℹ️ Não há mudanças para promover" >> $GITHUB_STEP_SUMMARY
-            echo "A branch develop está sincronizada com a main. Não há mudanças para promover." >> $GITHUB_STEP_SUMMARY
+            echo "no_changes=true" >> "$GITHUB_OUTPUT"
+            echo "### ℹ️ Não há mudanças para promover" >> "$GITHUB_STEP_SUMMARY"
+            echo "A branch develop está sincronizada com a main. Não há mudanças para promover." >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "no_changes=false" >> $GITHUB_OUTPUT
-            echo "### ✅ Há mudanças para promover" >> $GITHUB_STEP_SUMMARY
-            echo "A branch develop está $AHEAD commit(s) à frente da main." >> $GITHUB_STEP_SUMMARY
+            echo "no_changes=false" >> "$GITHUB_OUTPUT"
+            echo "### ✅ Há mudanças para promover" >> "$GITHUB_STEP_SUMMARY"
+            echo "A branch develop está $AHEAD commit(s) à frente da main." >> "$GITHUB_STEP_SUMMARY"
           fi
       
       - name: Gerar versão para release
@@ -159,8 +159,8 @@ jobs:
             fi
           fi
           
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Versão gerada para release: $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Versão gerada para release: $VERSION" >> "$GITHUB_STEP_SUMMARY"
       
       - name: Promover para main
         if: steps.check-changes.outputs.no_changes != 'true'
@@ -183,9 +183,9 @@ jobs:
           git push origin main
           git push origin "$VERSION"
           
-          echo "### ✅ Main atualizada com sucesso" >> $GITHUB_STEP_SUMMARY
-          echo "- Tag da develop: $DEV_TAG" >> $GITHUB_STEP_SUMMARY
-          echo "- Nova tag de release: $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Main atualizada com sucesso" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Tag da develop: $DEV_TAG" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Nova tag de release: $VERSION" >> "$GITHUB_STEP_SUMMARY"
       
       - name: Gerar changelog
         if: steps.check-changes.outputs.no_changes != 'true'
@@ -208,7 +208,7 @@ jobs:
             git log --pretty=format:"- %s (%an)" >> changelog.md
           fi
           
-          cat changelog.md >> $GITHUB_STEP_SUMMARY
+          cat changelog.md >> "$GITHUB_STEP_SUMMARY"
       
       - name: Criar GitHub Release
         if: steps.check-changes.outputs.no_changes != 'true'
@@ -228,12 +228,12 @@ jobs:
           VERSION="${{ steps.generate-version.outputs.version }}"
           DEV_TAG="${{ steps.get-dev-tag.outputs.dev_tag }}"
           
-          echo "### 🚀 Promoção concluída com sucesso" >> $GITHUB_STEP_SUMMARY
-          echo "As mudanças da tag $DEV_TAG foram promovidas para main como versão $VERSION" >> $GITHUB_STEP_SUMMARY
-          echo "Uma release foi criada no GitHub: https://github.com/${{ github.repository }}/releases/tag/$VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 Promoção concluída com sucesso" >> "$GITHUB_STEP_SUMMARY"
+          echo "As mudanças da tag $DEV_TAG foram promovidas para main como versão $VERSION" >> "$GITHUB_STEP_SUMMARY"
+          echo "Uma release foi criada no GitHub: https://github.com/${{ github.repository }}/releases/tag/$VERSION" >> "$GITHUB_STEP_SUMMARY"
       
       - name: Notificar que não há mudanças
         if: steps.check-changes.outputs.no_changes == 'true'
         run: |
-          echo "### ℹ️ Não houve promoção" >> $GITHUB_STEP_SUMMARY
-          echo "Não foram encontradas mudanças para promover da develop para a main" >> $GITHUB_STEP_SUMMARY 
+          echo "### ℹ️ Não houve promoção" >> "$GITHUB_STEP_SUMMARY"
+          echo "Não foram encontradas mudanças para promover da develop para a main" >> "$GITHUB_STEP_SUMMARY" 

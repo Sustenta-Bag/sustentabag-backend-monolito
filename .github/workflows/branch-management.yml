@@ -59,8 +59,8 @@ jobs:
             BRANCH="${{ github.ref_name }}"
           fi
           
-          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
-          echo "Branch determinada: $BRANCH" >> $GITHUB_STEP_SUMMARY
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          echo "Branch determinada: $BRANCH" >> "$GITHUB_STEP_SUMMARY"
       
       - name: Gerar tag baseada na branch
         id: generate-tag
@@ -116,9 +116,9 @@ jobs:
             MESSAGE=$(git log -1 --pretty=%B)
           fi
           
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "message=$MESSAGE" >> $GITHUB_OUTPUT
-          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "message=$MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
       
       - name: Criar tag automática
         run: |
@@ -134,10 +134,10 @@ jobs:
           git tag -a "$TAG" -m "$MESSAGE"
           git push origin "$TAG"
           
-          echo "### ✅ Tag criada com sucesso" >> $GITHUB_STEP_SUMMARY
-          echo "- Tag: $TAG" >> $GITHUB_STEP_SUMMARY
-          echo "- Mensagem: $MESSAGE" >> $GITHUB_STEP_SUMMARY
-          echo "- Branch: $BRANCH" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Tag criada com sucesso" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Tag: $TAG" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Mensagem: $MESSAGE" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Branch: $BRANCH" >> "$GITHUB_STEP_SUMMARY"
       
       - name: Gerar changelog
         run: |
@@ -162,19 +162,19 @@ jobs:
             TAG_PATTERN="branch-${CLEAN_BRANCH}-*"
           fi
           
-          echo "### Alterações na tag $TAG" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Alterações na tag $TAG" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
           
           if [ -n "$PREV_TAG" ]; then
-            echo "Mudanças desde $PREV_TAG:" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-            git log --pretty=format:"- %s (%an)" $PREV_TAG..HEAD >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "Mudanças desde $PREV_TAG:" >> "$GITHUB_STEP_SUMMARY"
+            echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+            git log --pretty=format:"- %s (%an)" $PREV_TAG..HEAD >> "$GITHUB_STEP_SUMMARY"
+            echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "Primeiro conjunto de mudanças nesta branch" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-            git log --pretty=format:"- %s (%an)" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "Primeiro conjunto de mudanças nesta branch" >> "$GITHUB_STEP_SUMMARY"
+            echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+            git log --pretty=format:"- %s (%an)" >> "$GITHUB_STEP_SUMMARY"
+            echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
           fi
       
       - name: Notificar equipe
@@ -182,9 +182,9 @@ jobs:
           TAG="${{ steps.generate-tag.outputs.tag }}"
           BRANCH="${{ steps.generate-tag.outputs.branch }}"
           
-          echo "### 📢 Nova tag criada" >> $GITHUB_STEP_SUMMARY
-          echo "A tag $TAG foi criada na branch $BRANCH." >> $GITHUB_STEP_SUMMARY
+          echo "### 📢 Nova tag criada" >> "$GITHUB_STEP_SUMMARY"
+          echo "A tag $TAG foi criada na branch $BRANCH." >> "$GITHUB_STEP_SUMMARY"
           
           if [[ "$BRANCH" == "develop" ]]; then
-            echo "Esta tag será promovida automaticamente para a main se os testes passarem." >> $GITHUB_STEP_SUMMARY
+            echo "Esta tag será promovida automaticamente para a main se os testes passarem." >> "$GITHUB_STEP_SUMMARY"
           fi 
