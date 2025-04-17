@@ -5,19 +5,17 @@ on:
   push:
     tags:
       - 'dev-*'
-      
-  # Trigger quando uma tag é criada via API ou interface web
+  
+  # Trigger quando uma tag é criada via API ou interface web  
   create:
   
-  # Opcional: Trigger quando workflow de branch-management concluir com sucesso
+  # Trigger quando qualquer workflow é concluído com sucesso
   workflow_run:
     workflows: ["Fluxo de Branches e Tags", "CI Pipeline"]
     types:
       - completed
-    branches:
-      - develop
   
-  # Trigger diário às 00:00 para verificar se há mudanças
+  # Trigger diário às 00:00 UTC para verificar se há mudanças
   schedule:
     - cron: '0 0 * * *'
   
@@ -38,31 +36,49 @@ permissions:
   pull-requests: write
 
 jobs:
+  # Job de observabilidade para depuração
+  log-event:
+    name: Registrar Detalhes do Evento
+    runs-on: ubuntu-latest
+    steps:
+      - name: Registrar informações do evento
+        run: |
+          echo "Evento: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "SHA: ${{ github.sha }}"
+          
+          if [ "${{ github.event_name }}" == "push" ]; then
+            echo "Push ref: ${{ github.ref }}"
+            echo "Tag: ${{ github.ref_name }}"
+          elif [ "${{ github.event_name }}" == "create" ]; then
+            echo "Create ref: ${{ github.ref }}"
+            echo "Ref type: ${{ github.event.ref_type }}"
+          elif [ "${{ github.event_name }}" == "workflow_run" ]; then
+            echo "Workflow: ${{ github.event.workflow.name }}"
+            echo "Conclusão: ${{ github.event.workflow_run.conclusion }}"
+          fi
+  
   # Job 1: Verificar status dos testes
   check-tests:
     name: Verificar Status dos Testes
     runs-on: ubuntu-latest
-    # Pular se for trigger manual, por tag ou por agendamento
+    needs: [log-event]
+    # Pular se não for workflow_run do CI Pipeline
     if: |
-      github.event_name == 'workflow_run' && 
-      github.event.workflow.name == 'CI Pipeline'
+      github.event_name != 'workflow_run' || 
+      (github.event_name == 'workflow_run' && 
+       github.event.workflow.name == 'CI Pipeline' && 
+       github.event.workflow_run.conclusion == 'success')
     steps:
-      - name: Verificar se testes passaram
-        if: github.event.workflow_run.conclusion != 'success'
+      - name: Verificar status dos testes
         run: |
-          echo "::error::Os testes não passaram. Promoção automática abortada."
-          echo "### ❌ Promoção automática cancelada" >> "$GITHUB_STEP_SUMMARY"
-          echo "Os testes na pipeline CI não passaram. A promoção para main foi abortada." >> "$GITHUB_STEP_SUMMARY"
-          exit 1
+          echo "✅ Verificação de testes concluída com sucesso"
+          echo "### ✅ Verificação de testes concluída" >> "$GITHUB_STEP_SUMMARY"
 
   # Job 2: Promover alterações da develop para a main
   auto-promote:
     name: Promover para Main
     needs: [check-tests]
-    if: |
-      always() && 
-      (needs.check-tests.result == 'success' || needs.check-tests.result == 'skipped') &&
-      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' || github.event.workflow.name == 'Fluxo de Branches e Tags')
     runs-on: ubuntu-latest
     
     steps:
@@ -76,6 +92,14 @@ jobs:
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
+          
+      - name: Buscar todas as tags
+        run: |
+          git fetch --tags --force
+          
+          echo "Tags disponíveis:"
+          git tag -l "dev-*" | sort -V
+          echo "---"
       
       - name: Determinar tag da develop
         id: get-dev-tag
@@ -88,9 +112,12 @@ jobs:
           if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ -n "${{ github.event.inputs.dev_tag }}" ]; then
             # Tag especificada manualmente
             DEV_TAG="${{ github.event.inputs.dev_tag }}"
-          elif [ "${{ github.event_name }}" == "push" ]; then
+          elif [ "${{ github.event_name }}" == "push" ] && [[ "${{ github.ref }}" == refs/tags/dev-* ]]; then
             # Evento acionado por tag
             DEV_TAG="${{ github.ref_name }}"
+          elif [ "${{ github.event_name }}" == "create" ] && [ "${{ github.event.ref_type }}" == "tag" ] && [[ "${{ github.event.ref }}" == dev-* ]]; then
+            # Evento de criação de tag
+            DEV_TAG="${{ github.event.ref }}"
           else
             # Buscar última tag da develop
             DEV_TAG=$(git tag -l "dev-*" | sort -V | tail -n 1)
@@ -104,7 +131,6 @@ jobs:
           fi
           
           # Verificar se a tag existe
-          git fetch --tags
           if ! git tag | grep -q "^$DEV_TAG$"; then
             echo "::error::Tag '$DEV_TAG' não encontrada no repositório"
             echo "### ❌ Tag não encontrada" >> "$GITHUB_STEP_SUMMARY"

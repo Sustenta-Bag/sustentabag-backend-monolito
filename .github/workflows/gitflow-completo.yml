@@ -1,0 +1,410 @@
+name: "GitFlow Completo - Tags e Promoções"
+
+on:
+  # Acionado quando um PR é fechado
+  pull_request:
+    types: [closed]
+    branches: [develop, feature/*, hotfix/*]
+  
+  # Acionado quando código é enviado diretamente para branches
+  push:
+    branches: [develop, feature/*, hotfix/*]
+    
+  # Trigger diário para verificar promoção
+  schedule:
+    - cron: '0 0 * * *'
+    
+  # Opção manual para testes ou casos específicos
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Ação a realizar'
+        type: choice
+        required: true
+        default: 'criar-tag'
+        options:
+          - 'criar-tag'
+          - 'promover-para-main'
+      branch:
+        description: 'Branch para criar tag (ex: develop, feature/nome)'
+        required: false
+        default: 'develop'
+      dev_tag:
+        description: 'Tag da develop para promover (ex: dev-012)'
+        required: false
+        default: ''
+      version:
+        description: 'Versão para tag de release (ex: 1.2.3)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # Job 1: Criar tags automaticamente para branches
+  tag-branch:
+    name: Criar Tag Automática
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true) ||
+      (github.event_name == 'push' && github.actor != 'github-actions[bot]') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'criar-tag')
+    runs-on: ubuntu-latest
+    outputs:
+      created_tag: ${{ steps.generate-tag.outputs.tag }}
+      branch_name: ${{ steps.branch.outputs.branch }}
+    
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Configurar identidade Git
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+      
+      - name: Determinar branch atual
+        id: branch
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            # Uso da branch especificada manualmente
+            BRANCH="${{ github.event.inputs.branch }}"
+          elif [ "${{ github.event_name }}" == "pull_request" ]; then
+            # Uso da branch de destino do PR
+            BRANCH="${{ github.event.pull_request.base.ref }}"
+          else
+            # Uso da branch atual do push
+            BRANCH="${{ github.ref_name }}"
+          fi
+          
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          echo "Branch determinada: $BRANCH" >> "$GITHUB_STEP_SUMMARY"
+      
+      - name: Gerar tag baseada na branch
+        id: generate-tag
+        run: |
+          BRANCH="${{ steps.branch.outputs.branch }}"
+          DATE=$(date +'%Y%m%d')
+          
+          if [[ "$BRANCH" == "develop" ]]; then
+            # Tag para develop: dev-NNN
+            LATEST_DEV_TAG=$(git tag -l "dev-*" | sort -V | tail -n 1)
+            
+            if [ -z "$LATEST_DEV_TAG" ]; then
+              # Se não houver tag, começar com dev-001
+              DEV_NUMBER="001"
+            else
+              # Incrementar o número da tag de develop
+              DEV_NUMBER=$(echo $LATEST_DEV_TAG | sed -E 's/dev-([0-9]+).*/\1/')
+              DEV_NUMBER=$(printf "%03d" $((10#$DEV_NUMBER + 1)))
+            fi
+            
+            TAG="dev-${DEV_NUMBER}"
+            
+          elif [[ "$BRANCH" == feature/* ]]; then
+            # Tag para feature: feature-NOME-DATA-HASH
+            FEATURE_NAME=$(echo $BRANCH | sed -E 's/feature\/(.*)/\1/')
+            SHORT_HASH=$(git rev-parse --short HEAD)
+            
+            TAG="feature-${FEATURE_NAME}-${DATE}-${SHORT_HASH}"
+            
+          elif [[ "$BRANCH" == hotfix/* ]]; then
+            # Tag para hotfix: hotfix-NOME-DATA-HASH
+            HOTFIX_NAME=$(echo $BRANCH | sed -E 's/hotfix\/(.*)/\1/')
+            SHORT_HASH=$(git rev-parse --short HEAD)
+            
+            TAG="hotfix-${HOTFIX_NAME}-${DATE}-${SHORT_HASH}"
+            
+          else
+            # Tag genérica: branch-NOME-DATA-HASH
+            CLEAN_BRANCH=$(echo $BRANCH | sed -E 's/[^a-zA-Z0-9]/-/g')
+            SHORT_HASH=$(git rev-parse --short HEAD)
+            
+            TAG="branch-${CLEAN_BRANCH}-${DATE}-${SHORT_HASH}"
+          fi
+          
+          # Obter mensagem para a tag
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            # Usar título do PR
+            PR_TITLE="${{ github.event.pull_request.title }}"
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+            MESSAGE="PR #${PR_NUMBER}: ${PR_TITLE}"
+          else
+            # Usar última mensagem de commit, mas sanitizando para evitar problemas
+            # Remover caracteres problemáticos e limitar a 100 caracteres
+            MESSAGE=$(git log -1 --pretty=%s | sed 's/["\r\n]//g' | head -c 100)
+            
+            # Adicionar sufixo indicando commit
+            MESSAGE="Commit: ${MESSAGE}"
+          fi
+          
+          # Escrever saídas de forma segura
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "message=${MESSAGE}" >> "$GITHUB_OUTPUT"
+          echo "branch=${BRANCH}" >> "$GITHUB_OUTPUT"
+      
+      - name: Criar tag automática
+        run: |
+          TAG="${{ steps.generate-tag.outputs.tag }}"
+          MESSAGE="${{ steps.generate-tag.outputs.message }}"
+          BRANCH="${{ steps.generate-tag.outputs.branch }}"
+          
+          # Garantir que estamos na branch correta
+          git checkout $BRANCH
+          git pull origin $BRANCH
+          
+          # Criar a tag
+          git tag -a "$TAG" -m "$MESSAGE"
+          git push origin "$TAG"
+          
+          echo "### ✅ Tag criada com sucesso" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Tag: $TAG" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Mensagem: $MESSAGE" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Branch: $BRANCH" >> "$GITHUB_STEP_SUMMARY"
+      
+      - name: Gerar changelog
+        run: |
+          TAG="${{ steps.generate-tag.outputs.tag }}"
+          BRANCH="${{ steps.generate-tag.outputs.branch }}"
+          
+          # Encontrar a penúltima tag para mesma branch para listar mudanças
+          if [[ "$BRANCH" == "develop" ]]; then
+            PREV_TAG=$(git tag -l "dev-*" | sort -V | tail -n 2 | head -n 1)
+            TAG_PATTERN="dev-*"
+          elif [[ "$BRANCH" == feature/* ]]; then
+            FEATURE_NAME=$(echo $BRANCH | sed -E 's/feature\/(.*)/\1/')
+            PREV_TAG=$(git tag -l "feature-${FEATURE_NAME}-*" | sort -V | tail -n 2 | head -n 1)
+            TAG_PATTERN="feature-${FEATURE_NAME}-*"
+          elif [[ "$BRANCH" == hotfix/* ]]; then
+            HOTFIX_NAME=$(echo $BRANCH | sed -E 's/hotfix\/(.*)/\1/')
+            PREV_TAG=$(git tag -l "hotfix-${HOTFIX_NAME}-*" | sort -V | tail -n 2 | head -n 1)
+            TAG_PATTERN="hotfix-${HOTFIX_NAME}-*" 
+          else
+            CLEAN_BRANCH=$(echo $BRANCH | sed -E 's/[^a-zA-Z0-9]/-/g')
+            PREV_TAG=$(git tag -l "branch-${CLEAN_BRANCH}-*" | sort -V | tail -n 2 | head -n 1)
+            TAG_PATTERN="branch-${CLEAN_BRANCH}-*"
+          fi
+          
+          echo "### Alterações na tag $TAG" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          
+          if [ -n "$PREV_TAG" ]; then
+            echo "Mudanças desde $PREV_TAG:" >> "$GITHUB_STEP_SUMMARY"
+            echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+            git log --pretty=format:"- %s (%an)" $PREV_TAG..HEAD >> "$GITHUB_STEP_SUMMARY"
+            echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Primeiro conjunto de mudanças nesta branch" >> "$GITHUB_STEP_SUMMARY"
+            echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+            git log --pretty=format:"- %s (%an)" >> "$GITHUB_STEP_SUMMARY"
+            echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      
+      - name: Notificar equipe
+        run: |
+          TAG="${{ steps.generate-tag.outputs.tag }}"
+          BRANCH="${{ steps.generate-tag.outputs.branch }}"
+          
+          echo "### 📢 Nova tag criada" >> "$GITHUB_STEP_SUMMARY"
+          echo "A tag $TAG foi criada na branch $BRANCH." >> "$GITHUB_STEP_SUMMARY"
+          
+          if [[ "$BRANCH" == "develop" ]]; then
+            echo "Esta tag será automaticamente promovida para main no próximo passo do workflow." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  # Job 2: Promover alterações da develop para a main
+  promote-to-main:
+    name: Promover para Main
+    needs: [tag-branch]
+    if: |
+      (needs.tag-branch.outputs.branch_name == 'develop' && success()) ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'promover-para-main') ||
+      (github.event_name == 'schedule')
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Configurar identidade Git
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+      
+      - name: Determinar tag da develop
+        id: get-dev-tag
+        run: |
+          # Buscar todas as tags
+          git fetch --tags --force
+          
+          # Prioridade:
+          # 1. Tag do job anterior
+          # 2. Tag especificada no workflow_dispatch
+          # 3. Última tag da develop
+          
+          if [ -n "${{ needs.tag-branch.outputs.created_tag }}" ]; then
+            # Tag criada pelo job anterior
+            DEV_TAG="${{ needs.tag-branch.outputs.created_tag }}"
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ -n "${{ github.event.inputs.dev_tag }}" ]; then
+            # Tag especificada manualmente
+            DEV_TAG="${{ github.event.inputs.dev_tag }}"
+          else
+            # Buscar última tag da develop
+            DEV_TAG=$(git tag -l "dev-*" | sort -V | tail -n 1)
+          fi
+          
+          if [ -z "$DEV_TAG" ]; then
+            echo "::error::Nenhuma tag da develop encontrada para promoção"
+            echo "### ❌ Promoção cancelada" >> "$GITHUB_STEP_SUMMARY"
+            echo "Nenhuma tag da develop encontrada para promoção" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          
+          # Verificar se a tag existe
+          if ! git tag | grep -q "^$DEV_TAG$"; then
+            echo "::error::Tag '$DEV_TAG' não encontrada no repositório"
+            echo "### ❌ Tag não encontrada" >> "$GITHUB_STEP_SUMMARY"
+            echo "A tag '$DEV_TAG' não existe no repositório" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          
+          echo "dev_tag=$DEV_TAG" >> "$GITHUB_OUTPUT"
+          echo "Tag da develop para promoção: $DEV_TAG" >> "$GITHUB_STEP_SUMMARY"
+      
+      - name: Verificar se há mudanças para promover
+        id: check-changes
+        run: |
+          git fetch origin develop
+          git fetch origin main
+          
+          # Verificar se develop está à frente da main
+          git checkout develop
+          git pull origin develop
+          
+          # Comparar develop com main
+          AHEAD=$(git rev-list --count origin/main..origin/develop)
+          
+          if [ "$AHEAD" -eq "0" ]; then
+            echo "no_changes=true" >> "$GITHUB_OUTPUT"
+            echo "### ℹ️ Não há mudanças para promover" >> "$GITHUB_STEP_SUMMARY"
+            echo "A branch develop está sincronizada com a main. Não há mudanças para promover." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "no_changes=false" >> "$GITHUB_OUTPUT"
+            echo "### ✅ Há mudanças para promover" >> "$GITHUB_STEP_SUMMARY"
+            echo "A branch develop está $AHEAD commit(s) à frente da main." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      
+      - name: Gerar versão para release
+        id: generate-version
+        if: steps.check-changes.outputs.no_changes != 'true'
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ -n "${{ github.event.inputs.version }}" ]; then
+            # Usar versão fornecida pelo usuário
+            VERSION="${{ github.event.inputs.version }}"
+            if [[ ! $VERSION == v* ]]; then
+              VERSION="v$VERSION"
+            fi
+          else
+            # Gerar versão automática baseada na última tag de release
+            LATEST_TAG=$(git tag -l "v*" | grep -v "dev-" | sort -V | tail -n 1)
+            
+            if [ -z "$LATEST_TAG" ]; then
+              # Se não houver tag, começar com v1.0.0
+              VERSION="v1.0.0"
+            else
+              # Extrair números da versão
+              MAJOR=$(echo $LATEST_TAG | sed -E 's/v([0-9]+)\.([0-9]+)\.([0-9]+).*/\1/')
+              MINOR=$(echo $LATEST_TAG | sed -E 's/v([0-9]+)\.([0-9]+)\.([0-9]+).*/\2/')
+              PATCH=$(echo $LATEST_TAG | sed -E 's/v([0-9]+)\.([0-9]+)\.([0-9]+).*/\3/')
+              
+              # Incrementar patch
+              PATCH=$((PATCH + 1))
+              VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+            fi
+          fi
+          
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Versão gerada para release: $VERSION" >> "$GITHUB_STEP_SUMMARY"
+      
+      - name: Promover para main
+        if: steps.check-changes.outputs.no_changes != 'true'
+        run: |
+          DEV_TAG="${{ steps.get-dev-tag.outputs.dev_tag }}"
+          VERSION="${{ steps.generate-version.outputs.version }}"
+          
+          # Checkout da main
+          git checkout main
+          git pull origin main
+          
+          # Fazer merge da develop para main
+          echo "Mergeando develop (tag $DEV_TAG) para main como $VERSION"
+          git merge --no-ff origin/develop -m "Merge da develop (tag $DEV_TAG) para release $VERSION"
+          
+          # Criar tag de versão
+          git tag -a "$VERSION" -m "Release $VERSION (promovida da tag $DEV_TAG)"
+          
+          # Push das mudanças
+          git push origin main
+          git push origin "$VERSION"
+          
+          echo "### ✅ Main atualizada com sucesso" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Tag da develop: $DEV_TAG" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Nova tag de release: $VERSION" >> "$GITHUB_STEP_SUMMARY"
+      
+      - name: Gerar changelog
+        if: steps.check-changes.outputs.no_changes != 'true'
+        id: changelog
+        run: |
+          VERSION="${{ steps.generate-version.outputs.version }}"
+          DEV_TAG="${{ steps.get-dev-tag.outputs.dev_tag }}"
+          
+          # Obter última tag de release para comparar alterações
+          PREV_VERSION_TAG=$(git tag -l "v*" | grep -v "dev-" | sort -V | tail -n 2 | head -n 1)
+          
+          echo "### Changelog da versão $VERSION" > changelog.md
+          echo "" >> changelog.md
+          
+          if [ -n "$PREV_VERSION_TAG" ] && [ "$PREV_VERSION_TAG" != "$VERSION" ]; then
+            echo "Alterações desde $PREV_VERSION_TAG:" >> changelog.md
+            git log --pretty=format:"- %s (%an)" $PREV_VERSION_TAG..HEAD >> changelog.md
+          else
+            echo "Primeiro lançamento oficial" >> changelog.md
+            git log --pretty=format:"- %s (%an)" >> changelog.md
+          fi
+          
+          cat changelog.md >> "$GITHUB_STEP_SUMMARY"
+      
+      - name: Criar GitHub Release
+        if: steps.check-changes.outputs.no_changes != 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.generate-version.outputs.version }}
+          name: Release ${{ steps.generate-version.outputs.version }}
+          body_path: changelog.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Notificar equipe sobre promoção
+        if: steps.check-changes.outputs.no_changes != 'true'
+        run: |
+          VERSION="${{ steps.generate-version.outputs.version }}"
+          DEV_TAG="${{ steps.get-dev-tag.outputs.dev_tag }}"
+          
+          echo "### 🚀 Promoção concluída com sucesso" >> "$GITHUB_STEP_SUMMARY"
+          echo "As mudanças da tag $DEV_TAG foram promovidas para main como versão $VERSION" >> "$GITHUB_STEP_SUMMARY"
+          echo "Uma release foi criada no GitHub: https://github.com/${{ github.repository }}/releases/tag/$VERSION" >> "$GITHUB_STEP_SUMMARY"
+      
+      - name: Notificar que não há mudanças
+        if: steps.check-changes.outputs.no_changes == 'true'
+        run: |
+          echo "### ℹ️ Não houve promoção" >> "$GITHUB_STEP_SUMMARY"
+          echo "Não foram encontradas mudanças para promover da develop para a main" >> "$GITHUB_STEP_SUMMARY" 

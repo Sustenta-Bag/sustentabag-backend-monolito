@@ -258,16 +258,17 @@ O projeto conta com pipelines de integração contínua (CI) usando GitHub Actio
    - Funciona em qualquer tipo de repositório sem restrições
    - Realiza verificação semanal automática
 
-4. **Fluxo de Branches e Tags (`branch-management.yml`)**:
-   - Implementa o fluxo GitFlow automatizado entre branches feature → develop → main
-   - Cria tags numeradas automaticamente na develop após merge de PRs
-   - Permite promoção manual controlada de develop para main
-   - Gera changelogs e releases no GitHub
-   - Mantém histórico completo de versões
+4. **GitFlow Completo (`gitflow-completo.yml`)**:
+   - Implementa todo o fluxo GitFlow em uma única pipeline unificada
+   - Cria tags automaticamente para todas as branches após merges ou pushes
+   - Promove automaticamente as alterações da develop para main
+   - Gera releases completas com changelogs
+   - Mantém o histórico completo de versões e branches
+   - **Simplificação:** Substitui os antigos workflows separados para melhor integração
 
 ### Como usar o Gerenciamento de Branches e Tags
 
-O projeto utiliza um workflow GitFlow simplificado e automatizado:
+O projeto utiliza um workflow GitFlow simplificado e totalmente automatizado:
 
 #### 1. Desenvolvimento em Feature Branches
 
@@ -276,67 +277,49 @@ O projeto utiliza um workflow GitFlow simplificado e automatizado:
 3. Envie para o GitHub: `git push origin feature/nome-da-feature`
 4. Abra um Pull Request da sua feature para a branch **develop**
 
-#### 2. Geração Automática de Tags na Develop
+#### 2. Geração Automática de Tags
 
-Quando um PR é aprovado e mergeado na develop:
-- Um workflow automático é acionado
-- Uma tag numerada é criada (exemplo: `dev-001`, `dev-002`)
-- Um changelog é gerado com todas as alterações
-- Não é necessária nenhuma ação manual
+Quando um PR é aprovado e mergeado (ou ao fazer push direto):
+- O workflow **GitFlow Completo** é acionado automaticamente
+- Uma tag é criada para a branch correspondente:
+  - Para develop: `dev-001`, `dev-002`, etc.
+  - Para feature: `feature-nome-AAAAMMDD-hash`
+  - Para hotfix: `hotfix-nome-AAAAMMDD-hash`
+- Um changelog é gerado com as alterações
 
-#### 3. Promoção para Main (Produção)
+#### 3. Promoção Automática para Main
 
-Quando quiser promover as alterações de develop para main (release):
-
-1. Acesse a página do GitHub: `https://github.com/[seu-usuario]/sustentabag-backend-monolito/actions`
-2. Clique no workflow "Fluxo de Branches e Tags"
-3. Clique no botão "Run workflow"
-4. Em "Promover develop para main", selecione **true**
-5. Opcionalmente, forneça uma versão específica para a tag (ex: 1.0.0)
-6. Clique em "Run workflow"
-
-O processo:
-- Cria uma nova tag de versão na main (ex: `v1.0.0`)
-- Faz o merge da última tag da develop para a main
+Quando uma tag é criada na develop:
+- O mesmo workflow continua executando
+- Verifica se há mudanças para promover
+- Gera nova versão (ex: `v1.0.0`, `v1.0.1`)
+- Faz merge da develop para main
 - Cria uma release no GitHub com changelog detalhado
+- Notifica a equipe sobre a nova versão
 
-#### 4. Visibilidade do Processo
+#### 4. Promoção Manual (Caso Necessário)
 
-Após a execução do workflow:
-- A aba "Releases" do GitHub mostrará todas as versões oficiais
-- As tags serão visíveis em `https://github.com/[seu-usuario]/sustentabag-backend-monolito/tags`
-- O histórico de execuções do workflow exibirá os logs e relatórios
-
-#### Exemplo de Uso
-
-```bash
-# Criar branch de feature a partir da develop
-git checkout develop
-git pull
-git checkout -b feature/nova-funcionalidade
-
-# Desenvolver e commitar
-git add .
-git commit -m "Implementa nova funcionalidade"
-git push origin feature/nova-funcionalidade
-
-# Após aprovação e merge do PR, a tag é criada automaticamente na develop
-# Para promover para produção, use a interface web do GitHub Actions
-```
+Se precisar promover manualmente:
+1. Acesse a página do GitHub: `https://github.com/[seu-usuario]/sustentabag-backend-monolito/actions`
+2. Clique no workflow "GitFlow Completo"
+3. Clique em "Run workflow"
+4. Selecione "promover-para-main" como ação
+5. Opcionalmente, forneça uma tag e versão específicas
+6. Clique em "Run workflow"
 
 #### Diagrama do Fluxo GitFlow Automatizado
 
 ```
-Fluxo de trabalho:
+Fluxo de trabalho unificado:
 
-  [feature/xyz]  ──merge PR──▶  [develop]  ──promoção manual─▶  [main]
-                                   │                              │
-                                   ▼                              ▼
-                               tag: dev-001                  tag: v1.0.0
-                               tag: dev-002                  tag: v1.0.1
-                               tag: dev-003                  tag: v1.0.2
-                                   │                              │
-                                   └─────────── merge ────────────┘
+  [feature/xyz]  ──merge PR──▶  [develop]  ──automático─▶  [main]
+                                   │                          │
+                                   ▼                          ▼
+                      tag: feature-xyz-DATA    tag: dev-001   tag: v1.0.0
+                                               tag: dev-002   tag: v1.0.1
+                                               tag: dev-003   tag: v1.0.2
+                                                  │              │
+                                                  └──merge───────┘
 ```
 
 #### Configuração Necessária para os Workflows
