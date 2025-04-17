@@ -28,10 +28,6 @@ export const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
   }
 });
 
-/**
- * Estabelece conexão com o banco de dados
- * @returns {Promise<boolean>} true se a conexão foi estabelecida com sucesso
- */
 export const connectDatabase = async () => {
   try {
     await sequelize.authenticate();
@@ -43,11 +39,6 @@ export const connectDatabase = async () => {
   }
 };
 
-/**
- * Sincroniza os modelos com o banco de dados
- * @param {boolean} force Se true, recria todas as tabelas
- * @returns {Promise<boolean>} true se os modelos foram sincronizados com sucesso
- */
 export const syncDatabase = async (force = false) => {
   try {
     await sequelize.sync({ force });

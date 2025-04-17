@@ -62,10 +62,6 @@ class PostgresBagRepository extends BagRepository {
     return bagRecords.map(record => this._mapToDomainEntity(record));
   }
   
-  /**
-   * Mapeia um registro do modelo para uma entidade de domínio
-   * @private
-   */
   _mapToDomainEntity(record) {
     return new Bag(
       record.id,

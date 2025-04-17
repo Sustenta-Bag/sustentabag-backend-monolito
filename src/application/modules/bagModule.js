@@ -6,12 +6,6 @@ import BagModel from '../../domain/models/BagModel.js';
 
 dotenv.config();
 
-/**
- * Configura e retorna o roteador para o módulo de Bags
- * @param {Object} options - Opções de configuração
- * @param {Object} options.sequelizeInstance - Instância do Sequelize do monolito
- * @returns {Object} Router do Express configurado para o módulo de Bags
- */
 export const setupBagModule = (options = {}) => {
   const router = express.Router();
   
@@ -22,10 +16,6 @@ export const setupBagModule = (options = {}) => {
   return router;
 };
 
-/**
- * Inicializa os modelos de banco de dados do módulo de Bags
- * @param {Object} sequelizeInstance - Instância do Sequelize do monolito
- */
 export const initializeModels = (sequelizeInstance) => {
   if (!sequelizeInstance) {
     throw new Error('É necessário fornecer uma instância do Sequelize para inicializar os modelos');

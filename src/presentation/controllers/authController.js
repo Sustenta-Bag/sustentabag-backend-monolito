@@ -20,12 +20,6 @@ export const generate = (req, res, next) => {
 }
 
 export const verify = (req, res, next) => {
-  /*
-  #swagger.autoHeaders = false
-  #swagger.security = [{
-    "bearerAuth": {}
-  }]
-  */
   const authHeader = req.headers.authorization;
 
   if (!!authHeader) {

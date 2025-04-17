@@ -13,4 +13,3 @@ export default (schema) => (req, res, next) => {
       });
     }
   }
-  

@@ -4,10 +4,6 @@ import morgan from "morgan";
 import helmet from "helmet";
 import cors from "cors";
 
-/**
- * Configura a aplicação Express com middlewares padrão
- * @returns {Object} Aplicação Express configurada
- */
 export const configureExpress = () => {
   const app = express();
 
@@ -19,4 +15,4 @@ export const configureExpress = () => {
   app.use(morgan("dev"));
 
   return app;
-}; 
+};

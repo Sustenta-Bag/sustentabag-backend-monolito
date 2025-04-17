@@ -34,7 +34,11 @@ class BagModel extends Model {
       companyId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: 'idEmpresa'
+        field: 'idEmpresa',
+        references: {
+          model: 'empresas',
+          key: 'id'
+        }
       },
       status: {
         type: DataTypes.INTEGER,
@@ -65,11 +69,13 @@ class BagModel extends Model {
     return this;
   }
   
-  /**
-   * Define associações com outros modelos no monolito
-   * @param {Object} models - Objeto contendo todos os modelos do monolito
-   */
   static associate(models) {
+    if (models.CompanyModel) {
+      this.belongsTo(models.CompanyModel, { 
+        foreignKey: 'companyId',
+        as: 'company'
+      });
+    }
   }
 }
 

@@ -1,9 +1,6 @@
 import AppError from '../../infrastructure/errors/AppError.js';
 import { validationResult } from 'express-validator';
 
-/**
- * Middleware para tratar erros de validação do express-validator
- */
 export const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -16,9 +13,6 @@ export const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-/**
- * Middleware para tratar todos os erros da aplicação
- */
 export const errorHandler = (err, req, res, next) => {
   console.error('Error:', err);
 

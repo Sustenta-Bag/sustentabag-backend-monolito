@@ -1,7 +1,4 @@
 export default (req, res, next) => {
-  /*
-    #swagger.ignore = true
-    */
   res.hateoas_item = (data) => {
     res.ok({
       ...data._doc,
@@ -23,9 +20,6 @@ export default (req, res, next) => {
   };
 
   res.hateoas_list = (data, totalPages) => {
-    /*
-      #swagger.ignore = true
-      */
     const page = parseInt(req.query._page) || 1;
     const size = parseInt(req.query._size) || 10;
 

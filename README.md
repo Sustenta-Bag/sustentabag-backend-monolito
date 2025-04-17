@@ -1,38 +1,51 @@
-# Sacola Service
+# SustentaBag Backend Monolito
 
-Microserviço para gerenciamento de sacolas ecológicas utilizando arquitetura DDD (Domain-Driven Design).
+Sistema backend monolítico para gerenciamento de sacolas ecológicas utilizando arquitetura DDD (Domain-Driven Design).
 
 ## Descrição
 
-Este serviço gerencia sacolas ecológicas, permitindo o cadastro, busca, atualização e remoção de sacolas, implementando uma arquitetura baseada em DDD com Node.js.
+Este sistema gerencia sacolas ecológicas para o projeto SustentaBag, permitindo o cadastro, busca, atualização e remoção de sacolas, além de outras funcionalidades como autenticação e gerenciamento de usuários. O projeto implementa uma arquitetura baseada em DDD com Node.js.
 
 ## Tecnologias
 
 - Node.js
 - Express
-- PostgreSQL
-- Sequelize ORM
+- PostgreSQL com Sequelize ORM
+- MongoDB com Mongoose (para determinadas funcionalidades)
+- ESM Modules
 - Jest (Testes)
-- Arquitetura DDD
 - Swagger (Documentação da API)
+- JWT (Autenticação)
+- Yup e Express-validator (Validação)
+- Docker e Docker Compose (Containerização)
 
 ## Estrutura do Projeto
 
 ```
 src/
-  ├── domain/             # Regras de negócio e entidades
-  │   ├── entities/       # Entidades do domínio
-  │   └── repositories/   # Interfaces dos repositórios
-  ├── application/        # Casos de uso e serviços
-  │   └── services/       # Serviços da aplicação
-  ├── infrastructure/     # Implementações técnicas
-  │   ├── database/       # Configuração e modelos do banco de dados
-  │   ├── http/           # Configurações relacionadas ao HTTP
-  │   └── repositories/   # Implementação dos repositórios
-  └── interfaces/         # Interfaces com o usuário
-      ├── controllers/    # Controladores
-      ├── middleware/     # Middlewares
-      └── routes/         # Rotas da API
+  ├── app.js                # Configuração da aplicação
+  ├── index.js              # Ponto de entrada
+  ├── server.js             # Servidor HTTP
+  ├── application/          # Casos de uso e serviços
+  │   ├── bootstrap.js      # Inicialização da aplicação
+  │   ├── dtos/             # Objetos de transferência de dados
+  │   ├── modules/          # Módulos da aplicação
+  │   └── services/         # Serviços da aplicação
+  ├── domain/               # Regras de negócio e entidades
+  │   ├── entities/         # Entidades do domínio
+  │   ├── models/           # Modelos de dados
+  │   └── value/            # Objetos de valor
+  ├── infrastructure/       # Implementações técnicas
+  │   ├── config/           # Configurações
+  │   ├── database/         # Configuração do banco de dados
+  │   ├── errors/           # Tratamento de erros
+  │   └── repositories/     # Implementação dos repositórios
+  └── presentation/         # Interfaces com o usuário
+      ├── controllers/      # Controladores
+      ├── http/             # Configurações relacionadas ao HTTP
+      ├── middleware/       # Middlewares
+      ├── routes/           # Rotas da API
+      └── routes/helper/    # Funções auxiliares para rotas
 ```
 
 ## Configuração
@@ -41,6 +54,8 @@ src/
 
 - Node.js (v14+)
 - PostgreSQL
+- MongoDB (opcional, dependendo das funcionalidades utilizadas)
+- Docker e Docker Compose (opcional, para execução em container)
 
 ### Variáveis de Ambiente
 
@@ -53,21 +68,28 @@ NODE_ENV=development
 # PostgreSQL Database Config
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
-POSTGRES_DB=sacola_service
+POSTGRES_DB=sustentabag
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
+
+# MongoDB Config (se aplicável)
+MONGODB_URI=mongodb://localhost:27017/sustentabag
+
+# JWT Config
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRATION=24h
 ```
 
 ### Instalação
 
 1. Clone o repositório:
 ```
-git clone https://github.com/Sustenta-Bag/sacola-service.git
+git clone https://github.com/Sustenta-Bag/sustentabag-backend-monolito.git
 ```
 
 2. Instale as dependências:
 ```
-cd sacola-service
+cd sustentabag-backend-monolito
 npm install
 ```
 
@@ -76,7 +98,7 @@ npm install
 npm run dev
 ```
 
-## Endpoints da API
+## Endpoints Principais da API
 
 | Método | Endpoint                       | Descrição                              |
 |--------|--------------------------------|----------------------------------------|
@@ -85,21 +107,21 @@ npm run dev
 | GET    | /api/bags/:id                  | Obter detalhes de uma sacola           |
 | PUT    | /api/bags/:id                  | Atualizar informações de uma sacola    |
 | DELETE | /api/bags/:id                  | Remover uma sacola                     |
-| GET    | /api/company/:companyId/bags   | Listar sacolas de uma empresa          |
-| GET    | /api/company/:companyId/bags/active | Listar sacolas ativas de uma empresa |
-| PATCH  | /api/bags/:id/status           | Alterar o status de uma sacola         |
+| POST   | /api/auth/login                | Login de usuário                       |
+| POST   | /api/auth/register             | Registro de novo usuário               |
+| GET    | /api/users                     | Listar usuários                        |
 
-## Modelo de Dados
+## Modelo de Dados Principal
 
 A entidade Sacola (Bag) possui os seguintes atributos:
 
 | Campo       | Tipo          | Descrição                                   |
 |-------------|---------------|---------------------------------------------|
-| id          | INT           | Identificador único da sacola (idSacola)    |
+| id          | INT           | Identificador único da sacola               |
 | type        | ENUM          | Tipo da sacola: 'Doce', 'Salgada', 'Mista' |
 | price       | FLOAT         | Preço da sacola                             |
 | description | TEXT          | Descrição da sacola                         |
-| companyId   | INT           | ID da empresa (vem do microserviço empresa) |
+| companyId   | INT           | ID da empresa                               |
 | status      | INT           | Status: 0 (inativo) ou 1 (ativo)            |
 | createdAt   | DATETIME      | Data de criação do registro                 |
 | updatedAt   | DATETIME      | Data de atualização do registro             |
@@ -121,21 +143,19 @@ O projeto inclui configuração Docker para facilitar o desenvolvimento e deploy
 docker-compose up -d
 
 # Construir apenas o serviço
-docker build -t sacola-service .
+docker build -t sustentabag-backend .
 ```
 
-## Testes
-
-Execute os testes com:
+## Scripts Disponíveis
 
 ```
-npm test
-```
-
-Para verificar a cobertura de testes:
-
-```
-npm run test:coverage
+npm start            # Inicia o servidor em modo produção
+npm run dev          # Inicia o servidor em modo desenvolvimento com nodemon
+npm run start:watch  # Inicia o servidor com watch mode nativo
+npm run swagger      # Gera a documentação Swagger
+npm run test         # Executa os testes
+npm run test:watch   # Executa os testes em modo watch
+npm run test:coverage # Verifica a cobertura dos testes
 ```
 
 ## Contribuindo

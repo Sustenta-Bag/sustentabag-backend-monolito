@@ -1,9 +1,6 @@
 import { body, param } from 'express-validator';
 import { handleValidationErrors } from './errorHandler.js';
 
-/**
- * Validações para criação de sacolas
- */
 export const validateCreateBag = [
   body('type')
     .isIn(['Doce', 'Salgada', 'Mista'])
@@ -30,9 +27,6 @@ export const validateCreateBag = [
   handleValidationErrors
 ];
 
-/**
- * Validações para atualização de sacolas
- */
 export const validateUpdateBag = [
   body('type')
     .optional()
@@ -62,9 +56,6 @@ export const validateUpdateBag = [
   handleValidationErrors
 ];
 
-/**
- * Validação do parâmetro ID da sacola
- */
 export const validateBagId = [
   param('id')
     .isInt({ min: 1 })
@@ -73,9 +64,6 @@ export const validateBagId = [
   handleValidationErrors
 ];
 
-/**
- * Validação do parâmetro ID da empresa
- */
 export const validateCompanyId = [
   param('companyId')
     .isInt({ min: 1 })
@@ -84,9 +72,6 @@ export const validateCompanyId = [
   handleValidationErrors
 ];
 
-/**
- * Validações específicas para alteração de status
- */
 export const validateStatusUpdate = [
   body('status')
     .exists()
