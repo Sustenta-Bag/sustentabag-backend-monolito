@@ -252,11 +252,92 @@ O projeto conta com pipelines de integração contínua (CI) usando GitHub Actio
    - **Funciona melhor em:** Repositórios públicos (gratuito) ou privados com GitHub Enterprise
    - **Comportamento em repositórios privados sem Enterprise:** Tentará executar, mas não publicará resultados se o Advanced Security não estiver habilitado
 
-3. **Verificação de Qualidade de Código (`lint.yml`)**:
-   - Verifica a qualidade do código usando ESLint
-   - Complemento ao CodeQL, oferecendo verificações de qualidade básicas
-   - Executa em todas as branches de feature e pull requests
-   - **Funciona em:** Repositórios públicos e privados
+3. **Análise de Vulnerabilidades (`npm-audit.yml`)**:
+   - Verifica dependências do projeto quanto a vulnerabilidades conhecidas
+   - Gera relatórios detalhados com contagem de problemas por severidade
+   - Funciona em qualquer tipo de repositório sem restrições
+   - Realiza verificação semanal automática
+
+4. **Fluxo de Branches e Tags (`branch-management.yml`)**:
+   - Implementa o fluxo GitFlow automatizado entre branches feature → develop → main
+   - Cria tags numeradas automaticamente na develop após merge de PRs
+   - Permite promoção manual controlada de develop para main
+   - Gera changelogs e releases no GitHub
+   - Mantém histórico completo de versões
+
+### Como usar o Gerenciamento de Branches e Tags
+
+O projeto utiliza um workflow GitFlow simplificado e automatizado:
+
+#### 1. Desenvolvimento em Feature Branches
+
+1. Crie uma branch a partir da develop: `git checkout -b feature/nome-da-feature develop`
+2. Desenvolva sua funcionalidade e faça commits
+3. Envie para o GitHub: `git push origin feature/nome-da-feature`
+4. Abra um Pull Request da sua feature para a branch **develop**
+
+#### 2. Geração Automática de Tags na Develop
+
+Quando um PR é aprovado e mergeado na develop:
+- Um workflow automático é acionado
+- Uma tag numerada é criada (exemplo: `dev-001`, `dev-002`)
+- Um changelog é gerado com todas as alterações
+- Não é necessária nenhuma ação manual
+
+#### 3. Promoção para Main (Produção)
+
+Quando quiser promover as alterações de develop para main (release):
+
+1. Acesse a página do GitHub: `https://github.com/[seu-usuario]/sustentabag-backend-monolito/actions`
+2. Clique no workflow "Fluxo de Branches e Tags"
+3. Clique no botão "Run workflow"
+4. Em "Promover develop para main", selecione **true**
+5. Opcionalmente, forneça uma versão específica para a tag (ex: 1.0.0)
+6. Clique em "Run workflow"
+
+O processo:
+- Cria uma nova tag de versão na main (ex: `v1.0.0`)
+- Faz o merge da última tag da develop para a main
+- Cria uma release no GitHub com changelog detalhado
+
+#### 4. Visibilidade do Processo
+
+Após a execução do workflow:
+- A aba "Releases" do GitHub mostrará todas as versões oficiais
+- As tags serão visíveis em `https://github.com/[seu-usuario]/sustentabag-backend-monolito/tags`
+- O histórico de execuções do workflow exibirá os logs e relatórios
+
+#### Exemplo de Uso
+
+```bash
+# Criar branch de feature a partir da develop
+git checkout develop
+git pull
+git checkout -b feature/nova-funcionalidade
+
+# Desenvolver e commitar
+git add .
+git commit -m "Implementa nova funcionalidade"
+git push origin feature/nova-funcionalidade
+
+# Após aprovação e merge do PR, a tag é criada automaticamente na develop
+# Para promover para produção, use a interface web do GitHub Actions
+```
+
+#### Diagrama do Fluxo GitFlow Automatizado
+
+```
+Fluxo de trabalho:
+
+  [feature/xyz]  ──merge PR──▶  [develop]  ──promoção manual─▶  [main]
+                                   │                              │
+                                   ▼                              ▼
+                               tag: dev-001                  tag: v1.0.0
+                               tag: dev-002                  tag: v1.0.1
+                               tag: dev-003                  tag: v1.0.2
+                                   │                              │
+                                   └─────────── merge ────────────┘
+```
 
 ### Configuração para Diferentes Tipos de Repositórios
 
