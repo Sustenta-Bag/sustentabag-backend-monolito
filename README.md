@@ -240,9 +240,9 @@ O projeto conta com pipelines de integração contínua (CI) usando GitHub Actio
 
 1. **CI Pipeline (`ci.yml`)**: 
    - Executa em cada push para as branches principais (main, master, develop) e branches de feature (feature/*)
-   - Executa em pull requests para as branches principais
-   - Roda os testes unitários
-   - Gera relatórios de cobertura de código
+   - É acionada automaticamente quando um PR é aberto ou atualizado para as branches principais
+   - Roda os testes unitários para verificar se o código está funcionando corretamente
+   - Gera relatórios de cobertura de código para garantir qualidade
    - **Funciona em:** Repositórios públicos e privados
 
 2. **Análise de Segurança (`codeql-analysis.yml`)**:
@@ -338,6 +338,52 @@ Fluxo de trabalho:
                                    │                              │
                                    └─────────── merge ────────────┘
 ```
+
+#### Configuração Necessária para os Workflows
+
+Para que os workflows funcionem corretamente, especialmente o gerenciamento automático de branches e tags, certifique-se de:
+
+1. **Configurar sua identidade Git local**:
+   ```bash
+   git config --global user.name "Seu Nome"
+   git config --global user.email "seu.email@exemplo.com"
+   ```
+
+2. **Configuração de Permissões para o Workflow**:
+
+   **Opção A - Se você tem acesso administrativo às configurações de Actions**:
+   - Acesse as configurações do repositório no GitHub
+   - Vá para "Settings" > "Actions" > "General"
+   - Em "Workflow permissions", selecione "Read and write permissions"
+   - Marque a opção "Allow GitHub Actions to create and approve pull requests"
+   - Clique em "Save"
+
+   **Opção B - Se as permissões de workflow estão bloqueadas (comum em organizações)**:
+   - Crie um Personal Access Token (PAT) com escopo `repo`:
+     1. Acesse [https://github.com/settings/tokens](https://github.com/settings/tokens)
+     2. Clique em "Generate new token" > "Generate new token (classic)"
+     3. Dê um nome ao token, como "SustentaBag Workflow Token"
+     4. Selecione o escopo `repo` completo
+     5. Clique em "Generate token" e copie o token gerado
+   - Adicione o token como um Secret no repositório:
+     1. Vá para o repositório > "Settings" > "Secrets and variables" > "Actions"
+     2. Clique em "New repository secret"
+     3. Nome: `PERSONAL_ACCESS_TOKEN`
+     4. Valor: cole o token que você copiou
+     5. Clique em "Add secret"
+
+3. **Criar Estrutura de Branches Inicial**:
+   Se você ainda não tem as branches principais configuradas:
+   ```bash
+   # Criar branch develop a partir da main
+   git checkout main
+   git checkout -b develop
+   git push origin develop
+   ```
+
+4. **Verificar Acesso em Repositórios Privados**:
+   Em repositórios privados, você precisa ter permissão de administrador ou proprietário
+   para que os workflows possam criar tags e fazer push para branches protegidas.
 
 ### Configuração para Diferentes Tipos de Repositórios
 
