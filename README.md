@@ -324,7 +324,7 @@ Fluxo de trabalho unificado:
 
 #### Configuração Necessária para os Workflows
 
-Para que os workflows funcionem corretamente, especialmente o gerenciamento automático de branches e tags, certifique-se de:
+Para que os workflows funcionem corretamente, especialmente o GitFlow Completo, certifique-se de:
 
 1. **Configurar sua identidade Git local**:
    ```bash
@@ -371,16 +371,19 @@ Para que os workflows funcionem corretamente, especialmente o gerenciamento auto
 ### Configuração para Diferentes Tipos de Repositórios
 
 #### Para Repositórios Públicos
-Todos os workflows funcionam sem configuração adicional. O GitHub Advanced Security está habilitado gratuitamente.
+- Todos os workflows funcionam sem configuração adicional
+- O GitHub Advanced Security está habilitado gratuitamente para análises de segurança
+- O workflow GitFlow Completo tem permissões para operações de escrita e criação de releases
 
 #### Para Repositórios Privados
-- O workflow de testes (`ci.yml`) e o linting (`lint.yml`) funcionam normalmente
-- O workflow de análise de segurança (`codeql-analysis.yml`) será executado, mas:
-  - Não publicará resultados sem GitHub Advanced Security
-  - Não impedirá outros workflows de funcionarem
+- O workflow de CI (`ci.yml`) e análise de dependências (`npm-audit.yml`) funcionam normalmente
+- O GitFlow Completo requer configuração apropriada de permissões conforme mencionado acima
+- A análise de segurança CodeQL terá funcionalidade limitada se GitHub Advanced Security não estiver habilitado
 
 #### Para Repositórios em Organizações
-Para organizações com GitHub Enterprise, o administrador pode habilitar o Advanced Security para todos os repositórios nas configurações da organização.
+- Verifique com o administrador da organização sobre as políticas de segurança e permissões
+- Para organizações com GitHub Enterprise, o administrador pode habilitar o Advanced Security para todos os repositórios
+- Em alguns casos, pode ser necessário usar tokens personalizados ou configurações específicas da organização
 
 ## Contribuindo
 
