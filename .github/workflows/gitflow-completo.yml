@@ -4,11 +4,11 @@ on:
   # Acionado quando um PR é fechado
   pull_request:
     types: [closed]
-    branches: [develop, feature/*, hotfix/*]
+    branches: [develop]
   
-  # Acionado quando código é enviado diretamente para branches
+  # Acionado quando código é enviado diretamente para a develop
   push:
-    branches: [develop, feature/*, hotfix/*]
+    branches: [develop]
     
   # Trigger diário para verificar promoção
   schedule:
@@ -26,7 +26,7 @@ on:
           - 'criar-tag'
           - 'promover-para-main'
       branch:
-        description: 'Branch para criar tag (ex: develop, feature/nome)'
+        description: 'Branch para criar tag (ex: develop)'
         required: false
         default: 'develop'
       dev_tag:
@@ -43,7 +43,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  # Job 1: Criar tags automaticamente para branches
+  # Job 1: Criar tags automaticamente para a develop
   tag-branch:
     name: Criar Tag Automática
     if: |
@@ -54,6 +54,7 @@ jobs:
     outputs:
       created_tag: ${{ steps.generate-tag.outputs.tag }}
       branch_name: ${{ steps.branch.outputs.branch }}
+      pr_type: ${{ steps.pr-info.outputs.pr_type }}
     
     steps:
       - name: Checkout do repositório
@@ -74,56 +75,91 @@ jobs:
             # Uso da branch especificada manualmente
             BRANCH="${{ github.event.inputs.branch }}"
           elif [ "${{ github.event_name }}" == "pull_request" ]; then
-            # Uso da branch de destino do PR
+            # Uso da branch de destino do PR (deve ser develop)
             BRANCH="${{ github.event.pull_request.base.ref }}"
           else
-            # Uso da branch atual do push
+            # Uso da branch atual do push (deve ser develop)
             BRANCH="${{ github.ref_name }}"
           fi
           
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
           echo "Branch determinada: $BRANCH" >> "$GITHUB_STEP_SUMMARY"
       
+      - name: Obter informações do PR
+        id: pr-info
+        if: github.event_name == 'pull_request'
+        run: |
+          # Obter a branch de origem do PR para determinar se era feature ou hotfix
+          PR_HEAD="${{ github.event.pull_request.head.ref }}"
+          
+          if [[ "$PR_HEAD" == feature/* ]]; then
+            PR_TYPE="feature"
+            FEATURE_NAME=$(echo $PR_HEAD | sed -E 's/feature\/(.*)/\1/')
+            echo "feature_name=$FEATURE_NAME" >> "$GITHUB_OUTPUT"
+          elif [[ "$PR_HEAD" == hotfix/* ]]; then
+            PR_TYPE="hotfix"
+            HOTFIX_NAME=$(echo $PR_HEAD | sed -E 's/hotfix\/(.*)/\1/')
+            echo "hotfix_name=$HOTFIX_NAME" >> "$GITHUB_OUTPUT"
+          else
+            PR_TYPE="other"
+          fi
+          
+          echo "pr_type=$PR_TYPE" >> "$GITHUB_OUTPUT"
+          echo "PR origem: $PR_HEAD, Tipo: $PR_TYPE" >> "$GITHUB_STEP_SUMMARY"
+      
       - name: Gerar tag baseada na branch
         id: generate-tag
         run: |
           BRANCH="${{ steps.branch.outputs.branch }}"
           DATE=$(date +'%Y%m%d')
+          SHORT_HASH=$(git rev-parse --short HEAD)
           
           if [[ "$BRANCH" == "develop" ]]; then
-            # Tag para develop: dev-NNN
-            LATEST_DEV_TAG=$(git tag -l "dev-*" | sort -V | tail -n 1)
-            
-            if [ -z "$LATEST_DEV_TAG" ]; then
-              # Se não houver tag, começar com dev-001
-              DEV_NUMBER="001"
+            # Verificar se veio de um PR
+            if [ "${{ github.event_name }}" == "pull_request" ]; then
+              PR_TYPE="${{ steps.pr-info.outputs.pr_type }}"
+              
+              if [[ "$PR_TYPE" == "feature" ]]; then
+                # Tag para feature mesclada à develop: feature-NOME-DATA-HASH
+                FEATURE_NAME="${{ steps.pr-info.outputs.feature_name }}"
+                TAG="feature-${FEATURE_NAME}-${DATE}-${SHORT_HASH}"
+              elif [[ "$PR_TYPE" == "hotfix" ]]; then
+                # Tag para hotfix mesclado à develop: hotfix-NOME-DATA-HASH
+                HOTFIX_NAME="${{ steps.pr-info.outputs.hotfix_name }}"
+                TAG="hotfix-${HOTFIX_NAME}-${DATE}-${SHORT_HASH}"
+              else
+                # Tag padrão para develop: dev-NNN
+                LATEST_DEV_TAG=$(git tag -l "dev-*" | sort -V | tail -n 1)
+                
+                if [ -z "$LATEST_DEV_TAG" ]; then
+                  # Se não houver tag, começar com dev-001
+                  DEV_NUMBER="001"
+                else
+                  # Incrementar o número da tag de develop
+                  DEV_NUMBER=$(echo $LATEST_DEV_TAG | sed -E 's/dev-([0-9]+).*/\1/')
+                  DEV_NUMBER=$(printf "%03d" $((10#$DEV_NUMBER + 1)))
+                fi
+                
+                TAG="dev-${DEV_NUMBER}"
+              fi
             else
-              # Incrementar o número da tag de develop
-              DEV_NUMBER=$(echo $LATEST_DEV_TAG | sed -E 's/dev-([0-9]+).*/\1/')
-              DEV_NUMBER=$(printf "%03d" $((10#$DEV_NUMBER + 1)))
+              # Tag padrão para develop sem PR: dev-NNN
+              LATEST_DEV_TAG=$(git tag -l "dev-*" | sort -V | tail -n 1)
+              
+              if [ -z "$LATEST_DEV_TAG" ]; then
+                # Se não houver tag, começar com dev-001
+                DEV_NUMBER="001"
+              else
+                # Incrementar o número da tag de develop
+                DEV_NUMBER=$(echo $LATEST_DEV_TAG | sed -E 's/dev-([0-9]+).*/\1/')
+                DEV_NUMBER=$(printf "%03d" $((10#$DEV_NUMBER + 1)))
+              fi
+              
+              TAG="dev-${DEV_NUMBER}"
             fi
-            
-            TAG="dev-${DEV_NUMBER}"
-            
-          elif [[ "$BRANCH" == feature/* ]]; then
-            # Tag para feature: feature-NOME-DATA-HASH
-            FEATURE_NAME=$(echo $BRANCH | sed -E 's/feature\/(.*)/\1/')
-            SHORT_HASH=$(git rev-parse --short HEAD)
-            
-            TAG="feature-${FEATURE_NAME}-${DATE}-${SHORT_HASH}"
-            
-          elif [[ "$BRANCH" == hotfix/* ]]; then
-            # Tag para hotfix: hotfix-NOME-DATA-HASH
-            HOTFIX_NAME=$(echo $BRANCH | sed -E 's/hotfix\/(.*)/\1/')
-            SHORT_HASH=$(git rev-parse --short HEAD)
-            
-            TAG="hotfix-${HOTFIX_NAME}-${DATE}-${SHORT_HASH}"
-            
           else
             # Tag genérica: branch-NOME-DATA-HASH
             CLEAN_BRANCH=$(echo $BRANCH | sed -E 's/[^a-zA-Z0-9]/-/g')
-            SHORT_HASH=$(git rev-parse --short HEAD)
-            
             TAG="branch-${CLEAN_BRANCH}-${DATE}-${SHORT_HASH}"
           fi
           
@@ -171,16 +207,16 @@ jobs:
           TAG="${{ steps.generate-tag.outputs.tag }}"
           BRANCH="${{ steps.generate-tag.outputs.branch }}"
           
-          # Encontrar a penúltima tag para mesma branch para listar mudanças
-          if [[ "$BRANCH" == "develop" ]]; then
+          # Encontrar a penúltima tag do mesmo tipo para listar mudanças
+          if [[ "$TAG" == dev-* ]]; then
             PREV_TAG=$(git tag -l "dev-*" | sort -V | tail -n 2 | head -n 1)
             TAG_PATTERN="dev-*"
-          elif [[ "$BRANCH" == feature/* ]]; then
-            FEATURE_NAME=$(echo $BRANCH | sed -E 's/feature\/(.*)/\1/')
+          elif [[ "$TAG" == feature-* ]]; then
+            FEATURE_NAME=$(echo $TAG | sed -E 's/feature-([^-]+).*/\1/')
             PREV_TAG=$(git tag -l "feature-${FEATURE_NAME}-*" | sort -V | tail -n 2 | head -n 1)
             TAG_PATTERN="feature-${FEATURE_NAME}-*"
-          elif [[ "$BRANCH" == hotfix/* ]]; then
-            HOTFIX_NAME=$(echo $BRANCH | sed -E 's/hotfix\/(.*)/\1/')
+          elif [[ "$TAG" == hotfix-* ]]; then
+            HOTFIX_NAME=$(echo $TAG | sed -E 's/hotfix-([^-]+).*/\1/')
             PREV_TAG=$(git tag -l "hotfix-${HOTFIX_NAME}-*" | sort -V | tail -n 2 | head -n 1)
             TAG_PATTERN="hotfix-${HOTFIX_NAME}-*" 
           else
@@ -192,7 +228,7 @@ jobs:
           echo "### Alterações na tag $TAG" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           
-          if [ -n "$PREV_TAG" ]; then
+          if [ -n "$PREV_TAG" ] && [ "$PREV_TAG" != "$TAG" ]; then
             echo "Mudanças desde $PREV_TAG:" >> "$GITHUB_STEP_SUMMARY"
             echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
             git log --pretty=format:"- %s (%an)" $PREV_TAG..HEAD >> "$GITHUB_STEP_SUMMARY"
@@ -216,7 +252,7 @@ jobs:
             echo "Esta tag será automaticamente promovida para main no próximo passo do workflow." >> "$GITHUB_STEP_SUMMARY"
           fi
 
-  # Job 2: Promover alterações da develop para a main
+# Job 2: Promover alterações da develop para a main (sem alterações)
   promote-to-main:
     name: Promover para Main
     needs: [tag-branch]
