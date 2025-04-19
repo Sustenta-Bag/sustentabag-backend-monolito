@@ -31,14 +31,24 @@ class BagModel extends Model {
         allowNull: true,
         field: 'descricao'
       },
+      // companyId: {
+      //   type: DataTypes.INTEGER,
+      //   allowNull: false,
+      //   field: 'idEmpresa',
+      //   references: {
+      //     model: 'empresas',
+      //     key: 'id'
+      //   }
+      // },
       companyId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
         field: 'idEmpresa',
-        references: {
-          model: 'empresas',
-          key: 'id'
-        }
+        allowNull: false, // Mude para true se for opcional
+        // Remova ou modifique a referência abaixo se a tabela empresas não existir ainda
+        // references: {
+        //   model: 'empresas',
+        //   key: 'id'
+        // }
       },
       status: {
         type: DataTypes.INTEGER,
