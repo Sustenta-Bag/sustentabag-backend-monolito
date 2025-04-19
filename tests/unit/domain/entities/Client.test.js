@@ -1,85 +1,202 @@
 import Client from '../../../../src/domain/entities/Client.js';
 
-describe('Client Entity', () => {
-  test('should create a client with correct properties', () => {
-    const id = 1;
-    const name = 'João Silva';
-    const email = 'joao.silva@email.com';
-    const cpf = '12345678901';
-    const password = 'hashed_password';
-    const phone = '11987654321';
-    const status = 1;
-    const createdAt = new Date('2023-01-01');
+describe('Client Entity Unit Tests', () => {
+  // Test data for reuse
+  const clientData = {
+    id: 1,
+    name: 'João Silva',
+    email: 'joao@email.com',
+    cpf: '12345678901',
+    password: 'hashed_password',
+    phone: '11987654321',
+    status: 1,
+    createdAt: new Date('2023-01-01')
+  };
 
-    const client = new Client(id, name, email, cpf, password, phone, status, createdAt);
+  describe('Constructor', () => {
+    test('should initialize with all properties correctly', () => {
+      const client = new Client(
+        clientData.id,
+        clientData.name,
+        clientData.email,
+        clientData.cpf,
+        clientData.password,
+        clientData.phone,
+        clientData.status,
+        clientData.createdAt
+      );
 
-    expect(client.id).toBe(id);
-    expect(client.name).toBe(name);
-    expect(client.email).toBe(email);
-    expect(client.cpf).toBe(cpf);
-    expect(client.password).toBe(password);
-    expect(client.phone).toBe(phone);
-    expect(client.status).toBe(status);
-    expect(client.createdAt).toBe(createdAt);
+      expect(client.id).toBe(clientData.id);
+      expect(client.name).toBe(clientData.name);
+      expect(client.email).toBe(clientData.email);
+      expect(client.cpf).toBe(clientData.cpf);
+      expect(client.password).toBe(clientData.password);
+      expect(client.phone).toBe(clientData.phone);
+      expect(client.status).toBe(clientData.status);
+      expect(client.createdAt).toEqual(clientData.createdAt);
+    });
+
+    test('should initialize with default status when not provided', () => {
+      const client = new Client(
+        clientData.id, 
+        clientData.name,
+        clientData.email,
+        clientData.cpf,
+        clientData.password,
+        clientData.phone
+      );
+
+      expect(client.status).toBe(1);
+    });
+
+    test('should initialize with default createdAt when not provided', () => {
+      const beforeCreation = new Date();
+      const client = new Client(
+        clientData.id,
+        clientData.name,
+        clientData.email,
+        clientData.cpf,
+        clientData.password,
+        clientData.phone,
+        clientData.status
+      );
+      const afterCreation = new Date();
+
+      expect(client.createdAt).toBeInstanceOf(Date);
+      expect(client.createdAt >= beforeCreation).toBeTruthy();
+      expect(client.createdAt <= afterCreation).toBeTruthy();
+    });
   });
 
-  test('should create a client with default status if not provided', () => {
-    const client = new Client(1, 'João Silva', 'joao@email.com', '12345678901', 'password', '11987654321');
-    expect(client.status).toBe(1);
-  });
+  describe('Methods', () => {
+    test('updateStatus should change status and return this', () => {
+      const client = new Client(
+        clientData.id,
+        clientData.name,
+        clientData.email,
+        clientData.cpf,
+        clientData.password,
+        clientData.phone,
+        1
+      );
+      
+      const returnValue = client.updateStatus(0);
+      
+      expect(client.status).toBe(0);
+      expect(returnValue).toBe(client); // Should return this for method chaining
+    });
 
-  test('should create a client with default createdAt if not provided', () => {
-    const now = new Date();
-    const client = new Client(1, 'João Silva', 'joao@email.com', '12345678901', 'password', '11987654321');
+    test('updateName should change name and return this', () => {
+      const client = new Client(
+        clientData.id,
+        clientData.name,
+        clientData.email,
+        clientData.cpf,
+        clientData.password,
+        clientData.phone
+      );
+      
+      const newName = 'Maria Silva';
+      const returnValue = client.updateName(newName);
+      
+      expect(client.name).toBe(newName);
+      expect(returnValue).toBe(client); // Should return this for method chaining
+    });
+
+    test('updateEmail should change email and return this', () => {
+      const client = new Client(
+        clientData.id,
+        clientData.name,
+        clientData.email,
+        clientData.cpf,
+        clientData.password,
+        clientData.phone
+      );
+      
+      const newEmail = 'joao.updated@email.com';
+      const returnValue = client.updateEmail(newEmail);
+      
+      expect(client.email).toBe(newEmail);
+      expect(returnValue).toBe(client); // Should return this for method chaining
+    });
+
+    test('updatePhone should change phone and return this', () => {
+      const client = new Client(
+        clientData.id,
+        clientData.name,
+        clientData.email,
+        clientData.cpf,
+        clientData.password,
+        clientData.phone
+      );
+      
+      const newPhone = '11999998888';
+      const returnValue = client.updatePhone(newPhone);
+      
+      expect(client.phone).toBe(newPhone);
+      expect(returnValue).toBe(client); // Should return this for method chaining
+    });
+
+    test('deactivate should set status to 0 and return this', () => {
+      const client = new Client(
+        clientData.id,
+        clientData.name,
+        clientData.email,
+        clientData.cpf,
+        clientData.password,
+        clientData.phone,
+        1 // Active status
+      );
+      
+      const returnValue = client.deactivate();
+      
+      expect(client.status).toBe(0);
+      expect(returnValue).toBe(client); // Should return this for method chaining
+    });
+
+    test('activate should set status to 1 and return this', () => {
+      const client = new Client(
+        clientData.id,
+        clientData.name,
+        clientData.email,
+        clientData.cpf,
+        clientData.password,
+        clientData.phone,
+        0 // Inactive status
+      );
+      
+      const returnValue = client.activate();
+      
+      expect(client.status).toBe(1);
+      expect(returnValue).toBe(client); // Should return this for method chaining
+    });
     
-    expect(client.createdAt.getTime()).toBeCloseTo(now.getTime(), -3);
-  });
-
-  test('should update status successfully', () => {
-    const client = new Client(1, 'João Silva', 'joao@email.com', '12345678901', 'password', '11987654321');
-    const updatedClient = client.updateStatus(0);
-    
-    expect(client.status).toBe(0);
-    expect(updatedClient).toBe(client);
-  });
-
-  test('should update name successfully', () => {
-    const client = new Client(1, 'João Silva', 'joao@email.com', '12345678901', 'password', '11987654321');
-    const updatedClient = client.updateName('João Santos');
-    
-    expect(client.name).toBe('João Santos');
-    expect(updatedClient).toBe(client);
-  });
-
-  test('should update email successfully', () => {
-    const client = new Client(1, 'João Silva', 'joao@email.com', '12345678901', 'password', '11987654321');
-    const updatedClient = client.updateEmail('joao.santos@email.com');
-    
-    expect(client.email).toBe('joao.santos@email.com');
-    expect(updatedClient).toBe(client);
-  });
-
-  test('should update phone successfully', () => {
-    const client = new Client(1, 'João Silva', 'joao@email.com', '12345678901', 'password', '11987654321');
-    const updatedClient = client.updatePhone('11999998888');
-    
-    expect(client.phone).toBe('11999998888');
-    expect(updatedClient).toBe(client);
-  });
-
-  test('should deactivate client successfully', () => {
-    const client = new Client(1, 'João Silva', 'joao@email.com', '12345678901', 'password', '11987654321', 1);
-    const updatedClient = client.deactivate();
-    
-    expect(client.status).toBe(0);
-    expect(updatedClient).toBe(client);
-  });
-
-  test('should activate client successfully', () => {
-    const client = new Client(1, 'João Silva', 'joao@email.com', '12345678901', 'password', '11987654321', 0);
-    const updatedClient = client.activate();
-    
-    expect(client.status).toBe(1);
-    expect(updatedClient).toBe(client);
+    test('methods should support chaining', () => {
+      const client = new Client(
+        clientData.id,
+        clientData.name,
+        clientData.email,
+        clientData.cpf,
+        clientData.password,
+        clientData.phone,
+        1
+      );
+      
+      client
+        .updateName('New Name')
+        .updateEmail('new@email.com')
+        .updatePhone('11922223333')
+        .deactivate();
+      
+      expect(client.name).toBe('New Name');
+      expect(client.email).toBe('new@email.com');
+      expect(client.phone).toBe('11922223333');
+      expect(client.status).toBe(0);
+      
+      client.activate().updateName('Reactivated Client');
+      
+      expect(client.status).toBe(1);
+      expect(client.name).toBe('Reactivated Client');
+    });
   });
 });

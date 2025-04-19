@@ -31,7 +31,7 @@ class BagModel extends Model {
         allowNull: true,
         field: 'descricao'
       },
-      // companyId: {
+      // companyId: { TODO - DESCOMENTAR ISSO QUANDO A COMPANY FOR INTEGRADA
       //   type: DataTypes.INTEGER,
       //   allowNull: false,
       //   field: 'idEmpresa',
