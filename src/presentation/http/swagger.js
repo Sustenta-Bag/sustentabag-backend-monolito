@@ -252,14 +252,6 @@ const options = {
         name: "Sacolas",
         description: "Operações relacionadas a sacolas ecológicas",
       },
-      {
-        name: "Autenticação",
-        description: "Operações de login e autenticação",
-      },
-      {
-        name: "Usuários",
-        description: "Gerenciamento de usuários",
-      },
     ],
     paths: {
       "/api/auth/login": {
