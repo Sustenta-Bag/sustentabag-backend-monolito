@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import express from 'express';
-import { setupRoutes } from '../../presentation/routes/index.js';
+import { setupRoutes } from '../../presentation/routes/bagRoutes.js';
 import { errorHandler } from '../../presentation/middleware/errorHandler.js';
 import BagModel from '../../domain/models/BagModel.js';
 
