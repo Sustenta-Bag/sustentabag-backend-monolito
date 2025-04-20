@@ -732,6 +732,11 @@ const options = {
           tags: ["Sacolas"],
           summary: "Criar uma nova sacola",
           description: "Cria uma nova sacola ecológica no sistema",
+          security: [
+            {
+              bearerAuth: [],
+            },
+          ],
           requestBody: {
             required: true,
             content: {
@@ -807,6 +812,11 @@ const options = {
           summary: "Listar todas as sacolas",
           description:
             "Retorna uma lista de todas as sacolas cadastradas no sistema",
+          security: [
+            {
+              bearerAuth: [],
+            },
+          ],
           responses: {
             200: {
               description: "Lista de sacolas retornada com sucesso",
@@ -839,6 +849,11 @@ const options = {
           tags: ["Sacolas"],
           summary: "Obter detalhes de uma sacola",
           description: "Retorna os dados completos de uma sacola específica",
+          security: [
+            {
+              bearerAuth: [],
+            },
+          ],
           parameters: [
             {
               name: "id",
@@ -887,6 +902,11 @@ const options = {
           tags: ["Sacolas"],
           summary: "Atualizar uma sacola",
           description: "Atualiza os dados de uma sacola existente",
+          security: [
+            {
+              bearerAuth: [],
+            },
+          ],
           parameters: [
             {
               name: "id",
@@ -980,6 +1000,11 @@ const options = {
           tags: ["Sacolas"],
           summary: "Remover uma sacola",
           description: "Remove permanentemente uma sacola do sistema",
+          security: [
+            {
+              bearerAuth: [],
+            },
+          ],
           parameters: [
             {
               name: "id",
@@ -1024,6 +1049,11 @@ const options = {
           summary: "Listar sacolas de uma empresa",
           description:
             "Retorna todas as sacolas associadas a uma empresa específica",
+          security: [
+            {
+              bearerAuth: [],
+            },
+          ],
           parameters: [
             {
               name: "companyId",
@@ -1078,6 +1108,11 @@ const options = {
           summary: "Listar sacolas ativas de uma empresa",
           description:
             "Retorna apenas as sacolas ativas (status=1) associadas a uma empresa específica",
+          security: [
+            {
+              bearerAuth: [],
+            },
+          ],
           parameters: [
             {
               name: "companyId",
@@ -1132,6 +1167,11 @@ const options = {
           summary: "Alterar status de uma sacola",
           description:
             "Atualiza apenas o status de uma sacola (ativo ou inativo)",
+          security: [
+            {
+              bearerAuth: [],
+            },
+          ],
           parameters: [
             {
               name: "id",
