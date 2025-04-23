@@ -78,7 +78,8 @@ class PostgresClientRepository extends ClientRepository {
       record.password,
       record.phone,
       record.status,
-      record.createdAt
+      record.createdAt,
+      record.firebaseId
     );
   }
 }

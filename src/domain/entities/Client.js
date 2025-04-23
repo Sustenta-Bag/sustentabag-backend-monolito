@@ -7,7 +7,8 @@ class Client {
     password,
     phone,
     status = 1,
-    createdAt = new Date()
+    createdAt = new Date(),
+    firebaseId = null
   ) {
     this.id = id;
     this.name = name; // Nome do cliente
@@ -17,6 +18,7 @@ class Client {
     this.phone = phone; // Telefone do cliente
     this.status = status; // 0 = inativo, 1 = ativo
     this.createdAt = createdAt; // Data de criação do cliente
+    this.firebaseId = firebaseId;
   }
 
   updateStatus(newStatus) {

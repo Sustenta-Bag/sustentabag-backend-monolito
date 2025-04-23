@@ -64,7 +64,12 @@ class ClientModel extends Model {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
         field: 'dataAtualizacao'
-      }
+      },
+      firebaseId: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: 'firebase_id'
+      },
     }, {
       sequelize: sequelizeInstance,
       tableName: 'clientes',
