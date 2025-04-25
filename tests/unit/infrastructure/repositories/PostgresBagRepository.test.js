@@ -11,7 +11,7 @@ describe('PostgresBagRepository', () => {
     type: 'Mista',
     price: 15.99,
     description: 'Mixed bag with various items',
-    companyId: 5,
+    idBusiness: 5,
     status: 1,
     createdAt: new Date('2023-01-01')
   };
@@ -45,7 +45,7 @@ describe('PostgresBagRepository', () => {
       expect(result.type).toBe(bagData.type);
       expect(result.price).toBe(bagData.price);
       expect(result.description).toBe(bagData.description);
-      expect(result.companyId).toBe(bagData.companyId);
+      expect(result.idBusiness).toBe(bagData.idBusiness);
       expect(result.status).toBe(bagData.status);
       expect(result.createdAt).toEqual(bagData.createdAt);
     });
@@ -167,67 +167,67 @@ describe('PostgresBagRepository', () => {
     });
   });
 
-  describe('findByCompanyId', () => {
-    test('should find bags by company id and return domain entities', async () => {
+  describe('findByBusinessId', () => {
+    test('should find bags by business id and return domain entities', async () => {
       const mockBagRecords = [
         {
           ...bagData,
           id: 1,
-          companyId: 5,
-          toJSON: () => ({ ...bagData, id: 1, companyId: 5 })
+          idBusiness: 5,
+          toJSON: () => ({ ...bagData, id: 1, idBusiness: 5 })
         },
         {
           ...bagData,
           id: 2,
-          companyId: 5,
-          toJSON: () => ({ ...bagData, id: 2, companyId: 5 })
+          idBusiness: 5,
+          toJSON: () => ({ ...bagData, id: 2, idBusiness: 5 })
         }
       ];
       
       mockBagModel.findAll.mockResolvedValue(mockBagRecords);
       
-      const results = await repository.findByCompanyId(5);
+      const results = await repository.findByBusinessId(5);
       
-      expect(mockBagModel.findAll).toHaveBeenCalledWith({ where: { companyId: 5 } });
+      expect(mockBagModel.findAll).toHaveBeenCalledWith({ where: { idBusiness: 5 } });
       expect(results).toHaveLength(2);
       expect(results[0]).toBeInstanceOf(Bag);
       expect(results[1]).toBeInstanceOf(Bag);
-      expect(results[0].companyId).toBe(5);
-      expect(results[1].companyId).toBe(5);
+      expect(results[0].idBusiness).toBe(5);
+      expect(results[1].idBusiness).toBe(5);
     });
   });
 
-  describe('findActiveByCompanyId', () => {
-    test('should find active bags by company id and return domain entities', async () => {
+  describe('findActiveByBusinessId', () => {
+    test('should find active bags by business id and return domain entities', async () => {
       const mockBagRecords = [
         {
           ...bagData,
           id: 1,
-          companyId: 5,
+          idBusiness: 5,
           status: 1,
-          toJSON: () => ({ ...bagData, id: 1, companyId: 5, status: 1 })
+          toJSON: () => ({ ...bagData, id: 1, idBusiness: 5, status: 1 })
         },
         {
           ...bagData,
           id: 2,
-          companyId: 5,
+          idBusiness: 5,
           status: 1,
-          toJSON: () => ({ ...bagData, id: 2, companyId: 5, status: 1 })
+          toJSON: () => ({ ...bagData, id: 2, idBusiness: 5, status: 1 })
         }
       ];
       
       mockBagModel.findAll.mockResolvedValue(mockBagRecords);
       
-      const results = await repository.findActiveByCompanyId(5);
+      const results = await repository.findActiveByBusinessId(5);
       
-      expect(mockBagModel.findAll).toHaveBeenCalledWith({ where: { companyId: 5, status: 1 } });
+      expect(mockBagModel.findAll).toHaveBeenCalledWith({ where: { idBusiness: 5, status: 1 } });
       expect(results).toHaveLength(2);
       expect(results[0]).toBeInstanceOf(Bag);
       expect(results[1]).toBeInstanceOf(Bag);
-      expect(results[0].companyId).toBe(5);
+      expect(results[0].idBusiness).toBe(5);
       expect(results[0].status).toBe(1);
-      expect(results[1].companyId).toBe(5);
+      expect(results[1].idBusiness).toBe(5);
       expect(results[1].status).toBe(1);
     });
   });
-}); 
+});

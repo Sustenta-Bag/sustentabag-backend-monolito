@@ -1,10 +1,10 @@
 class Bag {
-  constructor(id, type, price, description, companyId, status = 1, createdAt = new Date()) {
+  constructor(id, type, price, description, idBusiness, status = 1, createdAt = new Date()) {
     this.id = id;
     this.type = type;
     this.price = price; 
     this.description = description;
-    this.companyId = companyId; 
+    this.idBusiness = idBusiness; 
     this.status = status;
     this.createdAt = createdAt;
   }

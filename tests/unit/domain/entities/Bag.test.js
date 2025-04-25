@@ -6,17 +6,17 @@ describe('Bag Entity', () => {
     const type = 'Mista';
     const price = 15.99;
     const description = 'Mixed bag with various items';
-    const companyId = 5;
+    const idBusiness = 5;
     const status = 1;
     const createdAt = new Date('2023-01-01');
 
-    const bag = new Bag(id, type, price, description, companyId, status, createdAt);
+    const bag = new Bag(id, type, price, description, idBusiness, status, createdAt);
 
     expect(bag.id).toBe(id);
     expect(bag.type).toBe(type);
     expect(bag.price).toBe(price);
     expect(bag.description).toBe(description);
-    expect(bag.companyId).toBe(companyId);
+    expect(bag.idBusiness).toBe(idBusiness);
     expect(bag.status).toBe(status);
     expect(bag.createdAt).toBe(createdAt);
   });
@@ -72,4 +72,4 @@ describe('Bag Entity', () => {
     expect(bag.status).toBe(1);
     expect(updatedBag).toBe(bag);
   });
-}); 
+});
