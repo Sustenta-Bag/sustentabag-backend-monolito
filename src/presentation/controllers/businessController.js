@@ -7,7 +7,7 @@ class BusinessController {
   
     async createBusiness(req, res, next) {
       try {
-        const business = await this.businessService.createBusiness(req.body);
+        const business = await this.businessService.createBusiness(req.body, req.file);
         return res.status(201).json(business);
       } catch (error) {
         next(error);
@@ -40,7 +40,7 @@ class BusinessController {
   
     async updateBusiness(req, res, next) {
       try {
-        const business = await this.businessService.updateBusiness(req.params.id, req.body);
+        const business = await this.businessService.updateBusiness(req.params.id, req.body, req.file);
         return res.json(business);
       } catch (error) {
         next(error);

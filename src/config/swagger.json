@@ -359,14 +359,58 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#components/schemas/BusinessInput"
-              }
-            },
-            "application/xml": {
-              "schema": {
-                "$ref": "#components/schemas/BusinessInput"
+                "type": "object",
+                "properties": {
+                  "legalName": {
+                    "type": "string",
+                    "example": "Sustenta Bag LTDA"
+                  },
+                  "cnpj": {
+                    "type": "string",
+                    "example": "12345678000195"
+                  },
+                  "appName": {
+                    "type": "string",
+                    "example": "Sustenta Bag - Centro"
+                  },
+                  "cellphone": {
+                    "type": "string",
+                    "example": "11987654321"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Empresa especializada em sacolas"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "senha123"
+                  },
+                  "delivery": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "deliveryTax": {
+                    "type": "number",
+                    "example": 5.99
+                  },
+                  "idAddress": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "logo": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "legalName",
+                  "cnpj",
+                  "appName",
+                  "cellphone",
+                  "password"
+                ]
               }
             }
           }
@@ -1130,6 +1174,10 @@
                   "type": {
                     "type": "string",
                     "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "binary"
                   },
                   "description": {
                     "type": "string",
