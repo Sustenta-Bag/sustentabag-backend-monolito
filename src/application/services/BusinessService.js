@@ -1,0 +1,163 @@
+import AppError from "../../infrastructure/errors/AppError.js";
+import bcrypt from 'bcrypt';
+
+class BusinessService {
+  constructor(businessRepository, addressRepository) {
+    this.businessRepository = businessRepository;
+    this.addressRepository = addressRepository;
+  }
+
+  async createBusiness(data) {
+    if (!data.idAddress) {
+      throw new AppError("Endereço é obrigatório", "ADDRESS_REQUIRED");
+    }
+
+    const address = await this.addressRepository.findById(data.idAddress);
+    if (!address) {
+      throw AppError.notFound("Address", data.idAddress);
+    }
+
+    const exists = await this.businessRepository.findByCnpj(data.cnpj);
+    if (exists) {
+      throw new AppError("CNPJ já cadastrado", "CNPJ_ALREADY_EXISTS");
+    }
+
+    const hashed = await bcrypt.hash(data.password, 10);
+    data.password = hashed;
+    data.status = 1;
+
+    return await this.businessRepository.create(data);
+  }
+
+  async getBusiness(id, { includeAddress = false } = {}) {
+    let business;
+    if (includeAddress) {
+      business = await this.businessRepository.findByIdWithAddress(id);
+    } else {
+      business = await this.businessRepository.findById(id);
+    }
+    if (!business) {
+      throw AppError.notFound("Empresa", id);
+    }
+    return business;
+  }
+
+  async listBusinesses({ page = 1, limit = 10, onlyActive = false } = {}) {
+    const offset = (page - 1) * limit;
+    const options = { offset, limit };
+
+    if (onlyActive) {
+      options.where = { status: 1 };
+    }
+
+    return await this.businessRepository.findAll(options);
+  }
+
+  async updateBusiness(id, data) {
+    const existing = await this.businessRepository.findById(id);
+    if (!existing) {
+      throw AppError.notFound("Empresa", id);
+    }
+
+    if (data.cnpj && data.cnpj !== existing.cnpj) {
+      const byCnpj = await this.businessRepository.findByCnpj(data.cnpj);
+      if (byCnpj && byCnpj.idBusiness !== id) {
+        throw new AppError(
+          "CNPJ já cadastrado por outra empresa",
+          "CNPJ_ALREADY_EXISTS"
+        );
+      }
+    }
+
+    if (data.idAddress && data.idAddress !== existing.idAddress) {
+      const addr = await this.addressRepository.findById(data.idAddress);
+      if (!addr) {
+        throw AppError.notFound("Address", data.idAddress);
+      }
+    }
+
+    if (data.password) {
+      data.password = await bcrypt.hash(data.password, 10);
+    }
+
+    return await this.businessRepository.update(id, data);
+  }
+
+  async deleteBusiness(id) {
+    const deleted = await this.businessRepository.delete(id);
+    if (!deleted) {
+      throw AppError.notFound("Empresa", id);
+    }
+    return deleted;
+  }
+
+  async getActiveBusiness() {
+    return await this.businessRepository.findActiveBusiness();
+  }
+
+  async changeBusinessStatus(id, status) {
+    if (typeof status === "boolean") {
+      status = status ? 1 : 0;
+    }
+    if (status !== 0 && status !== 1) {
+      throw new AppError(
+        "Status inválido. Deve ser 0 (inativo) ou 1 (ativo)",
+        "INVALID_STATUS"
+      );
+    }
+
+    const business = await this.businessRepository.findById(id);
+    if (!business) {
+      throw AppError.notFound("Empresa", id);
+    }
+
+    return await this.businessRepository.update(id, { status });
+  }
+
+  async authenticateBusiness(cnpj, password) {
+    const business = await this.businessRepository.findByCnpj(cnpj);
+    if (!business) {
+      throw new AppError(
+        "Credenciais inválidas",
+        "INVALID_CREDENTIALS",
+        401
+      );
+    }
+    if (business.status !== 1) {
+      throw new AppError(
+        "Conta inativa",
+        "ACCOUNT_INACTIVE",
+        401
+      );
+    }
+    const ok = await bcrypt.compare(password, business.password);
+    if (!ok) {
+      throw new AppError(
+        "Credenciais inválidas",
+        "INVALID_CREDENTIALS",
+        401
+      );
+    }
+    return business;
+  }
+
+  async changePassword(id, currentPassword, newPassword) {
+    const business = await this.businessRepository.findById(id);
+    if (!business) {
+      throw AppError.notFound("Business", id);
+    }
+    const match = await bcrypt.compare(currentPassword, business.password);
+    if (!match) {
+      throw new AppError(
+        "Senha atual incorreta",
+        "INVALID_CREDENTIALS",
+        401
+      );
+    }
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await this.businessRepository.update(id, { password: hashed });
+    return true;
+  }
+}
+
+export default BusinessService;

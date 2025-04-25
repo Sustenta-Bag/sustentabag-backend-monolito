@@ -1,5 +1,5 @@
-class BagRepository {
-  async create(bag) {
+class AddressRepository {
+  async create(address) {
     throw new Error('Método não implementado');
   }
 
@@ -7,25 +7,25 @@ class BagRepository {
     throw new Error('Método não implementado');
   }
 
-  async findAll() {
+  async findAll(options) {
     throw new Error('Método não implementado');
   }
 
-  async update(id, bag) {
+  async findAndCountAll(options) {
+    throw new Error('Método não implementado');
+  }
+
+  async findByUnique({ zipCode, city, street, number }) {
+    throw new Error('Método não implementado');
+  }
+
+  async update(id, address) {
     throw new Error('Método não implementado');
   }
 
   async delete(id) {
     throw new Error('Método não implementado');
   }
-  
-  async findByBusinessId(idBusiness) {
-    throw new Error('Método não implementado');
-  }
-  
-  async findActiveByBusinessId(idBusiness) {
-    throw new Error('Método não implementado');
-  }
 }
 
-export default BagRepository;
+export default AddressRepository;

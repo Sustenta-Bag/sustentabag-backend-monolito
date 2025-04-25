@@ -1,0 +1,2195 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Sustentabag API",
+    "version": "1.0.0",
+    "description": "API completa para gerenciamento de sacolas misteriosas do sistema Sustenta Bag",
+    "contact": {
+      "name": "Equipe Sustenta Bag",
+      "url": "https://github.com/Sustenta-Bag",
+      "email": "contato@sustentabag.com"
+    },
+    "license": {
+      "name": "ISC",
+      "url": "https://opensource.org/licenses/ISC"
+    }
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Servidor de API"
+    }
+  ],
+  "paths": {
+    "/api/addresses": {
+      "post": {
+        "tags": [
+          "Address"
+        ],
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#components/schemas/AddressInput"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#components/schemas/AddressInput"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Address"
+        ],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/addresses/{id}": {
+      "get": {
+        "tags": [
+          "Address"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Address"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#components/schemas/AddressInput"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#components/schemas/AddressInput"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Address"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/bags": {
+      "post": {
+        "tags": [
+          "Bag"
+        ],
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#components/schemas/BagInput"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#components/schemas/BagInput"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Bag"
+        ],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/bags/{id}": {
+      "get": {
+        "tags": [
+          "Bag"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Bag"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#components/schemas/BagInput"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#components/schemas/BagInput"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Bag"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/bags/{idBusiness}": {
+      "get": {
+        "tags": [
+          "Bag"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "idBusiness",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/bags/{idBusiness}/active": {
+      "get": {
+        "tags": [
+          "Bag"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "idBusiness",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/bags/{id}/status": {
+      "patch": {
+        "tags": [
+          "Bag"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/businesses": {
+      "post": {
+        "tags": [
+          "Business"
+        ],
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#components/schemas/BusinessInput"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#components/schemas/BusinessInput"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Business"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "onlyActive",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/businesses/{id}": {
+      "get": {
+        "tags": [
+          "Business"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeAddress",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Business"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#components/schemas/BusinessInput"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#components/schemas/BusinessInput"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Business"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/businesses/active": {
+      "get": {
+        "tags": [
+          "Business"
+        ],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/businesses/{id}/status": {
+      "patch": {
+        "tags": [
+          "Business"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clients/auth/login": {
+      "post": {
+        "tags": [
+          "Client"
+        ],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#components/schemas/LoginInput"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#components/schemas/LoginInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clients": {
+      "post": {
+        "tags": [
+          "Client"
+        ],
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#components/schemas/ClientInput"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#components/schemas/ClientInput"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Client"
+        ],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/clients/active": {
+      "get": {
+        "tags": [
+          "Client"
+        ],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/clients/{id}": {
+      "get": {
+        "tags": [
+          "Client"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Client"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#components/schemas/ClientInput"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#components/schemas/ClientInput"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Client"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/clients/{id}/status": {
+      "patch": {
+        "tags": [
+          "Client"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Bag": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "integer"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "ID único da sacola (idSacola)"
+                  },
+                  "example": {
+                    "type": "number",
+                    "example": 1
+                  }
+                }
+              },
+              "type": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "enum": {
+                    "type": "array",
+                    "example": [
+                      "Doce",
+                      "Salgada",
+                      "Mista"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Tipo da sacola"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "Doce"
+                  }
+                }
+              },
+              "price": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "float"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Preço da sacola"
+                  },
+                  "example": {
+                    "type": "number",
+                    "example": 10.99
+                  }
+                }
+              },
+              "description": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Descrição da sacola"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "Sacola com diversos doces e sobremesas"
+                  }
+                }
+              },
+              "idBusiness": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "integer"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "ID da empresa (referência)"
+                  },
+                  "example": {
+                    "type": "number",
+                    "example": 1
+                  }
+                }
+              },
+              "status": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "integer"
+                  },
+                  "enum": {
+                    "type": "array",
+                    "example": [
+                      0,
+                      1
+                    ],
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Status da sacola: 0 para inativo, 1 para ativo"
+                  },
+                  "example": {
+                    "type": "number",
+                    "example": 1
+                  }
+                }
+              },
+              "createdAt": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "date-time"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Data de criação do registro"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "2025-04-10T14:30:00Z"
+                  }
+                }
+              },
+              "updatedAt": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "date-time"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Data de atualização do registro"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "2025-04-10T16:45:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "example": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number",
+                "example": 1
+              },
+              "type": {
+                "type": "string",
+                "example": "Doce"
+              },
+              "price": {
+                "type": "number",
+                "example": 10.99
+              },
+              "description": {
+                "type": "string",
+                "example": "Sacola com diversos doces e sobremesas"
+              },
+              "idBusiness": {
+                "type": "number",
+                "example": 1
+              },
+              "status": {
+                "type": "number",
+                "example": 1
+              },
+              "createdAt": {
+                "type": "string",
+                "example": "2025-04-10T14:30:00Z"
+              },
+              "updatedAt": {
+                "type": "string",
+                "example": "2025-04-10T16:45:00Z"
+              }
+            }
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "type",
+              "price",
+              "idBusiness"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "xml": {
+          "name": "Bag"
+        }
+      },
+      "BagInput": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "Doce"
+          },
+          "price": {
+            "type": "number",
+            "example": 10.99
+          },
+          "description": {
+            "type": "string",
+            "example": "Sacola com diversos doces e sobremesas"
+          },
+          "idBusiness": {
+            "type": "number",
+            "example": 1
+          },
+          "status": {
+            "type": "number",
+            "example": 1
+          }
+        },
+        "xml": {
+          "name": "BagInput"
+        }
+      },
+      "Business": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "idBusiness": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "integer"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "ID único da empresa"
+                  },
+                  "example": {
+                    "type": "number",
+                    "example": 1
+                  }
+                }
+              },
+              "legalName": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Razão social da empresa"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "Sustenta Bag LTDA"
+                  }
+                }
+              },
+              "CNPJ": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "CNPJ da empresa (14 dígitos)"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "12345678000195"
+                  }
+                }
+              },
+              "appName": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Nome dentro do aplicativo"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "Sustenta Bag - Centro"
+                  }
+                }
+              },
+              "cellphone": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Número de celular da empresa"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "11987654321"
+                  }
+                }
+              },
+              "description": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Descrição da empresa"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "Empresa especializada em sacolas ecológicas"
+                  }
+                }
+              },
+              "logo": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Arquivo de imagem do logo da empresa"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "Logo.png"
+                  }
+                }
+              },
+              "password": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "password"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Senha de acesso da empresa"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "senha123"
+                  }
+                }
+              },
+              "delivery": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "boolean"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Indica se a empresa realiza entregas"
+                  },
+                  "example": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                }
+              },
+              "deliveryTax": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "float"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Taxa de entrega da empresa"
+                  },
+                  "example": {
+                    "type": "number",
+                    "example": 5.99
+                  }
+                }
+              },
+              "idAddress": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "integer"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "ID do endereço da empresa (referência)"
+                  },
+                  "example": {
+                    "type": "number",
+                    "example": 1
+                  }
+                }
+              },
+              "status": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "integer"
+                  },
+                  "enum": {
+                    "type": "array",
+                    "example": [
+                      0,
+                      1
+                    ],
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Status da empresa: 0 para inativa, 1 para ativa"
+                  },
+                  "example": {
+                    "type": "number",
+                    "example": 1
+                  }
+                }
+              },
+              "createdAt": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "date-time"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Data de criação do registro"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "2025-04-10T14:30:00Z"
+                  }
+                }
+              },
+              "updatedAt": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "date-time"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Data de atualização do registro"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "2025-04-10T16:45:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "example": {
+            "type": "object",
+            "properties": {
+              "idBusiness": {
+                "type": "number",
+                "example": 1
+              },
+              "legalName": {
+                "type": "string",
+                "example": "Sustenta Bag LTDA"
+              },
+              "CNPJ": {
+                "type": "string",
+                "example": "12345678000195"
+              },
+              "appName": {
+                "type": "string",
+                "example": "Sustenta Bag - Centro"
+              },
+              "cellphone": {
+                "type": "string",
+                "example": "11987654321"
+              },
+              "description": {
+                "type": "string",
+                "example": "Empresa especializada em sacolas ecológicas"
+              },
+              "logo": {
+                "type": "string",
+                "example": "Logo.png"
+              },
+              "password": {
+                "type": "string",
+                "example": "senha123"
+              },
+              "delivery": {
+                "type": "boolean",
+                "example": true
+              },
+              "deliveryTax": {
+                "type": "number",
+                "example": 5.99
+              },
+              "idAddress": {
+                "type": "number",
+                "example": 1
+              },
+              "status": {
+                "type": "number",
+                "example": 1
+              },
+              "createdAt": {
+                "type": "string",
+                "example": "2025-04-10T14:30:00Z"
+              },
+              "updatedAt": {
+                "type": "string",
+                "example": "2025-04-10T16:45:00Z"
+              }
+            }
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "legalName",
+              "CNPJ",
+              "appName",
+              "cellphone",
+              "password"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "xml": {
+          "name": "Business"
+        }
+      },
+      "BusinessInput": {
+        "type": "object",
+        "properties": {
+          "legalName": {
+            "type": "string",
+            "example": "Sustenta Bag LTDA"
+          },
+          "cnpj": {
+            "type": "string",
+            "example": "12345678000195"
+          },
+          "appName": {
+            "type": "string",
+            "example": "Sustenta Bag - Centro"
+          },
+          "cellphone": {
+            "type": "string",
+            "example": "11987654321"
+          },
+          "description": {
+            "type": "string",
+            "example": "Empresa especializada em sacolas"
+          },
+          "password": {
+            "type": "string",
+            "example": "senha123"
+          },
+          "delivery": {
+            "type": "boolean",
+            "example": true
+          },
+          "deliveryTax": {
+            "type": "number",
+            "example": 5.99
+          },
+          "idAddress": {
+            "type": "number",
+            "example": 1
+          }
+        },
+        "xml": {
+          "name": "BusinessInput"
+        }
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "zipCode",
+              "State",
+              "city",
+              "Street",
+              "Number"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "zipCode": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "12345-678"
+                  }
+                }
+              },
+              "State": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "PR"
+                  }
+                }
+              },
+              "city": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "Curitiba"
+                  }
+                }
+              },
+              "Street": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "Rua das Flores"
+                  }
+                }
+              },
+              "Number": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "123"
+                  }
+                }
+              },
+              "Complement": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "Apto 45"
+                  }
+                }
+              }
+            }
+          },
+          "example": {
+            "type": "object",
+            "properties": {
+              "zipCode": {
+                "type": "string",
+                "example": "12345678"
+              },
+              "State": {
+                "type": "string",
+                "example": "PR"
+              },
+              "city": {
+                "type": "string",
+                "example": "Curitiba"
+              },
+              "Street": {
+                "type": "string",
+                "example": "Rua das Flores"
+              },
+              "Number": {
+                "type": "string",
+                "example": "123"
+              },
+              "Complement": {
+                "type": "string",
+                "example": "Apto 45"
+              }
+            }
+          }
+        },
+        "xml": {
+          "name": "Address"
+        }
+      },
+      "AddressInput": {
+        "type": "object",
+        "properties": {
+          "zipCode": {
+            "type": "string",
+            "example": "12345678"
+          },
+          "state": {
+            "type": "string",
+            "example": "PR"
+          },
+          "city": {
+            "type": "string",
+            "example": "Curitiba"
+          },
+          "street": {
+            "type": "string",
+            "example": "Rua das Flores"
+          },
+          "number": {
+            "type": "string",
+            "example": "123"
+          },
+          "complement": {
+            "type": "string",
+            "example": "Apto 45"
+          }
+        },
+        "xml": {
+          "name": "AddressInput"
+        }
+      },
+      "Client": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "integer"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "ID único do cliente"
+                  },
+                  "example": {
+                    "type": "number",
+                    "example": 1
+                  }
+                }
+              },
+              "name": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Nome do cliente"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "João Silva"
+                  }
+                }
+              },
+              "email": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "email"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Email do cliente"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "joao.silva@email.com"
+                  }
+                }
+              },
+              "cpf": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "CPF do cliente (11 dígitos)"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "12345678901"
+                  }
+                }
+              },
+              "phone": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Telefone do cliente"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "11987654321"
+                  }
+                }
+              },
+              "password": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "password"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Senha do cliente"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "senha123"
+                  }
+                }
+              },
+              "status": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "integer"
+                  },
+                  "enum": {
+                    "type": "array",
+                    "example": [
+                      0,
+                      1
+                    ],
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Status do cliente: 0 para inativo, 1 para ativo"
+                  },
+                  "example": {
+                    "type": "number",
+                    "example": 1
+                  }
+                }
+              },
+              "createdAt": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "date-time"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Data de criação do registro"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "2023-01-01T00:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "name",
+              "email",
+              "cpf",
+              "password",
+              "phone"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "xml": {
+          "name": "Client"
+        }
+      },
+      "ClientInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Gabriel da Silva Costa"
+          },
+          "email": {
+            "type": "string",
+            "example": "silva@gabriel.com"
+          },
+          "cpf": {
+            "type": "string",
+            "example": "12345678901"
+          },
+          "phone": {
+            "type": "string",
+            "example": "11987654321"
+          },
+          "password": {
+            "type": "string",
+            "example": "senha123"
+          }
+        },
+        "xml": {
+          "name": "ClientInput"
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "cpf": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "CPF do cliente (11 dígitos)"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "12345678901"
+                  }
+                }
+              },
+              "password": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "password"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Senha do cliente"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "senha123"
+                  }
+                }
+              }
+            }
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "cpf",
+              "password"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "xml": {
+          "name": "LoginRequest"
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "client": {
+                "xml": {
+                  "name": "client"
+                },
+                "$ref": "#/components/schemas/Client"
+              },
+              "token": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Token JWT de autenticação"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "xml": {
+          "name": "LoginResponse"
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "statusCode": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "integer"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Código de status HTTP do erro"
+                  },
+                  "example": {
+                    "type": "number",
+                    "example": 400
+                  }
+                }
+              },
+              "errorCode": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Código específico do erro"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "BAG_NOT_FOUND"
+                  }
+                }
+              },
+              "message": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Mensagem descritiva do erro"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "Sacola não encontrada com o ID fornecido"
+                  }
+                }
+              },
+              "details": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "object"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Detalhes adicionais do erro"
+                  },
+                  "nullable": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                }
+              },
+              "timestamp": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "date-time"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Data e hora do erro"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "2025-04-10T14:30:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "statusCode",
+              "errorCode",
+              "message",
+              "timestamp"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "xml": {
+          "name": "Error"
+        }
+      },
+      "ValidationError": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "statusCode": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "integer"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Código de status HTTP do erro"
+                  },
+                  "example": {
+                    "type": "number",
+                    "example": 400
+                  }
+                }
+              },
+              "errorCode": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Código de erro específico"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "VALIDATION_ERROR"
+                  }
+                }
+              },
+              "message": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Mensagem descritiva do erro"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "Erro de validação dos dados de entrada"
+                  }
+                }
+              },
+              "errors": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "array"
+                  },
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "example": "object"
+                      },
+                      "properties": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "example": "string"
+                              },
+                              "description": {
+                                "type": "string",
+                                "example": "Campo com erro"
+                              },
+                              "example": {
+                                "type": "string",
+                                "example": "type"
+                              }
+                            }
+                          },
+                          "message": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "example": "string"
+                              },
+                              "description": {
+                                "type": "string",
+                                "example": "Mensagem de erro específica"
+                              },
+                              "example": {
+                                "type": "string",
+                                "example": "Tipo da sacola deve ser Doce, Salgada ou Mista"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Lista de erros de validação"
+                  }
+                }
+              },
+              "timestamp": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "date-time"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Data e hora do erro"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "2025-04-10T14:30:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "statusCode",
+              "errorCode",
+              "message",
+              "errors",
+              "timestamp"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "xml": {
+          "name": "ValidationError"
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Insira o token JWT com o prefixo Bearer. Exemplo: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\""
+      }
+    }
+  }
+}

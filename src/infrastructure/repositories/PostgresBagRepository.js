@@ -43,18 +43,18 @@ class PostgresBagRepository extends BagRepository {
     return deleted > 0;
   }
 
-  async findByCompanyId(companyId) {
+  async findByBusinessId(idBusiness) {
     const bagRecords = await this.BagModel.findAll({
-      where: { companyId }
+      where: { idBusiness }
     });
     
     return bagRecords.map(record => this._mapToDomainEntity(record));
   }
 
-  async findActiveByCompanyId(companyId) {
+  async findActiveByBusinessId(idBusiness) {
     const bagRecords = await this.BagModel.findAll({
       where: { 
-        companyId,
+        idBusiness,
         status: 1
       }
     });
@@ -68,7 +68,7 @@ class PostgresBagRepository extends BagRepository {
       record.type,
       record.price,
       record.description,
-      record.companyId,
+      record.idBusiness,
       record.status,
       record.createdAt
     );

@@ -15,7 +15,7 @@ export const validateCreateBag = [
     .isString()
     .withMessage('Descrição deve ser uma string'),
 
-  body('companyId')
+  body('idBusiness')
     .isInt({ min: 1 })
     .withMessage('ID da empresa deve ser um número inteiro positivo'),
 
@@ -43,7 +43,7 @@ export const validateUpdateBag = [
     .isString()
     .withMessage('Descrição deve ser uma string'),
 
-  body('companyId')
+  body('idBusiness')
     .optional()
     .isInt({ min: 1 })
     .withMessage('ID da empresa deve ser um número inteiro positivo'),
@@ -64,8 +64,8 @@ export const validateBagId = [
   handleValidationErrors
 ];
 
-export const validateCompanyId = [
-  param('companyId')
+export const validateBusinessId = [
+  param('idBusiness')
     .isInt({ min: 1 })
     .withMessage('ID da empresa deve ser um número inteiro positivo'),
 
