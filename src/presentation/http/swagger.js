@@ -1,3 +1,4 @@
+import status from "http-status";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 
@@ -52,10 +53,11 @@ const options = {
               description: "Descrição da sacola",
               example: "Sacola com diversos doces e sobremesas",
             },
-            companyId: {
+            idBusiness: {
               type: "integer",
               description: "ID da empresa (referência)",
               example: 1,
+              $ref: "#/components/schemas/business/idBusiness",
             },
             status: {
               type: "integer",
@@ -77,6 +79,128 @@ const options = {
             },
           },
           required: ["type", "price", "companyId"],
+        },
+        Bussiness: {
+          type: "object",
+          properties: {
+            idBusiness: {
+              type: "integer",
+              description: "ID único da empresa",
+              example: 1,
+            },
+            legalName: {
+              type: "string",
+              description: "Razão social da empresa",
+              example: "Sustenta Bag LTDA",
+            },
+            CNPJ: {
+              type: "string",
+              description: "CNPJ da empresa (14 dígitos)",
+              example: "12345678000195",
+            },
+            appName: {
+              type: "string",
+              description: "Nome dentro do applicativo",
+              example: "Sustenta Bag - Centro",
+            },
+            cellphone: {
+              type: "string",
+              description: "Número de celular da empresa",
+              example: "11987654321",
+            },
+            description: {
+              type: "string",
+              description: "Descrição da empresa",
+              example: "Empresa especializada em sacolas ecológicas",
+            },
+            logo: {
+              type: "string",
+              description: "Arquivo de imagem do logo da empresa",
+              example: "Logo.png",
+            },
+            password: {
+              type: "string",
+              format: "password",
+              description: "Senha de acesso da empresa",
+              example: "senha123",
+            },
+            delivery: {
+              type: "boolean",
+              description: "Indica se a empresa realiza entregas",
+              example: true,
+            },
+            deliveryTax: {
+              type: "number",
+              format: "float",
+              description: "Taxa de entrega da empresa",
+              example: 5.99,
+            },
+            idAddress: {
+              type: "integer",
+              description: "ID do endereço da empresa (referência)",
+              example: 1,
+            },
+            status: {
+              type: "integer",
+              enum: [0, 1],
+              description: "Status da empresa: 0 para inativa, 1 para ativa",
+              example: 1,
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+              description: "Data de criação do registro",
+              example: "2025-04-10T14:30:00Z",
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+              description: "Data de atualização do registro",
+              example: "2025-04-10T16:45:00Z",
+            },
+          required: ["legalName", "CNPJ", "appName", "cellphone", "password"],
+          },
+        },
+        Address: {
+          type: "object",
+          properties: {
+            idAddress: {
+              type: "integer",
+              description: "ID único do endereço",
+              example: 1,
+            },
+            zipCode: {
+              type: "string",
+              description: "CEP do endereço",
+              example: "12345-678",
+            },
+            State: {
+              type: "string",
+              description: "Sigla do estado",
+              example: "PR",
+            },
+            city: {
+              type: "string",
+              description: "Nome da cidade",
+              example: "Curitiba",
+            },
+            Street: {
+              type: "string",
+              description: "Nome da rua",
+              example: "Rua das Flores",
+            },
+            Number: {
+              type: "string",
+              description: "Número do endereço",
+              example: "123",
+            },
+            Complement: {
+              type: "string",
+              description: "Complemento (se houver)",
+              example: "Apto 45",
+            },
+            required: ["zipCode", "State", "city", "Street", "Number"],
+          },
         },
         Client: {
           type: "object",

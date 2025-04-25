@@ -38,12 +38,12 @@ class BagService {
     return result;
   }
 
-  async getBagsByCompanyId(companyId) {
-    return await this.bagRepository.findByCompanyId(companyId);
+  async getBagsByBusinessId(idBusiness) {
+    return await this.bagRepository.findByBusinessId(idBusiness);
   }
 
-  async getActiveBagsByCompanyId(companyId) {
-    return await this.bagRepository.findActiveByCompanyId(companyId);
+  async getActiveBagsByBusinessId(idBusiness) {
+    return await this.bagRepository.findActiveByBusinessId(idBusiness);
   }
 
   async changeBagStatus(id, status) {

@@ -14,8 +14,8 @@ describe('BagService', () => {
       findAll: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
-      findByCompanyId: jest.fn(),
-      findActiveByCompanyId: jest.fn()
+      findByBusinessId: jest.fn(),
+      findActiveByBusinessId: jest.fn()
     };
     
     bagService = new BagService(mockBagRepository);
@@ -27,7 +27,7 @@ describe('BagService', () => {
         type: 'Mista',
         price: 15.99,
         description: 'Mixed bag',
-        companyId: 5
+        idBusiness: 5
       };
       
       const createdBag = new Bag(1, 'Mista', 15.99, 'Mixed bag', 5);
@@ -114,34 +114,34 @@ describe('BagService', () => {
     });
   });
   
-  describe('getBagsByCompanyId', () => {
+  describe('getBagsByBusinessId', () => {
     test('should return bags for a company', async () => {
       const bags = [
         new Bag(1, 'Doce', 10.0, 'Sweet bag', 5),
         new Bag(2, 'Salgada', 12.0, 'Salty bag', 5)
       ];
       
-      mockBagRepository.findByCompanyId.mockResolvedValue(bags);
+      mockBagRepository.findByBusinessId.mockResolvedValue(bags);
       
-      const result = await bagService.getBagsByCompanyId(5);
+      const result = await bagService.getBagsByBusinessId(5);
       
-      expect(mockBagRepository.findByCompanyId).toHaveBeenCalledWith(5);
+      expect(mockBagRepository.findByBusinessId).toHaveBeenCalledWith(5);
       expect(result).toEqual(bags);
     });
   });
   
-  describe('getActiveBagsByCompanyId', () => {
+  describe('getActiveBagsByBusinessId', () => {
     test('should return active bags for a company', async () => {
       const activeBags = [
         new Bag(1, 'Doce', 10.0, 'Sweet bag', 5, 1),
         new Bag(2, 'Salgada', 12.0, 'Salty bag', 5, 1)
       ];
       
-      mockBagRepository.findActiveByCompanyId.mockResolvedValue(activeBags);
+      mockBagRepository.findActiveByBusinessId.mockResolvedValue(activeBags);
       
-      const result = await bagService.getActiveBagsByCompanyId(5);
+      const result = await bagService.getActiveBagsByBusinessId(5);
       
-      expect(mockBagRepository.findActiveByCompanyId).toHaveBeenCalledWith(5);
+      expect(mockBagRepository.findActiveByBusinessId).toHaveBeenCalledWith(5);
       expect(result).toEqual(activeBags);
     });
   });
@@ -186,4 +186,4 @@ describe('BagService', () => {
       expect(mockBagRepository.findById).toHaveBeenCalledWith(999);
     });
   });
-}); 
+});

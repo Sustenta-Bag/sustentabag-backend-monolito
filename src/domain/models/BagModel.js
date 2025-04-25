@@ -31,24 +31,14 @@ class BagModel extends Model {
         allowNull: true,
         field: 'descricao'
       },
-      // companyId: { TODO - DESCOMENTAR ISSO QUANDO A COMPANY FOR INTEGRADA
-      //   type: DataTypes.INTEGER,
-      //   allowNull: false,
-      //   field: 'idEmpresa',
-      //   references: {
-      //     model: 'empresas',
-      //     key: 'id'
-      //   }
-      // },
-      companyId: {
+      idBusiness: {
         type: DataTypes.INTEGER,
+        allowNull: false,
         field: 'idEmpresa',
-        allowNull: false, // Mude para true se for opcional
-        // Remova ou modifique a referência abaixo se a tabela empresas não existir ainda
-        // references: {
-        //   model: 'empresas',
-        //   key: 'id'
-        // }
+        references: {
+          model: 'empresas',
+          key: 'idEmpresa'
+        }
       },
       status: {
         type: DataTypes.INTEGER,
@@ -80,10 +70,10 @@ class BagModel extends Model {
   }
   
   static associate(models) {
-    if (models.CompanyModel) {
-      this.belongsTo(models.CompanyModel, { 
-        foreignKey: 'companyId',
-        as: 'company'
+    if (models.BusinessModel) {
+      this.belongsTo(models.BusinessModel, { 
+        foreignKey: 'idBusiness',
+        as: 'business'
       });
     }
   }

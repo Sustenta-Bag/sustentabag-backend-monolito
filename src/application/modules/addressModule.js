@@ -1,15 +1,15 @@
 import dotenv from 'dotenv';
 import express from 'express';
-import { setupBagRoutes } from '../../presentation/routes/bagRoutes.js';
+import { setupAddressRoutes } from '../../presentation/routes/addressRoutes.js';
 import { errorHandler } from '../../presentation/middleware/errorHandler.js';
-import BagModel from '../../domain/models/BagModel.js';
+import AddressModel from '../../domain/models/AddressModel.js';
 
 dotenv.config();
 
-export const setupBagModule = (options = {}) => {
+export const setupAddressModule = (options = {}) => {
   const router = express.Router();
   
-  setupBagRoutes(router, options);
+  setupAddressRoutes(router, options);
   
   router.use(errorHandler);
   
@@ -21,18 +21,9 @@ export const initializeModels = (sequelizeInstance) => {
     throw new Error('É necessário fornecer uma instância do Sequelize para inicializar os modelos');
   }
   
-  BagModel.init(sequelizeInstance);
+  AddressModel.init(sequelizeInstance);
   
   return {
-    BagModel
+    AddressModel
   };
-};
-
-export const bagModuleConfig = {
-  name: 'bags',
-  routePrefix: '/api/bags',
-  description: 'Módulo de gerenciamento de sacolas ecológicas',
-  dependencies: [
-    'sequelize'
-  ]
 };
