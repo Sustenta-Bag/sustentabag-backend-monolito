@@ -2,12 +2,13 @@ import AppError from "../../infrastructure/errors/AppError.js";
 import bcrypt from 'bcrypt';
 
 class BusinessService {
-  constructor(businessRepository, addressRepository) {
+  constructor(businessRepository, addressRepository, diskRepository) {
     this.businessRepository = businessRepository;
     this.addressRepository = addressRepository;
+    this.diskRepository = diskRepository;
   }
 
-  async createBusiness(data) {
+  async createBusiness(data, file) {
     if (!data.idAddress) {
       throw new AppError("Endereço é obrigatório", "ADDRESS_REQUIRED");
     }
@@ -20,6 +21,11 @@ class BusinessService {
     const exists = await this.businessRepository.findByCnpj(data.cnpj);
     if (exists) {
       throw new AppError("CNPJ já cadastrado", "CNPJ_ALREADY_EXISTS");
+    }
+
+    if(file) {
+      const imgPath = await this.diskRepository.save(file);
+      data.logo = imgPath;
     }
 
     const hashed = await bcrypt.hash(data.password, 10);
@@ -53,7 +59,7 @@ class BusinessService {
     return await this.businessRepository.findAll(options);
   }
 
-  async updateBusiness(id, data) {
+  async updateBusiness(id, data, file) {
     const existing = await this.businessRepository.findById(id);
     if (!existing) {
       throw AppError.notFound("Empresa", id);
@@ -80,14 +86,28 @@ class BusinessService {
       data.password = await bcrypt.hash(data.password, 10);
     }
 
+    if(file) {
+      const imgPath = await this.diskRepository.save(file);
+      data.logo = imgPath;
+    }
+
     return await this.businessRepository.update(id, data);
   }
 
   async deleteBusiness(id) {
+    const existing = await this.businessRepository.findById(id);
+    if (!existing) {
+      throw AppError.notFound("Empresa", id);
+    }
+
+    await this.diskRepository.delete(existing.logo);
+
     const deleted = await this.businessRepository.delete(id);
+
     if (!deleted) {
       throw AppError.notFound("Empresa", id);
     }
+
     return deleted;
   }
 
