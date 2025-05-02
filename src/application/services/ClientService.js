@@ -9,7 +9,7 @@ class ClientService {
     this.firebaseService = new FirebaseService();
   }
 
-  async createClient(clientData) {
+  async createClient(clientData, userData) {
     const existingClientByCpf = await this.clientRepository.findByCpf(
       clientData.cpf
     );
@@ -27,6 +27,7 @@ class ClientService {
     const hashedPassword = await bcrypt.hash(clientData.password, 10);
 
     let firebaseUser = null;
+    
 
     try {
       console.log("Criando usuário no Firebase...");
@@ -59,7 +60,8 @@ class ClientService {
         );
       }
 
-      return newClient;
+      this.authService.registerClient(clientData, userData)
+
     } catch (error) {
       console.error("Erro ao salvar usuário no banco local:", error);
       throw error;

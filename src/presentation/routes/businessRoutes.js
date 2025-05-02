@@ -12,6 +12,12 @@ import {
   validateBusinessId,
   validateStatusUpdate,
 } from '../middleware/businessValidation.js';
+import { 
+  authenticate, 
+  requireBusinessRole, 
+  requireClientRole, 
+  requireAnyRole 
+} from '../middleware/authMiddleware.js';
 
 const upload = multer(multerConfig);
 
@@ -22,6 +28,7 @@ export const setupBusinessRoutes = (router, options = {}) => {
   const businessService = new BusinessService(businessRepository, addressRepository, diskStorage);
   const businessController = new BusinessController(businessService);
 
+  // Public route for registration - no authentication required
   router.post(`/`,
 /*
   #swagger.path = '/api/businesses'
@@ -57,6 +64,7 @@ export const setupBusinessRoutes = (router, options = {}) => {
     businessController.createBusiness.bind(businessController)
   );
 
+  // Public route for listing businesses
   router.get(`/`,
     /*
     #swagger.path = '/api/businesses'
@@ -66,6 +74,7 @@ export const setupBusinessRoutes = (router, options = {}) => {
     businessController.listBusinesses.bind(businessController)
   );
 
+  // Public route for getting a specific business
   router.get(`/:id`,
     /*
     #swagger.path = '/api/businesses/{id}'
@@ -76,32 +85,57 @@ export const setupBusinessRoutes = (router, options = {}) => {
     businessController.getBusiness.bind(businessController)
   );
 
+  // Protected route - only the business itself can update
   router.put(`/:id`,
     /*
     #swagger.path = '/api/businesses/{id}'
     #swagger.tags = ["Business"]
+    #swagger.security = [{ "bearerAuth": [] }]
     #swagger.requestBody = {
       required: true,
       schema: { $ref: '#components/schemas/BusinessInput' },
     }
     #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/Error" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/Error" }
+    }
     */
+    authenticate,
+    requireBusinessRole,
     upload.single('logo'),
     validateBusinessId,
     validateUpdateBusiness,
     businessController.updateBusiness.bind(businessController)
   );
 
+  // Protected route - only admin should be able to delete a business
   router.delete(`/:id`,
     /*
     #swagger.path = '/api/businesses/{id}'
     #swagger.tags = ["Business"]
+    #swagger.security = [{ "bearerAuth": [] }]
     #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/Error" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/Error" }
+    }
     */
+    authenticate,
+    requireBusinessRole,
     validateBusinessId,
     businessController.deleteBusiness.bind(businessController)
   );
 
+  // Public route for getting active businesses
   router.get(`/active`,
     /*
     #swagger.path = '/api/businesses/active'
@@ -111,13 +145,25 @@ export const setupBusinessRoutes = (router, options = {}) => {
     businessController.getActiveBusiness.bind(businessController)
   );
 
+  // Protected route - only business can change its status
   router.patch(
     `/:id/status`,
     /*
     #swagger.path = '/api/businesses/{id}/status'
     #swagger.tags = ["Business"]
+    #swagger.security = [{ "bearerAuth": [] }]
     #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/Error" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/Error" }
+    }
     */
+    authenticate,
+    requireBusinessRole,
     validateBusinessId,
     validateStatusUpdate,
     businessController.changeBusinessStatus.bind(businessController)

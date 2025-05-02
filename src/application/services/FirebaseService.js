@@ -1,12 +1,9 @@
 import { initializeApp } from "firebase/app";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-} from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import admin from "firebase-admin";
 import AppError from "../../infrastructure/errors/AppError.js";
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 class FirebaseService {
   constructor() {
@@ -26,24 +23,31 @@ class FirebaseService {
     if (!admin.apps.length) {
       try {
         const serviceAccountPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-        
+
         if (serviceAccountPath && fs.existsSync(serviceAccountPath)) {
           admin.initializeApp({
-            credential: admin.credential.cert(serviceAccountPath)
+            credential: admin.credential.cert(serviceAccountPath),
           });
-          console.log('Firebase Admin SDK inicializado com arquivo de credenciais');
+          console.log(
+            "Firebase Admin SDK inicializado com arquivo de credenciais"
+          );
         } else {
           admin.initializeApp({
             credential: admin.credential.cert({
               projectId: process.env.FIREBASE_PROJECT_ID,
               clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-              privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')
+              privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(
+                /\\n/g,
+                "\n"
+              ),
             }),
           });
-          console.log('Firebase Admin SDK inicializado com variáveis de ambiente');
+          console.log(
+            "Firebase Admin SDK inicializado com variáveis de ambiente"
+          );
         }
       } catch (error) {
-        console.error('Erro ao inicializar Firebase Admin SDK:', error);
+        console.error("Erro ao inicializar Firebase Admin SDK:", error);
       }
     }
   }
@@ -58,7 +62,9 @@ class FirebaseService {
 
       try {
         if (!admin.apps.length) {
-          console.warn('Admin SDK não inicializado, pulando operação Firestore');
+          console.warn(
+            "Admin SDK não inicializado, pulando operação Firestore"
+          );
           return { uid: userCredential.user.uid };
         }
 
@@ -73,11 +79,14 @@ class FirebaseService {
             phone: userData.phone,
             status: userData.status || 1,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            localId: null
+            localId: null,
           });
-        console.log('Dados armazenados com sucesso no Firestore');
+        console.log("Dados armazenados com sucesso no Firestore");
       } catch (firestoreError) {
-        console.error('Erro ao salvar no Firestore, mas usuário Auth foi criado:', firestoreError);
+        console.error(
+          "Erro ao salvar no Firestore, mas usuário Auth foi criado:",
+          firestoreError
+        );
       }
 
       return {
@@ -100,22 +109,60 @@ class FirebaseService {
   async updateLocalIdInFirestore(firebaseUid, localId) {
     try {
       if (!admin.apps.length) {
-        console.warn('Admin SDK não inicializado, pulando atualização do ID local');
+        console.warn(
+          "Admin SDK não inicializado, pulando atualização do ID local"
+        );
         return false;
       }
 
-      await admin
-        .firestore()
-        .collection("users")
-        .doc(firebaseUid)
-        .update({
-          localId: localId
-        });
-      
+      await admin.firestore().collection("users").doc(firebaseUid).update({
+        localId: localId,
+      });
+
       return true;
     } catch (error) {
       console.error("Erro ao atualizar ID local no Firestore:", error);
       return false;
+    }
+  }
+
+  // Add these methods to the FirebaseService class
+
+  async verifyIdToken(idToken) {
+    try {
+      if (!admin.apps.length) {
+        throw new Error("Admin SDK not initialized");
+      }
+
+      const decodedToken = await admin.auth().verifyIdToken(idToken);
+      return decodedToken;
+    } catch (error) {
+      console.error("Error verifying Firebase token:", error);
+      throw new AppError(
+        "Token Firebase inválido",
+        "INVALID_FIREBASE_TOKEN",
+        401
+      );
+    }
+  }
+
+  async updateUserPassword(uid, newPassword) {
+    try {
+      if (!admin.apps.length) {
+        throw new Error("Admin SDK not initialized");
+      }
+
+      await admin.auth().updateUser(uid, {
+        password: newPassword,
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Error updating Firebase password:", error);
+      throw new AppError(
+        "Erro ao atualizar senha no Firebase",
+        "FIREBASE_PASSWORD_UPDATE_ERROR"
+      );
     }
   }
 }

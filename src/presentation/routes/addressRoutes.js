@@ -6,6 +6,12 @@ import {
   validateUpdateAddress,
   validateAddressId,
 } from '../middleware/addressValidation.js';
+import { 
+  authenticate, 
+  requireBusinessRole, 
+  requireClientRole, 
+  requireAnyRole 
+} from '../middleware/authMiddleware.js';
 
 export const setupAddressRoutes = (router, options = {}) => {
   const addressRepository = options.addressRepository || new PostgresAddressRepository();
@@ -16,12 +22,19 @@ export const setupAddressRoutes = (router, options = {}) => {
   /*
   #swagger.path = '/api/addresses'
   #swagger.tags = ["Address"]
+  #swagger.security = [{ "bearerAuth": [] }]
   #swagger.requestBody = {
     required: true,
     schema: { $ref: '#components/schemas/AddressInput' },
   }
   #swagger.responses[201]
+  #swagger.responses[401] = {
+    description: "Unauthorized - Authentication required or invalid token",
+    schema: { $ref: "#/components/schemas/Error" }
+  }
   */
+    authenticate,
+    requireAnyRole,
     validateCreateAddress,
     addressController.createAddress.bind(addressController)
   );
@@ -30,9 +43,15 @@ export const setupAddressRoutes = (router, options = {}) => {
   /*
   #swagger.path = '/api/addresses'
   #swagger.tags = ["Address"]
+  #swagger.security = [{ "bearerAuth": [] }]
   #swagger.responses[200]
+  #swagger.responses[401] = {
+    description: "Unauthorized - Authentication required or invalid token",
+    schema: { $ref: "#/components/schemas/Error" }
+  }
   */
-    // authenticate,
+    authenticate,
+    requireAnyRole,
     addressController.listAddresses.bind(addressController)
   );
 
@@ -40,9 +59,20 @@ export const setupAddressRoutes = (router, options = {}) => {
     /*
     #swagger.path = '/api/addresses/{id}'
     #swagger.tags = ["Address"]
+    #swagger.security = [{ "bearerAuth": [] }]
     #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/Error" }
+    }
+    #swagger.responses[404] = {
+      description: "Not Found - Address not found",
+      schema: { $ref: "#/components/schemas/Error" }
+    }
     */
     `/:id`,
+    authenticate,
+    requireAnyRole,
     validateAddressId,
     addressController.getAddress.bind(addressController)
   );
@@ -51,13 +81,28 @@ export const setupAddressRoutes = (router, options = {}) => {
     /*
     #swagger.path = '/api/addresses/{id}'
     #swagger.tags = ["Address"]
+    #swagger.security = [{ "bearerAuth": [] }]
     #swagger.requestBody = {
       required: true,
       schema: { $ref: '#components/schemas/AddressInput' },
     }
     #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/Error" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/Error" }
+    }
+    #swagger.responses[404] = {
+      description: "Not Found - Address not found",
+      schema: { $ref: "#/components/schemas/Error" }
+    }
     */
     `/:id`,
+    authenticate,
+    requireAnyRole,
     validateUpdateAddress,
     addressController.updateAddress.bind(addressController)
   );
@@ -66,9 +111,24 @@ export const setupAddressRoutes = (router, options = {}) => {
     /*
     #swagger.path = '/api/addresses/{id}'
     #swagger.tags = ["Address"]
+    #swagger.security = [{ "bearerAuth": [] }]
     #swagger.responses[204]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/Error" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/Error" }
+    }
+    #swagger.responses[404] = {
+      description: "Not Found - Address not found",
+      schema: { $ref: "#/components/schemas/Error" }
+    }
     */
     `/:id`,
+    authenticate,
+    requireAnyRole,
     validateAddressId,
     addressController.deleteAddress.bind(addressController)
   );
