@@ -50,18 +50,18 @@ class BagController {
     }
   }
 
-  async getBagsByCompany(req, res, next) {
+  async getBagsByBusiness(req, res, next) {
     try {
-      const bags = await this.bagService.getBagsByCompanyId(req.params.companyId);
+      const bags = await this.bagService.getBagsByBusinessId(req.params.idBusiness);
       return res.json(bags);
     } catch (error) {
       next(error);
     }
   }
 
-  async getActiveBagsByCompany(req, res, next) {
+  async getActiveBagsByBusiness(req, res, next) {
     try {
-      const bags = await this.bagService.getActiveBagsByCompanyId(req.params.companyId);
+      const bags = await this.bagService.getActiveBagsByBusinessId(req.params.idBusiness);
       return res.json(bags);
     } catch (error) {
       next(error);
