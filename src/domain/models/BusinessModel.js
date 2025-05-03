@@ -50,11 +50,6 @@ class BusinessModel extends Model {
         allowNull: true,
         field: 'logo'
       },
-      password: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
-        field: 'senha'
-      },
       delivery: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
@@ -81,6 +76,11 @@ class BusinessModel extends Model {
         defaultValue: true,
         field: 'status'
       },
+      firebaseId: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: 'firebase_id'
+      },
       createdAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
@@ -93,7 +93,7 @@ class BusinessModel extends Model {
       }
     }, {
       sequelize: sequelizeInstance,
-      tableName: 'Empresas',
+      tableName: 'empresas',
       timestamps: false,
     });
 

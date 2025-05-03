@@ -4,7 +4,6 @@ class Client {
     name,
     email,
     cpf,
-    password,
     phone,
     status = 1,
     createdAt = new Date()
@@ -13,7 +12,6 @@ class Client {
     this.name = name; // Nome do cliente
     this.email = email; // Email do cliente
     this.cpf = cpf; // CPF do cliente
-    this.password = password; // Senha do cliente (já deve estar em hash)
     this.phone = phone; // Telefone do cliente
     this.status = status; // 0 = inativo, 1 = ativo
     this.createdAt = createdAt; // Data de criação do cliente

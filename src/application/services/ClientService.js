@@ -1,14 +1,15 @@
 import Client from "../../domain/entities/Client.js";
 import AppError from "../../infrastructure/errors/AppError.js";
-import bcrypt from 'bcrypt';
+import bcrypt from "bcrypt";
+import FirebaseService from "./FirebaseService.js";
 
 class ClientService {
   constructor(clientRepository) {
     this.clientRepository = clientRepository;
+    this.firebaseService = new FirebaseService();
   }
 
-  async createClient(clientData) {
-    // Check if client with same CPF or email already exists
+  async createClient(clientData, userData) {
     const existingClientByCpf = await this.clientRepository.findByCpf(
       clientData.cpf
     );
@@ -23,13 +24,48 @@ class ClientService {
       throw new AppError("Email já cadastrado", "EMAIL_ALREADY_EXISTS");
     }
 
-    // Hash the password before storing
     const hashedPassword = await bcrypt.hash(clientData.password, 10);
 
-    return await this.clientRepository.create({
-      ...clientData,
-      password: hashedPassword,
-    });
+    let firebaseUser = null;
+    
+
+    try {
+      console.log("Criando usuário no Firebase...");
+      // Criar usuário no Firebase
+      firebaseUser = await this.firebaseService.createUser({
+        ...clientData,
+        password: clientData.password,
+      });
+      console.log("Usuário criado no Firebase com ID:", firebaseUser.uid);
+    } catch (firebaseError) {
+      console.error("Erro ao criar usuário no Firebase:", firebaseError);
+      // Continuamos com a criação do usuário local mesmo se falhar no Firebase
+    }
+
+    try {
+      console.log("Tentando salvar no banco local...");
+      // Agora salvar no banco de dados local (com ou sem ID do Firebase)
+      const newClient = await this.clientRepository.create({
+        ...clientData,
+        password: hashedPassword,
+        firebaseId: firebaseUser?.uid || null,
+      });
+      console.log("Usuário salvo no banco local com ID:", newClient.id);
+
+      // Atualizar o ID local no documento do Firestore (opcional, só se tiver firebaseUser)
+      if (firebaseUser?.uid) {
+        await this.firebaseService.updateLocalIdInFirestore(
+          firebaseUser.uid,
+          newClient.id
+        );
+      }
+
+      this.authService.registerClient(clientData, userData)
+
+    } catch (error) {
+      console.error("Erro ao salvar usuário no banco local:", error);
+      throw error;
+    }
   }
 
   async getClient(id) {
