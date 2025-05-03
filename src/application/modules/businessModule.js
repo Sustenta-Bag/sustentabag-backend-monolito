@@ -3,6 +3,7 @@ import express from 'express';
 import { setupBusinessRoutes } from '../../presentation/routes/businessRoutes.js';
 import { errorHandler } from '../../presentation/middleware/errorHandler.js';
 import BusinessModel from '../../domain/models/BusinessModel.js';
+import PostgresBusinessRepository from '../../infrastructure/repositories/PostgresBusinessRepository.js';
 
 dotenv.config();
 
@@ -14,6 +15,13 @@ export const setupBusinessModule = (options = {}) => {
   router.use(errorHandler);
   
   return router;
+};
+
+// Add this function to your existing businessModule.js file
+export const getBusinessRepository = (sequelize) => {
+  // Make sure model is initialized
+  BusinessModel.init(sequelize);
+  return new PostgresBusinessRepository(BusinessModel);
 };
 
 export const initializeModels = (sequelizeInstance) => {
