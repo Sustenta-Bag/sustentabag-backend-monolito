@@ -51,8 +51,8 @@ export const setupClientRoutes = (router, options = {}) => {
     clientController.createClient.bind(clientController)
   );
   
-  // Admin or business route to get all clients
-  router.get(`/`,
+   // Admin or business route to get all clients
+   router.get(`/`,
     /*
     #swagger.path = '/api/clients'
     #swagger.tags = ["Client"]
@@ -72,12 +72,14 @@ export const setupClientRoutes = (router, options = {}) => {
     clientController.getAllClients.bind(clientController)
   );
   
+  // IMPORTANTE: Mover a rota /active para antes da rota /:id
   // Admin or business route to get active clients
   router.get(`/active`,
     /*
     #swagger.path = '/api/clients/active'
     #swagger.tags = ["Client"]
     #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.description = "Retorna apenas clientes ativos (status=1)"
     #swagger.responses[200]
     #swagger.responses[401] = {
       description: "Unauthorized - Authentication required or invalid token",
