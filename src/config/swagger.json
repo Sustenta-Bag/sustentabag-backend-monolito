@@ -354,39 +354,313 @@
         ]
       }
     },
-    "/register": {
+    "/api/auth/register": {
       "post": {
-        "description": "",
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Registrar um novo usuário",
+        "description": "Registra um novo usuário (cliente ou empresa) no sistema",
         "responses": {
-          "default": {
-            "description": ""
+          "201": {
+            "description": "Usuário registrado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "firebaseId": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "entity": {
+                      "type": "object",
+                      "description": "Dados da entidade criada (cliente ou empresa)"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "entityType": {
+                    "type": "string",
+                    "enum": [
+                      "client",
+                      "business"
+                    ],
+                    "example": "client"
+                  },
+                  "userData": {
+                    "type": "object",
+                    "properties": {
+                      "email": {
+                        "type": "string",
+                        "example": "usuario@example.com"
+                      },
+                      "password": {
+                        "type": "string",
+                        "example": "senha123"
+                      }
+                    },
+                    "required": [
+                      "email",
+                      "password"
+                    ]
+                  },
+                  "entityData": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "title": "Cliente",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "example": "Maria Silva Oliveira"
+                          },
+                          "cpf": {
+                            "type": "string",
+                            "example": "12345678909"
+                          },
+                          "phone": {
+                            "type": "string",
+                            "example": "11987654321"
+                          },
+                          "status": {
+                            "type": "integer",
+                            "example": 1
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "cpf"
+                        ]
+                      },
+                      {
+                        "type": "object",
+                        "title": "Empresa",
+                        "properties": {
+                          "legalName": {
+                            "type": "string",
+                            "example": "Sustenta Bag LTDA"
+                          },
+                          "cnpj": {
+                            "type": "string",
+                            "example": "12345678000195"
+                          },
+                          "appName": {
+                            "type": "string",
+                            "example": "Sustenta Bag - Centro"
+                          },
+                          "cellphone": {
+                            "type": "string",
+                            "example": "11987654321"
+                          },
+                          "description": {
+                            "type": "string",
+                            "example": "Empresa especializada em sacolas sustentáveis"
+                          },
+                          "delivery": {
+                            "type": "boolean",
+                            "example": true
+                          },
+                          "deliveryTax": {
+                            "type": "number",
+                            "example": 5.99
+                          },
+                          "idAddress": {
+                            "type": "integer",
+                            "example": 1
+                          },
+                          "status": {
+                            "type": "integer",
+                            "example": 1
+                          }
+                        },
+                        "required": [
+                          "legalName",
+                          "cnpj",
+                          "appName",
+                          "cellphone"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "entityType",
+                  "userData",
+                  "entityData"
+                ]
+              },
+              "examples": {
+                "Cliente": {
+                  "value": {
+                    "entityType": "client",
+                    "userData": {
+                      "email": "usuario@example.com",
+                      "password": "senha123"
+                    },
+                    "entityData": {
+                      "name": "Maria Silva Oliveira",
+                      "cpf": "12345678909",
+                      "phone": "11987654321",
+                      "status": 1
+                    }
+                  }
+                },
+                "Empresa": {
+                  "value": {
+                    "entityType": "business",
+                    "userData": {
+                      "email": "empresa@example.com",
+                      "password": "senha123"
+                    },
+                    "entityData": {
+                      "legalName": "Sustenta Bag LTDA",
+                      "cnpj": "12345678000195",
+                      "appName": "Sustenta Bag - Centro",
+                      "cellphone": "11987654321",
+                      "description": "Empresa especializada em sacolas sustentáveis",
+                      "delivery": true,
+                      "deliveryTax": 5.99,
+                      "idAddress": 1,
+                      "status": 1
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
-    "/login": {
+    "/api/auth/login": {
       "post": {
-        "description": "",
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Autenticar usuário",
+        "description": "Realiza login de um usuário com email e senha",
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "Login realizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "entity": {
+                      "type": "object",
+                      "description": "Dados da entidade (cliente ou empresa)"
+                    },
+                    "token": {
+                      "type": "string",
+                      "description": "JWT para autenticação em rotas protegidas"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciais inválidas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "usuario@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "senha123"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              }
+            }
           }
         }
       }
     },
-    "/login/firebase": {
+    "/api/auth/change-password": {
       "post": {
-        "description": "",
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/change-password": {
-      "post": {
-        "description": "",
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Alterar senha",
+        "description": "Altera a senha do usuário autenticado",
         "parameters": [
           {
             "name": "authorization",
@@ -397,8 +671,67 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "204": {
+            "description": "Senha alterada com sucesso"
+          },
+          "400": {
+            "description": "Dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "currentPassword": {
+                    "type": "string",
+                    "example": "senha123"
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "example": "novaSenha456"
+                  }
+                },
+                "required": [
+                  "currentPassword",
+                  "newPassword"
+                ]
+              }
+            }
           }
         }
       }
