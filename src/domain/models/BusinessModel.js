@@ -93,7 +93,7 @@ class BusinessModel extends Model {
       }
     }, {
       sequelize: sequelizeInstance,
-      tableName: 'Empresas',
+      tableName: 'empresas',
       timestamps: false,
     });
 

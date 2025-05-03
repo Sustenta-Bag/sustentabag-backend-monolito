@@ -1,7 +1,7 @@
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import AppError from "../../infrastructure/errors/AppError.js";
-import FirebaseService from "./FirebaseService.js";
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import AppError from '../../infrastructure/errors/AppError.js';
+import FirebaseService from './FirebaseService.js';
 
 class AuthService {
   constructor(userRepository, clientRepository, businessRepository) {
@@ -24,7 +24,7 @@ class AuthService {
       throw new AppError("CPF já cadastrado", "CPF_ALREADY_EXISTS");
     }
 
-    // First create the client in local database
+    // Hash the password for user creation
     const hashedPassword = await bcrypt.hash(userData.password, 10);
     
     // Try to create Firebase user
@@ -44,18 +44,15 @@ class AuthService {
       // Continue with local user creation even if Firebase fails
     }
 
-    // Add Firebase ID to client data if available
+    // Create client record (without password or firebaseId)
     const clientToCreate = {
       ...clientData,
-      email: userData.email,  // Add this line to include email
-      password: hashedPassword,
-      firebaseId: firebaseUser?.uid || null
+      email: userData.email,
     };
     
-    // Create client record
     const newClient = await this.clientRepository.create(clientToCreate);
 
-    // Then create the associated user account
+    // Then create the associated user account with password and firebaseId
     const userToCreate = {
       email: userData.email,
       password: hashedPassword,
@@ -80,6 +77,7 @@ class AuthService {
         id: user.id,
         email: user.email,
         role: user.role,
+        firebaseId: user.firebaseId
       },
       client: newClient,
     };
@@ -98,7 +96,7 @@ class AuthService {
       throw new AppError("CNPJ já cadastrado", "CNPJ_ALREADY_EXISTS");
     }
 
-    // Hash the password
+    // Hash the password for user creation
     const hashedPassword = await bcrypt.hash(userData.password, 10);
     
     // Try to create Firebase user
@@ -119,22 +117,19 @@ class AuthService {
       // Continue with local user creation even if Firebase fails
     }
 
-    // Add Firebase ID to business data if available
+    // Create business record (without password or firebaseId)
     const businessToCreate = {
-      ...businessData,
-      password: hashedPassword,
-      firebaseId: firebaseUser?.uid || null
+      ...businessData
     };
     
-    // Create business record
     const newBusiness = await this.businessRepository.create(businessToCreate);
 
-    // Create the associated user account
+    // Create the associated user account with password and firebaseId
     const user = await this.userRepository.create({
       email: userData.email,
       password: hashedPassword,
       role: "business",
-      entityId: newBusiness.idBusiness,
+      entityId: newBusiness.id,
       active: true,
       firebaseId: firebaseUser?.uid || null
     });
@@ -143,7 +138,7 @@ class AuthService {
     if (firebaseUser?.uid) {
       await this.firebaseService.updateLocalIdInFirestore(
         firebaseUser.uid,
-        newBusiness.idBusiness
+        newBusiness.id
       );
     }
 
@@ -152,6 +147,7 @@ class AuthService {
         id: user.id,
         email: user.email,
         role: user.role,
+        firebaseId: user.firebaseId
       },
       business: newBusiness,
     };
@@ -169,7 +165,7 @@ class AuthService {
       throw new AppError("Conta inativa", "ACCOUNT_INACTIVE", 401);
     }
 
-    // Verify password
+    // Verify password from the user model (not from entity)
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
@@ -199,6 +195,7 @@ class AuthService {
         email: user.email,
         role: user.role,
         entityId: user.entityId,
+        firebaseId: user.firebaseId
       },
       process.env.JWT_SECRET || "sustentabag_secret_key",
       { expiresIn: process.env.JWT_EXPIRATION || "24h" }
@@ -266,29 +263,21 @@ class AuthService {
 
   async changePassword(userId, currentPassword, newPassword) {
     const user = await this.userRepository.findById(userId);
-
-    if (!user) {
-      throw AppError.notFound("Usuário", userId);
-    }
-
-    const passwordMatch = await bcrypt.compare(currentPassword, user.password);
-
-    if (!passwordMatch) {
-      throw new AppError("Senha atual incorreta", "INVALID_PASSWORD", 401);
-    }
-
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    await this.userRepository.update(userId, { password: hashedPassword });
     
-    if (user.firebaseId) {
-      try {
-        await this.firebaseService.updateUserPassword(user.firebaseId, newPassword);
-      } catch (firebaseError) {
-        console.error("Error updating Firebase password:", firebaseError);
-      }
+    if (!user) {
+      throw new AppError("Usuário não encontrado", "USER_NOT_FOUND", 404);
     }
-
+    
+    const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+    
+    if (!passwordMatch) {
+      throw new AppError("Senha atual incorreta", "INVALID_CURRENT_PASSWORD", 400);
+    }
+    
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    
+    await this.userRepository.update(userId, { password: hashedNewPassword });
+    
     return true;
   }
 }

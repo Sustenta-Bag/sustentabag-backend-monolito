@@ -22,6 +22,17 @@ class UserRepository {
     return this._mapToEntity(user);
   }
 
+  async findByEntityId(entityId, role) {
+    const user = await this.userModel.findOne({ 
+      where: { 
+        entityId,
+        role
+      } 
+    });
+    if (!user) return null;
+    return this._mapToEntity(user);
+  }
+
   async update(id, userData) {
     await this.userModel.update(userData, { where: { id } });
     const updated = await this.userModel.findByPk(id);

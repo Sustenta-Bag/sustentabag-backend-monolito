@@ -57,8 +57,9 @@ class UserModel extends Model {
       }
     }, {
       sequelize: sequelizeInstance,
-      tableName: 'Usuarios',
-      timestamps: false
+      tableName: 'usuarios', // Alterado para minúsculas
+      timestamps: true,
+      modelName: 'User' // Nome explícito do modelo
     });
 
     return this;

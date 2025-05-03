@@ -112,7 +112,7 @@ class ClientController {
   async login(req, res, next) {
     try {
       const { cpf, password } = req.body;
-
+  
       if (!cpf || !password) {
         throw new AppError(
           "CPF e senha são obrigatórios",
@@ -120,21 +120,40 @@ class ClientController {
           400
         );
       }
-
-      const client = await this.clientService.authenticateClient(cpf, password);
-
+  
+      const client = await this.clientService.findByCpf(cpf);
+      if (!client) {
+        throw new AppError("Credenciais inválidas", "INVALID_CREDENTIALS", 401);
+      }
+  
+      // Find the user associated with this client
+      const user = await this.userRepository.findByEntityId(client.id, "client");
+      if (!user) {
+        throw new AppError("Usuário não encontrado", "USER_NOT_FOUND", 404);
+      }
+  
+      // Verify password from user record
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      if (!passwordMatch) {
+        throw new AppError("Credenciais inválidas", "INVALID_CREDENTIALS", 401);
+      }
+  
       // Generate JWT token
       const token = jwt.sign(
-        { id: client.id, cpf: client.cpf },
+        { 
+          userId: user.id, 
+          email: user.email, 
+          role: user.role, 
+          entityId: client.id,
+          firebaseId: user.firebaseId
+        },
         process.env.JWT_SECRET || "sustentabag_secret_key",
         { expiresIn: process.env.JWT_EXPIRATION || "24h" }
       );
-
-      // Remove sensitive data before sending response
-      const { password: _, ...clientData } = client;
-
+  
       return res.json({
-        client: clientData,
+        user,
+        client,
         token,
       });
     } catch (error) {
