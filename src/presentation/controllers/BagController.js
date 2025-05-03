@@ -1,4 +1,5 @@
 import AppError from '../../infrastructure/errors/AppError.js';
+import RabbitMQPublisher from '../../application/services/RabbitMQPublisher.js'; // Assuming you have a RabbitMQ publisher set up
 
 class BagController {
   constructor(bagService) {
@@ -8,6 +9,26 @@ class BagController {
   async createBag(req, res, next) {
     try {
       const bag = await this.bagService.createBag(req.body);
+
+      if(res.status(201)){
+        
+        const data = {
+          to: bag.idBusiness,
+          notification: {
+            title: 'Novo produto criado',
+            body: `Uma nova bolsa do tipo ${bag.type} foi criada.`
+          },
+          data: {
+            type: 'BAG_CREATED',
+            payload: {
+              type: bag.type,
+            }
+          }
+        };
+
+        await RabbitMQPublisher(data);
+      }
+
       return res.status(201).json(bag);
     } catch (error) {
       next(error);
