@@ -74,12 +74,29 @@ export const setupBusinessRoutes = (router, options = {}) => {
     businessController.listBusinesses.bind(businessController)
   );
 
+  // IMPORTANTE: Mover a rota /active para antes da rota /:id
+  // Public route for getting active businesses
+  router.get(`/active`,
+    /*
+    #swagger.path = '/api/businesses/active'
+    #swagger.tags = ["Business"]
+    #swagger.responses[200]
+    #swagger.description = "Retorna apenas empresas ativas (status=1)"
+    */
+    businessController.getActiveBusiness.bind(businessController)
+  );
+
   // Public route for getting a specific business
   router.get(`/:id`,
     /*
     #swagger.path = '/api/businesses/{id}'
     #swagger.tags = ["Business"]
+    #swagger.parameters['id'] = { description: 'ID da empresa' }
     #swagger.responses[200]
+    #swagger.responses[404] = {
+      description: "Empresa não encontrada",
+      schema: { $ref: "#/components/schemas/Error" }
+    }
     */
     validateBusinessId,
     businessController.getBusiness.bind(businessController)
@@ -135,15 +152,6 @@ export const setupBusinessRoutes = (router, options = {}) => {
     businessController.deleteBusiness.bind(businessController)
   );
 
-  // Public route for getting active businesses
-  router.get(`/active`,
-    /*
-    #swagger.path = '/api/businesses/active'
-    #swagger.tags = ["Business"]
-    #swagger.responses[200]
-    */
-    businessController.getActiveBusiness.bind(businessController)
-  );
 
   // Protected route - only business can change its status
   router.patch(
