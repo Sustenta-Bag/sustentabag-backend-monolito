@@ -22,32 +22,33 @@ class FirebaseService {
 
     if (!admin.apps.length) {
       try {
-        const serviceAccountPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+        // A parte mais importante é garantir que a PRIVATE_KEY esteja formatada corretamente
+        const privateKey = process.env.FIREBASE_PRIVATE_KEY
+          ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n")
+          : undefined;
 
-        if (serviceAccountPath && fs.existsSync(serviceAccountPath)) {
-          admin.initializeApp({
-            credential: admin.credential.cert(serviceAccountPath),
-          });
-          console.log(
-            "Firebase Admin SDK inicializado com arquivo de credenciais"
-          );
-        } else {
-          admin.initializeApp({
-            credential: admin.credential.cert({
-              projectId: process.env.FIREBASE_PROJECT_ID,
-              clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-              privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(
-                /\\n/g,
-                "\n"
-              ),
-            }),
-          });
-          console.log(
-            "Firebase Admin SDK inicializado com variáveis de ambiente"
-          );
-        }
+        admin.initializeApp({
+          credential: admin.credential.cert({
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+            privateKey: privateKey,
+          }),
+        });
+
+        console.log(
+          "Firebase Admin SDK inicializado com sucesso usando variáveis individuais"
+        );
       } catch (error) {
         console.error("Erro ao inicializar Firebase Admin SDK:", error);
+        console.error("Detalhes da configuração:", {
+          projectId: process.env.FIREBASE_PROJECT_ID
+            ? "Definido"
+            : "Não definido",
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL
+            ? "Definido"
+            : "Não definido",
+          privateKeyExists: !!process.env.FIREBASE_PRIVATE_KEY,
+        });
       }
     }
   }
@@ -115,13 +116,18 @@ class FirebaseService {
         return false;
       }
 
-      await admin.firestore().collection("users").doc(firebaseUid).update({
+      // Teste a conexão antes de tentar atualizar
+      const docRef = admin.firestore().collection("users").doc(firebaseUid);
+      await docRef.get(); // Verifica se consegue acessar o documento
+
+      await docRef.update({
         localId: localId,
       });
 
       return true;
     } catch (error) {
       console.error("Erro ao atualizar ID local no Firestore:", error);
+      // Não falhe a operação principal se o Firestore falhar
       return false;
     }
   }

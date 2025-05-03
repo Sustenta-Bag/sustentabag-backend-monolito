@@ -12,22 +12,18 @@ class AuthService {
   }
 
   async registerClient(clientData, userData) {
-    // Validate if email already exists in User repository
     const existingUser = await this.userRepository.findByEmail(userData.email);
     if (existingUser) {
       throw new AppError("Email já cadastrado", "EMAIL_ALREADY_EXISTS");
     }
     
-    // Check for existing client with same CPF
     const existingClientByCpf = await this.clientRepository.findByCpf(clientData.cpf);
     if (existingClientByCpf) {
       throw new AppError("CPF já cadastrado", "CPF_ALREADY_EXISTS");
     }
 
-    // Hash the password for user creation
     const hashedPassword = await bcrypt.hash(userData.password, 10);
     
-    // Try to create Firebase user
     let firebaseUser = null;
     try {
       firebaseUser = await this.firebaseService.createUser({
@@ -41,10 +37,8 @@ class AuthService {
       console.log("Firebase user created with ID:", firebaseUser.uid);
     } catch (firebaseError) {
       console.error("Error creating Firebase user:", firebaseError);
-      // Continue with local user creation even if Firebase fails
     }
 
-    // Create client record (without password or firebaseId)
     const clientToCreate = {
       ...clientData,
       email: userData.email,
@@ -52,7 +46,6 @@ class AuthService {
     
     const newClient = await this.clientRepository.create(clientToCreate);
 
-    // Then create the associated user account with password and firebaseId
     const userToCreate = {
       email: userData.email,
       password: hashedPassword,
@@ -64,7 +57,6 @@ class AuthService {
 
     const user = await this.userRepository.create(userToCreate);
 
-    // Update Firebase record with local ID if available
     if (firebaseUser?.uid) {
       await this.firebaseService.updateLocalIdInFirestore(
         firebaseUser.uid,
