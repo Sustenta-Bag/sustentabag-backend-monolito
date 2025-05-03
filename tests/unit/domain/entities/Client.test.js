@@ -1,13 +1,12 @@
 import Client from '../../../../src/domain/entities/Client.js';
 
 describe('Client Entity Unit Tests', () => {
-  // Test data for reuse
+  // Dados de teste para reuso
   const clientData = {
     id: 1,
     name: 'João Silva',
     email: 'joao@email.com',
     cpf: '12345678901',
-    password: 'hashed_password',
     phone: '11987654321',
     status: 1,
     createdAt: new Date('2023-01-01')
@@ -20,7 +19,6 @@ describe('Client Entity Unit Tests', () => {
         clientData.name,
         clientData.email,
         clientData.cpf,
-        clientData.password,
         clientData.phone,
         clientData.status,
         clientData.createdAt
@@ -30,7 +28,6 @@ describe('Client Entity Unit Tests', () => {
       expect(client.name).toBe(clientData.name);
       expect(client.email).toBe(clientData.email);
       expect(client.cpf).toBe(clientData.cpf);
-      expect(client.password).toBe(clientData.password);
       expect(client.phone).toBe(clientData.phone);
       expect(client.status).toBe(clientData.status);
       expect(client.createdAt).toEqual(clientData.createdAt);
@@ -42,7 +39,6 @@ describe('Client Entity Unit Tests', () => {
         clientData.name,
         clientData.email,
         clientData.cpf,
-        clientData.password,
         clientData.phone
       );
 
@@ -56,7 +52,6 @@ describe('Client Entity Unit Tests', () => {
         clientData.name,
         clientData.email,
         clientData.cpf,
-        clientData.password,
         clientData.phone,
         clientData.status
       );
@@ -75,7 +70,6 @@ describe('Client Entity Unit Tests', () => {
         clientData.name,
         clientData.email,
         clientData.cpf,
-        clientData.password,
         clientData.phone,
         1
       );
@@ -92,7 +86,6 @@ describe('Client Entity Unit Tests', () => {
         clientData.name,
         clientData.email,
         clientData.cpf,
-        clientData.password,
         clientData.phone
       );
       
@@ -109,7 +102,6 @@ describe('Client Entity Unit Tests', () => {
         clientData.name,
         clientData.email,
         clientData.cpf,
-        clientData.password,
         clientData.phone
       );
       
@@ -126,7 +118,6 @@ describe('Client Entity Unit Tests', () => {
         clientData.name,
         clientData.email,
         clientData.cpf,
-        clientData.password,
         clientData.phone
       );
       
@@ -143,7 +134,6 @@ describe('Client Entity Unit Tests', () => {
         clientData.name,
         clientData.email,
         clientData.cpf,
-        clientData.password,
         clientData.phone,
         1 // Active status
       );
@@ -160,7 +150,6 @@ describe('Client Entity Unit Tests', () => {
         clientData.name,
         clientData.email,
         clientData.cpf,
-        clientData.password,
         clientData.phone,
         0 // Inactive status
       );
@@ -177,7 +166,6 @@ describe('Client Entity Unit Tests', () => {
         clientData.name,
         clientData.email,
         clientData.cpf,
-        clientData.password,
         clientData.phone,
         1
       );
