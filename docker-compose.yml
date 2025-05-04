@@ -75,6 +75,21 @@ services:
     networks:
       - sustentabag-network
 
+  notification-service:
+    build:
+      context: ../notification-service
+      dockerfile: Dockerfile
+    container_name: notification-service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - RABBITMQ=amqp://admin:admin@rabbitmq:5672
+      - MAX_RETRIES=5
+    depends_on:
+      - rabbitmq
+    networks:
+      - sustentabag-network
+
 volumes:
   postgres_data:
     name: sustentabag-postgres-data

@@ -45,6 +45,11 @@ class UserModel extends Model {
         allowNull: true,
         field: 'firebaseId'
       },
+      fcmToken: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        field: 'fcmToken'
+      },
       createdAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,

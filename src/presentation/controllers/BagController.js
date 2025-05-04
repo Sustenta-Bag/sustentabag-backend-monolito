@@ -13,7 +13,7 @@ class BagController {
       if(res.status(201)){
         
         const data = {
-          to: bag.idBusiness,
+          to: "GG7YEvoNUYh1qohZUmTSJRHu9fa2",
           notification: {
             title: 'Novo produto criado',
             body: `Uma nova bolsa do tipo ${bag.type} foi criada.`
@@ -22,7 +22,7 @@ class BagController {
             type: 'BAG_CREATED',
             payload: {
               type: bag.type,
-            }
+            },
           }
         };
 
