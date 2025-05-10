@@ -202,13 +202,11 @@ class AuthService {
 
   async loginWithFirebase(firebaseToken) {
     try {
-      // Verify Firebase token
       const decodedToken = await this.firebaseService.verifyIdToken(
         firebaseToken
       );
       const firebaseUid = decodedToken.uid;
 
-      // Try to find the user with this Firebase ID
       const user = await this.userRepository.findByFirebaseId(firebaseUid);
 
       if (!user) {
@@ -219,7 +217,6 @@ class AuthService {
         throw new AppError("Conta inativa", "ACCOUNT_INACTIVE", 401);
       }
 
-      // Get the associated entity based on role
       let entity = null;
       if (user.role === "client") {
         entity = await this.clientRepository.findById(user.entityId);
@@ -235,7 +232,6 @@ class AuthService {
         );
       }
 
-      // Generate JWT token
       const token = jwt.sign(
         {
           userId: user.id,

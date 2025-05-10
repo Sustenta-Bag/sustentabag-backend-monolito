@@ -8,7 +8,7 @@ dotenv.config();
 const exchange = "process_notification_exchange";
 const routingKey = "notification";
 
-export default async (data) => {
+export default async (data) => { // TODO - Refatorar para um serviço de mensagens genéricas
   let connection;
 
   try {
