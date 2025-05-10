@@ -243,6 +243,7 @@ class AuthService {
           role: user.role,
           entityId: user.entityId,
           firebaseId: user.firebaseId,
+          fcmToken: user.fcmToken,
         },
         process.env.JWT_SECRET || "sustentabag_secret_key",
         { expiresIn: process.env.JWT_EXPIRATION || "24h" }
