@@ -1,5 +1,5 @@
-import AppError from '../../infrastructure/errors/AppError.js';
-import RabbitMQPublisher from '../../application/services/RabbitMQPublisher.js'; // Assuming you have a RabbitMQ publisher set up
+import AppError from "../../infrastructure/errors/AppError.js";
+import RabbitMQPublisher from "../../application/services/RabbitMQPublisher.js"; // Assuming you have a RabbitMQ publisher set up
 
 class BagController {
   constructor(bagService) {
@@ -10,21 +10,36 @@ class BagController {
     try {
       const bag = await this.bagService.createBag(req.body);
 
-      if(res.status(201)){
-        
+      if (res.status(201)) {
         const data = {
-          to: "GG7YEvoNUYh1qohZUmTSJRHu9fa2",
+          to: "GG7YEvoNUYh1qohZUmTSJRHu9fa2", //data.payload.fcmToken
           notification: {
-            title: 'Novo produto criado',
-            body: `Uma nova bolsa do tipo ${bag.type} foi criada.`
+            title: "Novo produto criado",
+            body: `Uma nova bolsa do tipo ${bag.type} foi criada.`,
           },
           data: {
-            type: 'BAG_CREATED',
+            type: "BAG_CREATED",
             payload: {
               type: bag.type,
             },
-          }
+          },
         };
+
+        // const message = {
+        //   to: data.to || data.payload.fcmToken, // Usa o token fornecido ou o token do payload
+        //   notification: {
+        //     title: data.notification.title,
+        //     body: data.notification.body,
+        //   },
+        //   data: {
+        //     type: "single",
+        //     payload: {
+        //       ...data.payload,
+        //       timestamp: timestamp,
+        //       correlationId: messageId,
+        //     },
+        //   },
+        // };
 
         await RabbitMQPublisher(data);
       }
@@ -73,7 +88,9 @@ class BagController {
 
   async getBagsByBusiness(req, res, next) {
     try {
-      const bags = await this.bagService.getBagsByBusinessId(req.params.idBusiness);
+      const bags = await this.bagService.getBagsByBusinessId(
+        req.params.idBusiness
+      );
       return res.json(bags);
     } catch (error) {
       next(error);
@@ -82,7 +99,9 @@ class BagController {
 
   async getActiveBagsByBusiness(req, res, next) {
     try {
-      const bags = await this.bagService.getActiveBagsByBusinessId(req.params.idBusiness);
+      const bags = await this.bagService.getActiveBagsByBusinessId(
+        req.params.idBusiness
+      );
       return res.json(bags);
     } catch (error) {
       next(error);
@@ -92,10 +111,13 @@ class BagController {
   async changeBagStatus(req, res, next) {
     try {
       if (req.body.status === undefined) {
-        throw new AppError('Status não fornecido', 'MISSING_STATUS');
+        throw new AppError("Status não fornecido", "MISSING_STATUS");
       }
-      
-      const bag = await this.bagService.changeBagStatus(req.params.id, req.body.status);
+
+      const bag = await this.bagService.changeBagStatus(
+        req.params.id,
+        req.body.status
+      );
       return res.json(bag);
     } catch (error) {
       next(error);

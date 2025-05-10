@@ -171,6 +171,26 @@ class FirebaseService {
       );
     }
   }
+
+  async updateUserFcmToken(firebaseUid, fcmToken) {
+  try {
+    if (!admin.apps.length) {
+      console.warn("Admin SDK não inicializado, pulando atualização do token FCM");
+      return false;
+    }
+
+    const docRef = admin.firestore().collection("users").doc(firebaseUid);
+    await docRef.update({
+      fcmToken: fcmToken,
+      lastTokenUpdate: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Erro ao atualizar token FCM no Firestore:", error);
+    return false;
+  }
+}
 }
 
 export default FirebaseService;
