@@ -55,6 +55,7 @@ class UserRepository {
       model.entityId,
       model.active,
       model.firebaseId,
+      model.fcmToken,
       model.createdAt,
       model.updatedAt
     );

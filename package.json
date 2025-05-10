@@ -48,7 +48,10 @@
     "sequelize": "^6.37.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
-    "yup": "1.6.1"
+    "yup": "1.6.1",
+    "amqplib": "~0.10.7",
+    "uuid": "~11.1.0",
+    "colors": "~1.4.0"
   },
   "devDependencies": {
     "jest": "^29.7.0",

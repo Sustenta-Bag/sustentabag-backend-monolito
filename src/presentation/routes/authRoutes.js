@@ -1,15 +1,16 @@
-import { 
-  validateRegisterInput, 
-  validateLoginInput, 
+import {
+  validateRegisterInput,
+  validateLoginInput,
   validateFirebaseLoginInput,
-  validateChangePasswordInput 
-} from '../middleware/authValidation.js';
-import { authenticate } from '../middleware/authMiddleware.js';
+  validateChangePasswordInput,
+  validateDeviceTokenInput,
+} from "../middleware/authValidation.js";
+import { authenticate } from "../middleware/authMiddleware.js";
 
 export default (authController) => (router) => {
   // Public routes
   router.post(
-    '/register', 
+    "/register",
     /*
     #swagger.path = '/api/auth/register'
     #swagger.tags = ['Authentication']
@@ -142,9 +143,9 @@ export default (authController) => (router) => {
     validateRegisterInput,
     authController.registerUser.bind(authController)
   );
-  
+
   router.post(
-    '/login', 
+    "/login",
     /*
     #swagger.path = '/api/auth/login'
     #swagger.tags = ['Authentication']
@@ -201,9 +202,9 @@ export default (authController) => (router) => {
     validateLoginInput,
     authController.login.bind(authController)
   );
-  
+
   // router.post(
-  //   '/login/firebase', 
+  //   '/login/firebase',
   //   /*
   //   #swagger.path = '/api/auth/login/firebase'
   //   #swagger.tags = ['Authentication']
@@ -216,9 +217,9 @@ export default (authController) => (router) => {
   //         schema: {
   //           type: "object",
   //           properties: {
-  //             firebaseToken: { 
-  //               type: "string", 
-  //               example: "eyJhbGciOiJSUzI1NiIsImtpZCI6IjFlOTczZWUwZTE..." 
+  //             firebaseToken: {
+  //               type: "string",
+  //               example: "eyJhbGciOiJSUzI1NiIsImtpZCI6IjFlOTczZWUwZTE..."
   //             }
   //           },
   //           required: ["firebaseToken"]
@@ -249,10 +250,10 @@ export default (authController) => (router) => {
   //   validateFirebaseLoginInput,
   //   authController.loginWithFirebase.bind(authController)
   // );
-  
+
   // Protected routes
   router.post(
-    '/change-password', 
+    "/change-password",
     /*
     #swagger.path = '/api/auth/change-password'
     #swagger.tags = ['Authentication']
@@ -290,6 +291,48 @@ export default (authController) => (router) => {
     validateChangePasswordInput,
     authController.changePassword.bind(authController)
   );
-  
+
+  router.post(
+    "/device-token",
+    /*
+  #swagger.path = '/api/auth/device-token'
+  #swagger.tags = ['Authentication']
+  #swagger.summary = 'Registrar token do dispositivo'
+  #swagger.description = 'Registra o token FCM do dispositivo para receber notificações'
+  #swagger.security = [{ "bearerAuth": [] }]
+  #swagger.requestBody = {
+    required: true,
+    content: {
+      "application/json": {
+        schema: {
+          type: "object",
+          properties: {
+            deviceToken: { 
+              type: "string", 
+              example: "cSM76L5hQJKZZhXs-DsmFA:APA91bHgT1uQ..." 
+            }
+          },
+          required: ["deviceToken"]
+        }
+      }
+    }
+  }
+  #swagger.responses[204] = {
+    description: 'Token registrado com sucesso'
+  }
+  #swagger.responses[401] = {
+    description: 'Não autenticado',
+    schema: { $ref: "#/components/schemas/Error" }
+  }
+  #swagger.responses[400] = {
+    description: 'Dados inválidos',
+    schema: { $ref: "#/components/schemas/ValidationError" }
+  }
+  */
+    authenticate,
+    validateDeviceTokenInput,
+    authController.updateDeviceToken.bind(authController)
+  );
+
   return router;
 };
