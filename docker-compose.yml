@@ -63,6 +63,32 @@ services:
       - db
     networks:
       - sustentabag-network
+      
+  rabbitmq:
+    image: rabbitmq:3.7.8-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "admin"
+      RABBITMQ_DEFAULT_PASS: "admin"
+    networks:
+      - sustentabag-network
+
+  notification-service:
+    build:
+      context: ../notification-service
+      dockerfile: Dockerfile
+    container_name: notification-service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - RABBITMQ=amqp://admin:admin@rabbitmq:5672
+      - MAX_RETRIES=5
+    depends_on:
+      - rabbitmq
+    networks:
+      - sustentabag-network
 
 volumes:
   postgres_data:

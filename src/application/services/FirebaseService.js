@@ -2,12 +2,9 @@ import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import admin from "firebase-admin";
 import AppError from "../../infrastructure/errors/AppError.js";
-import fs from "fs";
-import path from "path";
 
 class FirebaseService {
   constructor() {
-    // Configuração para o Firebase Client SDK
     const firebaseConfig = {
       apiKey: process.env.FIREBASE_API_KEY,
       authDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -22,7 +19,6 @@ class FirebaseService {
 
     if (!admin.apps.length) {
       try {
-        // A parte mais importante é garantir que a PRIVATE_KEY esteja formatada corretamente
         const privateKey = process.env.FIREBASE_PRIVATE_KEY
           ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n")
           : undefined;
@@ -171,6 +167,26 @@ class FirebaseService {
       );
     }
   }
+
+  async updateUserFcmToken(firebaseUid, fcmToken) {
+  try {
+    if (!admin.apps.length) {
+      console.warn("Admin SDK não inicializado, pulando atualização do token FCM");
+      return false;
+    }
+
+    const docRef = admin.firestore().collection("users").doc(firebaseUid);
+    await docRef.update({
+      fcmToken: fcmToken,
+      lastTokenUpdate: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Erro ao atualizar token FCM no Firestore:", error);
+    return false;
+  }
+}
 }
 
 export default FirebaseService;

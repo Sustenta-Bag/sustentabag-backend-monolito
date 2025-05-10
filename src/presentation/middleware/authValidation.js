@@ -85,3 +85,20 @@ export const validateChangePasswordInput = [
     next();
   }
 ];
+
+export const validateDeviceTokenInput = [
+  body('deviceToken').notEmpty().withMessage('Token do dispositivo é obrigatório'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const validationErrors = errors.array().map(error => error.msg);
+      throw new AppError(
+        'Erro de validação',
+        'VALIDATION_ERROR',
+        400,
+        validationErrors
+      );
+    }
+    next();
+  }
+];

@@ -736,6 +736,83 @@
         }
       }
     },
+    "/api/auth/device-token": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Registrar token do dispositivo",
+        "description": "Registra o token FCM do dispositivo para receber notificações",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Token registrado com sucesso"
+          },
+          "400": {
+            "description": "Dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "deviceToken": {
+                    "type": "string",
+                    "example": "cSM76L5hQJKZZhXs-DsmFA:APA91bHgT1uQ..."
+                  }
+                },
+                "required": [
+                  "deviceToken"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/bags": {
       "post": {
         "tags": [

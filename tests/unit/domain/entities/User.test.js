@@ -23,6 +23,7 @@ describe('User Entity Unit Tests', () => {
         userData.entityId,
         userData.active,
         userData.firebaseId,
+        null, // fcmToken
         userData.createdAt
       );
 
@@ -33,6 +34,7 @@ describe('User Entity Unit Tests', () => {
       expect(user.entityId).toBe(userData.entityId);
       expect(user.active).toBe(userData.active);
       expect(user.firebaseId).toBe(userData.firebaseId);
+      expect(user.fcmToken).toBeNull();
       expect(user.createdAt).toEqual(userData.createdAt);
     });
 
