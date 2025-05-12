@@ -89,48 +89,12 @@ services:
       - rabbitmq
     networks:
       - sustentabag-network
-  mongodb:
-    image: mongo:6.0
-    container_name: payment-mongodb
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_DATABASE: payment-service
-    volumes:
-      - mongodb_data:/data/db
-    networks:
-      - sustentabag-network
-
-  # Serviço de pagamento
-  payment-service:
-    build:
-      context: ../payment-service
-      dockerfile: Dockerfile
-    container_name: payment-service
-    restart: unless-stopped
-    ports:
-      - "3001:3001"
-    environment:
-      - NODE_ENV=development
-      - PORT=3001
-      - MONGODB_URI=mongodb://mongodb:27017/payment-service
-      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
-      - MERCADOPAGO_ACCESS_TOKEN=
-      - MERCADOPAGO_WEBHOOK_URL=https://seu-dominio.com/api/payments/webhook
-    depends_on:
-      - rabbitmq
-      - mongodb
-    networks:
-      - sustentabag-network
 
 volumes:
   postgres_data:
     name: sustentabag-postgres-data
   pgadmin_data:
     name: sustentabag-pgadmin-data
-  mongodb_data:
-    name: payment-mongodb-data
 
 networks:
   sustentabag-network:
