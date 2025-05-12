@@ -21,31 +21,62 @@ class PostgresBusinessRepository extends BusinessRepository {
     if (!record) return null;
     return this._mapToDomainEntity(record);
   }
-
   async findByIdWithAddress(id) {
     const record = await this.BusinessModel.findByPk(id, {
       include: [{ model: this.AddressModel, as: 'address' }]
     });
     if (!record) return null;
 
-    console.log(record);
-
     const business = this._mapToDomainEntity(record);
 
     if (record.address) {
       const addr = record.address;
-      business.idAddress = new Address(
-        addr.idAddress,
+      business.address = new Address(
+        addr.id,
         addr.zipCode,
         addr.state,
         addr.city,
         addr.street,
         addr.number,
-        addr.complement
+        addr.complement,
+        addr.latitude,
+        addr.longitude,
+        addr.status,
+        addr.createdAt
       );
     }
 
     return business;
+  }
+
+  async findAllWithAddress() {
+    const records = await this.BusinessModel.findAll({
+      include: [{ model: this.AddressModel, as: 'address' }],
+      where: { status: 1 }
+    });
+
+    return records.map(record => {
+      const business = this._mapToDomainEntity(record);
+      
+      if (record.address) {
+        const addr = record.address;
+        business.address = new Address(
+          addr.id,
+          addr.zipCode,
+          addr.state,
+          addr.city,
+          addr.street,
+          addr.number,
+          addr.complement,
+          addr.latitude,
+          addr.longitude,
+          addr.status,
+          addr.createdAt
+        );
+      }
+      
+      return business;
+    });
   }
 
   async findAll(options = {}) {

@@ -23,11 +23,11 @@ WORKDIR /app
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package*.json ./
 
-# Copiar código-fonte
-COPY src ./src
+# Copiar código-fonte e outros arquivos necessários
+COPY . .
 
 # Expor a porta da aplicação
 EXPOSE 4041
 
-# Executar a aplicação
-CMD ["node", "src/index.js"]
+# Verificar estrutura de arquivos e então executar a aplicação
+CMD find /app -type f | grep ".js" | sort && echo "Iniciando aplicação..." && node src/server.js

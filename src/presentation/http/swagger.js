@@ -206,7 +206,8 @@ const doc = {
 const outputFile = "../../config/swagger.json";
 const endpointsFiles = [
   "../routes.js",
-  "../routes/*.js"
+  "../routes/*.js",
+  "../docs/*.js"
 ];
 
 swaggerAutogen({ openapi: "3.0.0" })(outputFile, endpointsFiles, doc)

@@ -5,6 +5,9 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import compression from "compression";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import swaggerFile from "./config/swagger.json" with { type: "json" };
 
@@ -14,6 +17,13 @@ import { initializeModules } from './application/bootstrap.js';
 import routes from "./presentation/routes.js";
 
 dotenv.config();
+
+if (!process.env.MAPBOX_ACCESS_TOKEN) {
+  console.warn("Warning: MAPBOX_ACCESS_TOKEN environment variable is not set.");
+  console.warn("Location services will be limited. Please add it to your .env file.");
+  console.warn("You can get a Mapbox token at https://account.mapbox.com/access-tokens/");
+}
+
 initializeModules(sequelize);
 
 const app = express();

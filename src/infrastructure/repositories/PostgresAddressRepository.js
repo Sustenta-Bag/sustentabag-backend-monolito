@@ -55,7 +55,6 @@ class PostgresAddressRepository extends AddressRepository {
     });
     return rows > 0;
   }
-
   _mapToDomainEntity(record) {
     return new Address(
       record.id,
@@ -64,7 +63,11 @@ class PostgresAddressRepository extends AddressRepository {
       record.city,
       record.street,
       record.number,
-      record.complement
+      record.complement,
+      record.latitude,
+      record.longitude,
+      record.status,
+      record.createdAt
     );
   }
 }

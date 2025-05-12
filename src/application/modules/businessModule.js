@@ -17,9 +17,7 @@ export const setupBusinessModule = (options = {}) => {
   return router;
 };
 
-// Add this function to your existing businessModule.js file
 export const getBusinessRepository = (sequelize) => {
-  // Make sure model is initialized
   BusinessModel.init(sequelize);
   return new PostgresBusinessRepository(BusinessModel);
 };

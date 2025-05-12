@@ -1,6 +1,8 @@
 import AddressController from '../controllers/AddressController.js';
 import AddressService from '../../application/services/AddressService.js';
+import LocationService from '../../application/services/LocationService.js';
 import PostgresAddressRepository from '../../infrastructure/repositories/PostgresAddressRepository.js';
+import PostgresBusinessRepository from '../../infrastructure/repositories/PostgresBusinessRepository.js';
 import {
   validateCreateAddress,
   validateUpdateAddress,
@@ -15,7 +17,16 @@ import {
 
 export const setupAddressRoutes = (router, options = {}) => {
   const addressRepository = options.addressRepository || new PostgresAddressRepository();
-  const addressService = new AddressService(addressRepository);
+  const businessRepository = options.businessRepository || new PostgresBusinessRepository();
+  
+  // Create location service with Mapbox token if available
+  const mapboxToken = process.env.MAPBOX_ACCESS_TOKEN;
+  let locationService = null;
+  if (mapboxToken) {
+    locationService = new LocationService(businessRepository, addressRepository, mapboxToken);
+  }
+  
+  const addressService = new AddressService(addressRepository, locationService);
   const addressController = new AddressController(addressService);
 
   router.post('/',

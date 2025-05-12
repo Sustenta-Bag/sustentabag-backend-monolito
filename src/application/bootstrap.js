@@ -4,6 +4,7 @@ import * as clientModule from './modules/clientModule.js';
 import * as addressModule from './modules/addressModule.js';
 import * as businessModule from './modules/businessModule.js';
 import * as authModule from './modules/authModule.js';
+import * as locationModule from './modules/locationModule.js';
 
 export const initializeModules = (sequelize) => {
   const bagModels = bagModule.initializeModels(sequelize);
@@ -24,16 +25,13 @@ export const initializeModules = (sequelize) => {
 };
 
 export const setupModuleRouters = (options = {}) => {
-  // Ensure we have a Sequelize instance
   if (!options.sequelizeInstance) {
     throw new Error('Sequelize instance is required to set up module routers');
   }
   
-  // Initialize client and business repositories first
   const clientRepository = clientModule.getClientRepository(options.sequelizeInstance);
   const businessRepository = businessModule.getBusinessRepository(options.sequelizeInstance);
   
-  // Set up routers with proper dependencies
   const bagRouter = bagModule.setupBagModule({
     sequelizeInstance: options.sequelizeInstance
   });
@@ -49,11 +47,14 @@ export const setupModuleRouters = (options = {}) => {
   const businessRouter = businessModule.setupBusinessModule({
     sequelizeInstance: options.sequelizeInstance
   });
-
   const authRouter = authModule.setupAuthModule({
     sequelizeInstance: options.sequelizeInstance,
     clientRepository: clientRepository,
     businessRepository: businessRepository
+  });
+  
+  const locationRouter = locationModule.setupLocationRoutes(express.Router(), {
+    sequelize: options.sequelizeInstance
   });
   
   if (!authRouter) {
@@ -65,6 +66,7 @@ export const setupModuleRouters = (options = {}) => {
     clientRouter,
     addresRouter,
     businessRouter,
-    authRouter
+    authRouter,
+    locationRouter
   };
 };

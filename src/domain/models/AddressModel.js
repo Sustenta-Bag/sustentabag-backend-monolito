@@ -46,11 +46,20 @@ class AddressModel extends Model {
         validate: {
           is: /^\d+$/ // Formato: apenas números
         }
-      },
-      complement: {
+      },      complement: {
         type: DataTypes.STRING(255),
         allowNull: true,
         field: 'Complemento'
+      },
+      latitude: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+        field: 'Latitude'
+      },
+      longitude: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+        field: 'Longitude'
       },
       status: {
         type: DataTypes.INTEGER,

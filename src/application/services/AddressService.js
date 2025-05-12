@@ -1,8 +1,9 @@
 import AppError from "../../infrastructure/errors/AppError.js";
 
 class AddressService {
-  constructor(addressRepository) {
+  constructor(addressRepository, locationService = null) {
     this.addressRepository = addressRepository;
+    this.locationService = locationService;
   }
 
   async createAddress(addressData) {
@@ -13,6 +14,16 @@ class AddressService {
     }
     if (!/^[A-Z]{2}$/.test(state)) {
       throw new AppError("Estado inválido. Deve ser a sigla de 2 letras maiúsculas.", "INVALID_STATE");
+    }
+
+    if (this.locationService) {
+      try {
+        const processedAddress = await this.locationService.processAddress(addressData);
+        return this.addressRepository.create(processedAddress);
+      } catch (error) {
+        console.error("Erro ao geocodificar endereço:", error);
+        return this.addressRepository.create(addressData);
+      }
     }
 
     return this.addressRepository.create(addressData);

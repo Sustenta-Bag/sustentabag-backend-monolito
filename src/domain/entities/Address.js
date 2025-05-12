@@ -1,5 +1,5 @@
 class Address {
-  constructor(id, zipCode, state, city, street, number, complement, status = 1, createdAt = new Date()) {
+  constructor(id, zipCode, state, city, street, number, complement, latitude = null, longitude = null, status = 1, createdAt = new Date()) {
     this.id = id;
     this.zipCode = zipCode;
     this.state = state; 
@@ -7,6 +7,8 @@ class Address {
     this.street = street;
     this.number = number;
     this.complement = complement;
+    this.latitude = latitude;
+    this.longitude = longitude;
     this.status = status;
     this.createdAt = createdAt;
   }
@@ -40,9 +42,14 @@ class Address {
       this.number = newNumber;
       return this;
   }
-
   updateComplement(newComplement) {
       this.complement = newComplement;
+      return this;
+  }
+
+  updateCoordinates(latitude, longitude) {
+      this.latitude = latitude;
+      this.longitude = longitude;
       return this;
   }
 

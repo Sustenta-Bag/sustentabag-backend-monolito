@@ -10,7 +10,6 @@ dotenv.config();
 export const setupClientModule = (options = {}) => {
   const router = express.Router();
   
-  // Make sure options has sequelizeInstance for the route setup
   setupClientRoutes(router, options);
   
   router.use(errorHandler);

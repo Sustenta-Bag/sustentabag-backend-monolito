@@ -9,7 +9,8 @@ const {
     clientRouter, 
     addresRouter, 
     businessRouter,
-    authRouter
+    authRouter,
+    locationRouter
 } = setupModuleRouters({
     sequelizeInstance: sequelize
 });
@@ -19,5 +20,6 @@ router.use('/api/clients', clientRouter);
 router.use('/api/businesses', businessRouter);
 router.use('/api/bags', bagRouter);
 router.use('/api/auth', authRouter);
+router.use('/api/location', locationRouter);
 
 export default router;

@@ -78,13 +78,11 @@ class AuthService {
   }
 
   async registerBusiness(businessData, userData) {
-    // Validate if email already exists in User repository
     const existingUser = await this.userRepository.findByEmail(userData.email);
     if (existingUser) {
       throw new AppError("Email já cadastrado", "EMAIL_ALREADY_EXISTS");
     }
 
-    // Check for existing business with same CNPJ
     const existingBusinessByCnpj = await this.businessRepository.findByCnpj(
       businessData.cnpj
     );
@@ -92,10 +90,8 @@ class AuthService {
       throw new AppError("CNPJ já cadastrado", "CNPJ_ALREADY_EXISTS");
     }
 
-    // Hash the password for user creation
     const hashedPassword = await bcrypt.hash(userData.password, 10);
 
-    // Try to create Firebase user
     let firebaseUser = null;
     try {
       firebaseUser = await this.firebaseService.createUser({
@@ -110,17 +106,14 @@ class AuthService {
       console.log("Firebase business user created with ID:", firebaseUser.uid);
     } catch (firebaseError) {
       console.error("Error creating Firebase business user:", firebaseError);
-      // Continue with local user creation even if Firebase fails
     }
 
-    // Create business record (without password or firebaseId)
     const businessToCreate = {
       ...businessData,
     };
 
     const newBusiness = await this.businessRepository.create(businessToCreate);
 
-    // Create the associated user account with password and firebaseId
     const user = await this.userRepository.create({
       email: userData.email,
       password: hashedPassword,
@@ -130,7 +123,6 @@ class AuthService {
       firebaseId: firebaseUser?.uid || null,
     });
 
-    // Update Firebase record with local ID if available
     if (firebaseUser?.uid) {
       await this.firebaseService.updateLocalIdInFirestore(
         firebaseUser.uid,
@@ -150,7 +142,6 @@ class AuthService {
   }
 
   async login(email, password) {
-    // Try to find the user in our local database
     const user = await this.userRepository.findByEmail(email);
 
     if (!user) {
@@ -161,14 +152,12 @@ class AuthService {
       throw new AppError("Conta inativa", "ACCOUNT_INACTIVE", 401);
     }
 
-    // Verify password from the user model (not from entity)
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
       throw new AppError("Credenciais inválidas", "INVALID_CREDENTIALS", 401);
     }
 
-    // Get the associated entity based on role
     let entity = null;
     if (user.role === "client") {
       entity = await this.clientRepository.findById(user.entityId);
@@ -184,7 +173,6 @@ class AuthService {
       );
     }
 
-    // Generate JWT token
     const token = jwt.sign(
       {
         userId: user.id,

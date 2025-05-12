@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "Microservice for bag management with DDD architecture",
   "main": "src/index.js",
-  "type": "module",
-  "scripts": {
+  "type": "module",  "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "start:watch": "node --watch src/server.js",
     "swagger": "node src/presentation/http/swagger.js",
+    "swagger:generate": "node src/scripts/generate-swagger.js",
     "swagger:watch": "node --watch src/presentation/http/swagger.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js tests/unit",
     "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js tests/integration",
@@ -31,7 +31,10 @@
   },
   "homepage": "https://github.com/Sustenta-Bag/sacola-service#readme",
   "dependencies": {
+    "@mapbox/mapbox-sdk": "^0.16.1",
+    "amqplib": "~0.10.7",
     "bcrypt": "^5.1.1",
+    "colors": "~1.4.0",
     "compression": "1.8.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
@@ -48,10 +51,8 @@
     "sequelize": "^6.37.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
-    "yup": "1.6.1",
-    "amqplib": "~0.10.7",
     "uuid": "~11.1.0",
-    "colors": "~1.4.0"
+    "yup": "1.6.1"
   },
   "devDependencies": {
     "jest": "^29.7.0",

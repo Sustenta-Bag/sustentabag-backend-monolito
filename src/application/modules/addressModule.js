@@ -3,8 +3,14 @@ import express from 'express';
 import { setupAddressRoutes } from '../../presentation/routes/addressRoutes.js';
 import { errorHandler } from '../../presentation/middleware/errorHandler.js';
 import AddressModel from '../../domain/models/AddressModel.js';
+import PostgresAddressRepository from '../../infrastructure/repositories/PostgresAddressRepository.js';
 
 dotenv.config();
+
+export const getAddressRepository = (sequelize) => {
+  AddressModel.init(sequelize);
+  return new PostgresAddressRepository(AddressModel);
+};
 
 export const setupAddressModule = (options = {}) => {
   const router = express.Router();
