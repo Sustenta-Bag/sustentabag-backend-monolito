@@ -13,9 +13,17 @@ describe('Address Entity Unit Tests', () => {
     status: 1,
     createdAt: new Date('2023-01-01')
   };
-
-  describe('Constructor', () => {
+  describe('Constructor', () => {    
     test('should initialize with all properties correctly', () => {
+      // Criar um mock para a data atual para que o teste seja estável
+      const mockDate = new Date('2023-01-01');
+      const originalDate = global.Date;
+      global.Date = class extends Date {
+        constructor() {
+          return mockDate;
+        }
+      };
+
       const address = new Address(
         addressData.id,
         addressData.zipCode,
@@ -24,6 +32,8 @@ describe('Address Entity Unit Tests', () => {
         addressData.street,
         addressData.number,
         addressData.complement,
+        null,
+        null,
         addressData.status,
         addressData.createdAt
       );
@@ -37,9 +47,10 @@ describe('Address Entity Unit Tests', () => {
       expect(address.complement).toBe(addressData.complement);
       expect(address.status).toBe(addressData.status);
       expect(address.createdAt).toEqual(addressData.createdAt);
-    });
-
-    test('should initialize with default status when not provided', () => {
+      
+      // Restaurar Date original
+      global.Date = originalDate;
+    });    test('should initialize with default status when not provided', () => {
       const address = new Address(
         addressData.id,
         addressData.zipCode,
@@ -53,20 +64,64 @@ describe('Address Entity Unit Tests', () => {
       expect(address.status).toBe(1);
     });
 
-    // test('should initialize with null complement when not provided', () => {
-    //   const address = new Address(
-    //     addressData.id,
-    //     addressData.zipCode,
-    //     addressData.state,
-    //     addressData.city,
-    //     addressData.street,
-    //     addressData.number
-    //   );
+    test('should initialize with default createdAt when not provided', () => {
+      const mockDate = new Date('2023-01-01');
+      const originalDate = global.Date;
+      global.Date = class extends Date {
+        constructor() {
+          return mockDate;
+        }
+      };
 
-    //   expect(address.complement).toBeNull();
-    // });
+      const address = new Address(
+        addressData.id,
+        addressData.zipCode,
+        addressData.state,
+        addressData.city,
+        addressData.street,
+        addressData.number,
+        addressData.complement
+      );
+
+      expect(address.createdAt).toEqual(mockDate);
+
+      global.Date = originalDate;
+    });
+
+    test('should initialize with null latitude and longitude when not provided', () => {
+      const address = new Address(
+        addressData.id,
+        addressData.zipCode,
+        addressData.state,
+        addressData.city,
+        addressData.street,
+        addressData.number,
+        addressData.complement
+      );
+
+      expect(address.latitude).toBeNull();
+      expect(address.longitude).toBeNull();
+    });
+
+    test('should initialize with provided latitude and longitude', () => {
+      const latitude = 40.7128;
+      const longitude = -74.0060;
+      const address = new Address(
+        addressData.id,
+        addressData.zipCode,
+        addressData.state,
+        addressData.city,
+        addressData.street,
+        addressData.number,
+        addressData.complement,
+        latitude,
+        longitude
+      );
+
+      expect(address.latitude).toBe(latitude);
+      expect(address.longitude).toBe(longitude);
+    });
   });
-
   describe('Methods', () => {
     test('updateZipCode should change zipCode and return this', () => {
       const address = new Address(
@@ -118,6 +173,130 @@ describe('Address Entity Unit Tests', () => {
       expect(address.city).toBe(newCity);
       expect(returnValue).toBe(address);
     });
+    
+    test('updateStreet should change street and return this', () => {
+      const address = new Address(
+        addressData.id,
+        addressData.zipCode,
+        addressData.state,
+        addressData.city,
+        addressData.street,
+        addressData.number
+      );
+      
+      const newStreet = 'Rua das Flores';
+      const returnValue = address.updateStreet(newStreet);
+      
+      expect(address.street).toBe(newStreet);
+      expect(returnValue).toBe(address);
+    });
+
+    test('updateNumber should change number and return this', () => {
+      const address = new Address(
+        addressData.id,
+        addressData.zipCode,
+        addressData.state,
+        addressData.city,
+        addressData.street,
+        addressData.number
+      );
+      
+      const newNumber = '2000';
+      const returnValue = address.updateNumber(newNumber);
+      
+      expect(address.number).toBe(newNumber);
+      expect(returnValue).toBe(address);
+    });
+
+    test('updateComplement should change complement and return this', () => {
+      const address = new Address(
+        addressData.id,
+        addressData.zipCode,
+        addressData.state,
+        addressData.city,
+        addressData.street,
+        addressData.number,
+        addressData.complement
+      );
+      
+      const newComplement = 'Apto 501';
+      const returnValue = address.updateComplement(newComplement);
+      
+      expect(address.complement).toBe(newComplement);
+      expect(returnValue).toBe(address);
+    });
+
+    test('updateCoordinates should change latitude and longitude and return this', () => {
+      const address = new Address(
+        addressData.id,
+        addressData.zipCode,
+        addressData.state,
+        addressData.city,
+        addressData.street,
+        addressData.number
+      );
+      
+      const newLatitude = 40.7128;
+      const newLongitude = -74.0060;
+      const returnValue = address.updateCoordinates(newLatitude, newLongitude);
+      
+      expect(address.latitude).toBe(newLatitude);
+      expect(address.longitude).toBe(newLongitude);
+      expect(returnValue).toBe(address);
+    });
+
+    test('updateStatus should change status and return this', () => {
+      const address = new Address(
+        addressData.id,
+        addressData.zipCode,
+        addressData.state,
+        addressData.city,
+        addressData.street,
+        addressData.number
+      );
+      
+      const newStatus = 0;
+      const returnValue = address.updateStatus(newStatus);
+      
+      expect(address.status).toBe(newStatus);
+      expect(returnValue).toBe(address);
+    });
+
+    test('deactivate should set status to 0 and return this', () => {
+      const address = new Address(
+        addressData.id,
+        addressData.zipCode,
+        addressData.state,
+        addressData.city,
+        addressData.street,
+        addressData.number
+      );
+      
+      const returnValue = address.deactivate();
+      
+      expect(address.status).toBe(0);
+      expect(returnValue).toBe(address);
+    });
+
+    test('activate should set status to 1 and return this', () => {
+      const address = new Address(
+        addressData.id,
+        addressData.zipCode,
+        addressData.state,
+        addressData.city,
+        addressData.street,
+        addressData.number,
+        addressData.complement,
+        null,
+        null,
+        0
+      );
+      
+      const returnValue = address.activate();
+      
+      expect(address.status).toBe(1);
+      expect(returnValue).toBe(address);
+    });
 
     test('methods should support chaining', () => {
       const address = new Address(
@@ -128,6 +307,8 @@ describe('Address Entity Unit Tests', () => {
         addressData.street,
         addressData.number,
         addressData.complement,
+        null,
+        null,
         1
       );
       
@@ -137,7 +318,10 @@ describe('Address Entity Unit Tests', () => {
         .updateCity('Rio de Janeiro')
         .updateStreet('Av. Atlântica')
         .updateNumber('2000')
-        .updateComplement('Apto 501');
+        .updateComplement('Apto 501')
+        .updateCoordinates(40.7128, -74.0060)
+        .updateStatus(0)
+        .activate();
       
       expect(address.zipCode).toBe('87654321');
       expect(address.state).toBe('RJ');
@@ -145,6 +329,9 @@ describe('Address Entity Unit Tests', () => {
       expect(address.street).toBe('Av. Atlântica');
       expect(address.number).toBe('2000');
       expect(address.complement).toBe('Apto 501');
+      expect(address.latitude).toBe(40.7128);
+      expect(address.longitude).toBe(-74.0060);
+      expect(address.status).toBe(1);
     });
   });
 });

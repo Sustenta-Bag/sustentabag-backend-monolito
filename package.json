@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Microservice for bag management with DDD architecture",
   "main": "src/index.js",
-  "type": "module",  "scripts": {
+  "type": "module",
+  "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "start:watch": "node --watch src/server.js",
@@ -45,6 +46,7 @@
     "helmet": "8.1.0",
     "http-status": "2.1.0",
     "jsonwebtoken": "9.0.2",
+    "mapbox": "^1.0.0-beta10",
     "morgan": "1.10.0",
     "multer": "^1.4.5-lts.2",
     "pg": "^8.14.1",
