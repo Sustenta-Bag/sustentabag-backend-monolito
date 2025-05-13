@@ -8,7 +8,7 @@ dotenv.config();
 const exchange = "process_notification_exchange";
 const routingKey = "notification";
 
-export default async (data) => { // TODO - Refatorar para um serviço de mensagens genéricas
+export default async (data) => {
   let connection;
 
   try {
@@ -18,21 +18,19 @@ export default async (data) => { // TODO - Refatorar para um serviço de mensage
     connection = await amqp.connect(RABBITMQ);
     const channel = await connection.createChannel();
 
-    // Garantir que a exchange exista
     await channel.assertExchange(exchange, "direct", { durable: true });
     
-    // Adicionar identificadores úteis à mensagem
     const messageId = v4();
     const timestamp = new Date();
     
     const message = {
-      to: "token FCM ", // data.to e se for bulk :  "to": ["token1", "token2", "token3"],
+      to: "token FCM ",
       notification: {
         title: data.notification.title,
         body: data.notification.body,
       },
       data: {
-        type: "single", // "type": "bulk",
+        type: "single",
         payload: {
           ...data.payload,
           timestamp: timestamp,

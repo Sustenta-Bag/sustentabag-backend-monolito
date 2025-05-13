@@ -1,5 +1,5 @@
 import AppError from "../../infrastructure/errors/AppError.js";
-import RabbitMQPublisher from "../../application/services/RabbitMQPublisher.js"; // Assuming you have a RabbitMQ publisher set up
+import RabbitMQPublisher from "../../application/services/RabbitMQPublisher.js";
 
 class BagController {
   constructor(bagService) {
@@ -12,7 +12,7 @@ class BagController {
 
       if (res.status(201)) {
         const data = {
-          to: "GG7YEvoNUYh1qohZUmTSJRHu9fa2", //data.payload.fcmToken
+          to: "GG7YEvoNUYh1qohZUmTSJRHu9fa2",
           notification: {
             title: "Novo produto criado",
             body: `Uma nova bolsa do tipo ${bag.type} foi criada.`,
@@ -24,22 +24,6 @@ class BagController {
             },
           },
         };
-
-        // const message = {
-        //   to: data.to || data.payload.fcmToken, // Usa o token fornecido ou o token do payload
-        //   notification: {
-        //     title: data.notification.title,
-        //     body: data.notification.body,
-        //   },
-        //   data: {
-        //     type: "single",
-        //     payload: {
-        //       ...data.payload,
-        //       timestamp: timestamp,
-        //       correlationId: messageId,
-        //     },
-        //   },
-        // };
 
         await RabbitMQPublisher(data);
       }

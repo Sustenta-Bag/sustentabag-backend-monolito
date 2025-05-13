@@ -2,7 +2,6 @@ import mapboxSdk from '@mapbox/mapbox-sdk';
 import geocodingService from '@mapbox/mapbox-sdk/services/geocoding.js';
 import dotenv from 'dotenv';
 
-// Load environment variables
 dotenv.config();
 
 async function testMapbox() {
@@ -19,7 +18,6 @@ async function testMapbox() {
     const mapboxClient = mapboxSdk({ accessToken: mapboxToken });
     const geocodingClient = geocodingService(mapboxClient);
     
-    // Test geocoding with a sample address
     const response = await geocodingClient
       .forwardGeocode({
         query: 'Avenida Paulista, 1000, São Paulo, SP, Brazil',

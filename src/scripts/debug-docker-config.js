@@ -1,8 +1,6 @@
-// Debug script to verify Firebase configuration
 console.log('Firebase Configuration Debug');
 console.log('---------------------------');
 
-// Check environment variables without showing sensitive values
 console.log('Environment Variables:');
 console.log(`FIREBASE_API_KEY: ${process.env.FIREBASE_API_KEY ? 'Present (length: ' + 
   process.env.FIREBASE_API_KEY.length + ')' : 'Missing!'}`);
@@ -15,7 +13,6 @@ console.log(`FIREBASE_CLIENT_EMAIL: ${process.env.FIREBASE_CLIENT_EMAIL || 'Miss
 console.log(`FIREBASE_PRIVATE_KEY: ${process.env.FIREBASE_PRIVATE_KEY ? 
   'Present (length: ' + process.env.FIREBASE_PRIVATE_KEY.length + ')' : 'Missing!'}`);
 
-// Check if the environment variables can be loaded correctly
 try {
   const dotenv = require('dotenv');
   console.log('\nLoading .env file result:', dotenv.config());
@@ -23,7 +20,6 @@ try {
   console.log('\nError loading dotenv:', err.message);
 }
 
-// Check Node.js version and other system info
 console.log('\nSystem Information:');
 console.log(`Node.js: ${process.version}`);
 console.log(`Platform: ${process.platform}`);
@@ -31,7 +27,6 @@ console.log(`Architecture: ${process.arch}`);
 console.log(`Current directory: ${process.cwd()}`);
 console.log(`User: ${process.env.USER || process.env.USERNAME || 'Unknown'}`);
 
-// List files in the current directory
 const fs = require('fs');
 console.log('\nFiles in current directory:');
 try {
@@ -42,7 +37,6 @@ try {
   console.log('Error listing files:', err.message);
 }
 
-// List files in the src directory
 console.log('\nFiles in src directory:');
 try {
   fs.readdirSync('./src').forEach(file => {

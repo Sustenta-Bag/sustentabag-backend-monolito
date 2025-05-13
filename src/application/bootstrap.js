@@ -8,7 +8,6 @@ import * as locationModule from './modules/locationModule.js';
 import setupAssociations from '../infrastructure/database/associations.js';
 
 export const initializeModules = (sequelize) => {
-  // Inicializa todos os modelos
   const bagModels = bagModule.initializeModels(sequelize);
   const clientModels = clientModule.initializeModels(sequelize);
   const addressModels = addressModule.initializeModels(sequelize);
@@ -23,7 +22,6 @@ export const initializeModules = (sequelize) => {
     ...authModels
   };
   
-  // Configura as associações entre os modelos
   setupAssociations(allModels);
   
   return {

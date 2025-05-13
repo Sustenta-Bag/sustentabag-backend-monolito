@@ -5,7 +5,6 @@ class AuthController {
     this.authService = authService;
   }
 
-  // Unified registration method
   async registerUser(req, res, next) {
     try {
       const { entityType, userData, entityData } = req.body;
@@ -34,7 +33,6 @@ class AuthController {
         result = await this.authService.registerBusiness(entityData, userData);
       }
 
-      // Remove sensitive information
       if (result.user && result.user.password) {
         delete result.user.password;
       }
@@ -67,7 +65,6 @@ class AuthController {
 
       const result = await this.authService.login(email, password);
 
-      // Remove sensitive data
       const { password: _, ...userData } = result.user;
 
       return res.json({
@@ -94,7 +91,6 @@ class AuthController {
 
       const result = await this.authService.loginWithFirebase(firebaseToken);
 
-      // Remove sensitive data
       const { password: _, ...userData } = result.user;
 
       return res.json({

@@ -8,7 +8,6 @@ import {
 import { authenticate } from "../middleware/authMiddleware.js";
 
 export default (authController) => (router) => {
-  // Public routes
   router.post(
     "/register",
     /*
@@ -203,55 +202,9 @@ export default (authController) => (router) => {
     authController.login.bind(authController)
   );
 
-  // router.post(
-  //   '/login/firebase',
-  //   /*
-  //   #swagger.path = '/api/auth/login/firebase'
-  //   #swagger.tags = ['Authentication']
-  //   #swagger.summary = 'Autenticar com Firebase'
-  //   #swagger.description = 'Realiza login usando token do Firebase'
-  //   #swagger.requestBody = {
-  //     required: true,
-  //     content: {
-  //       "application/json": {
-  //         schema: {
-  //           type: "object",
-  //           properties: {
-  //             firebaseToken: {
-  //               type: "string",
-  //               example: "eyJhbGciOiJSUzI1NiIsImtpZCI6IjFlOTczZWUwZTE..."
-  //             }
-  //           },
-  //           required: ["firebaseToken"]
-  //         }
-  //       }
-  //     }
-  //   }
-  //   #swagger.responses[200] = {
-  //     description: 'Login realizado com sucesso',
-  //     content: {
-  //       "application/json": {
-  //         schema: {
-  //           type: "object",
-  //           properties: {
-  //             user: { type: "object" },
-  //             entity: { type: "object" },
-  //             token: { type: "string" }
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  //   #swagger.responses[401] = {
-  //     description: 'Token inválido',
-  //     schema: { $ref: "#/components/schemas/Error" }
-  //   }
-  //   */
-  //   validateFirebaseLoginInput,
-  //   authController.loginWithFirebase.bind(authController)
-  // );
 
-  // Protected routes
+
+
   router.post(
     "/change-password",
     /*

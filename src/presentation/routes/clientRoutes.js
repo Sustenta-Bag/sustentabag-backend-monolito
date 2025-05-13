@@ -20,7 +20,6 @@ export const setupClientRoutes = (router, options = {}) => {
   const clientService = new ClientService(clientRepository);
   const clientController = new ClientController(clientService);
   
-  // This route should be deprecated in favor of the unified auth system
   router.post(`/auth/login`,
     /*
     #swagger.path = '/api/clients/auth/login'
@@ -36,7 +35,6 @@ export const setupClientRoutes = (router, options = {}) => {
     clientController.login.bind(clientController)
   );
 
-  // Public route for registration
   router.post(`/`,
     /*
     #swagger.path = '/api/clients'
@@ -51,7 +49,6 @@ export const setupClientRoutes = (router, options = {}) => {
     clientController.createClient.bind(clientController)
   );
   
-   // Admin or business route to get all clients
    router.get(`/`,
     /*
     #swagger.path = '/api/clients'
@@ -72,8 +69,6 @@ export const setupClientRoutes = (router, options = {}) => {
     clientController.getAllClients.bind(clientController)
   );
   
-  // IMPORTANTE: Mover a rota /active para antes da rota /:id
-  // Admin or business route to get active clients
   router.get(`/active`,
     /*
     #swagger.path = '/api/clients/active'
@@ -95,7 +90,6 @@ export const setupClientRoutes = (router, options = {}) => {
     clientController.getActiveClients.bind(clientController)
   );
   
-  // Client can get own data, business can view client data
   router.get(`/:id`,
     /*
     #swagger.path = '/api/clients/{id}'
@@ -117,7 +111,6 @@ export const setupClientRoutes = (router, options = {}) => {
     clientController.getClient.bind(clientController)
   );
   
-  // Client can update own data only
   router.put(`/:id`,
     /*
     #swagger.path = '/api/clients/{id}'
@@ -143,7 +136,6 @@ export const setupClientRoutes = (router, options = {}) => {
     clientController.updateClient.bind(clientController)
   );
   
-  // Admin function
   router.delete(`/:id`,
     /*
     #swagger.path = '/api/clients/{id}'
@@ -165,7 +157,6 @@ export const setupClientRoutes = (router, options = {}) => {
     clientController.deleteClient.bind(clientController)
   );
   
-  // Client can disable own account, admin can disable any client
   router.patch(`/:id/status`, 
     /*
     #swagger.path = '/api/clients/{id}/status'

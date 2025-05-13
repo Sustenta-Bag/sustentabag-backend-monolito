@@ -24,7 +24,7 @@ class BusinessModel extends Model {
         unique: true,
         field: 'cnpj',
         validate: {
-          is: /^\d{14}$/ // Formato: 14 dígitos
+          is: /^\d{14}$/ 
         }
       },
       appName: {
@@ -37,7 +37,7 @@ class BusinessModel extends Model {
         allowNull: false,
         field: 'celular',
         validate: {
-          is: /^\d{11}$/ // Formato: 11 dígitos
+          is: /^\d{11}$/ 
         }
       },
       description: {

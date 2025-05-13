@@ -19,7 +19,6 @@ export const setupAddressRoutes = (router, options = {}) => {
   const addressRepository = options.addressRepository || new PostgresAddressRepository();
   const businessRepository = options.businessRepository || new PostgresBusinessRepository();
   
-  // Create location service with Mapbox token if available
   const mapboxToken = process.env.MAPBOX_ACCESS_TOKEN;
   let locationService = null;
   if (mapboxToken) {

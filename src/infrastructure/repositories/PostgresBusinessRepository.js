@@ -22,11 +22,9 @@ class PostgresBusinessRepository extends BusinessRepository {
     return this._mapToDomainEntity(record);
   }  async findByIdWithAddress(id) {
     try {
-      // Verificando se a associação está configurada
       if (!this.BusinessModel.associations || !this.BusinessModel.associations.address) {
         console.warn('Associação entre Business e Address não encontrada. Tentando configurar manualmente...');
         
-        // Tenta configurar a associação manualmente, caso não esteja configurada
         this.BusinessModel.belongsTo(this.AddressModel, {
           foreignKey: 'idAddress',
           targetKey: 'id',
@@ -38,7 +36,7 @@ class PostgresBusinessRepository extends BusinessRepository {
         include: [{ 
           model: this.AddressModel, 
           as: 'address',
-          required: false // Torna o join LEFT JOIN em vez de INNER JOIN
+          required: false
         }]
       });
       
@@ -74,11 +72,9 @@ class PostgresBusinessRepository extends BusinessRepository {
   }
   async findAllWithAddress() {
     try {
-      // Verificando se a associação está configurada
       if (!this.BusinessModel.associations || !this.BusinessModel.associations.address) {
         console.warn('Associação entre Business e Address não encontrada. Tentando configurar manualmente...');
         
-        // Tenta configurar a associação manualmente, caso não esteja configurada
         this.BusinessModel.belongsTo(this.AddressModel, {
           foreignKey: 'idAddress',
           targetKey: 'id',
@@ -88,9 +84,9 @@ class PostgresBusinessRepository extends BusinessRepository {
         include: [{ 
           model: this.AddressModel, 
           as: 'address',
-          required: false // Torna o join LEFT JOIN em vez de INNER JOIN
+          required: false
         }],
-        where: { status: true } // Corrigido para boolean true
+        where: { status: true }
       });
 
       console.log(`Encontrados ${records.length} registros de empresas`);
@@ -140,7 +136,7 @@ class PostgresBusinessRepository extends BusinessRepository {
   }
   async findActiveBusiness() {
     const records = await this.BusinessModel.findAll({
-      where: { status: true } // Corrigido para boolean true
+      where: { status: true }
     });
     return records.map(r => this._mapToDomainEntity(r));
   }

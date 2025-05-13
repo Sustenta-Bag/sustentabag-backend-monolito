@@ -16,12 +16,10 @@ class LocationService {
    * @returns {Promise<{latitude: number, longitude: number}>} - Coordenadas do endereço
    */  async geocodeAddress(address) {
     try {
-      // Validação dos dados de entrada
       if (!address) {
         throw new AppError('Dados de endereço não fornecidos', 'GEOCODING_ERROR', 400);
       }
       
-      // Construção da query usando somente campos disponíveis
       const queryParts = [];
       
       if (address.street) queryParts.push(address.street);
@@ -41,7 +39,6 @@ class LocationService {
       const query = queryParts.join(', ');
       console.log(`Enviando consulta de geocodificação: "${query}"`);
       
-      // Verificar se o token do Mapbox está configurado
       if (!this.mapboxClient || !this.geocodingClient) {
         throw new AppError(
           'Serviço de geocodificação não configurado. Verifique a variável MAPBOX_ACCESS_TOKEN.', 
@@ -50,7 +47,6 @@ class LocationService {
         );
       }
       
-      // Tentar geocodificar com timeout para evitar espera infinita
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('Timeout na requisição de geocodificação')), 10000);
       });
@@ -108,12 +104,10 @@ class LocationService {
    * @returns {Promise<Object>} - Endereço processado com coordenadas
    */  async processAddress(addressData) {
     try {
-      // Validação dos dados de entrada
       if (!addressData || typeof addressData !== 'object') {
         throw new Error('Dados de endereço inválidos');
       }
       
-      // Verifica se dados mínimos estão presentes
       if (!addressData.street || !addressData.city || !addressData.state) {
         console.warn('Dados de endereço incompletos para geocodificação', 
           JSON.stringify({
@@ -124,7 +118,6 @@ class LocationService {
         );
       }
       
-      // Se já tem coordenadas, mantém elas
       if (addressData.latitude && addressData.longitude) {
         console.log(`Endereço já possui coordenadas: ${addressData.latitude}, ${addressData.longitude}`);
         return addressData;
@@ -141,12 +134,10 @@ class LocationService {
     } catch (error) {
       console.error('Erro ao processar coordenadas:', error);
       
-      // Registra o erro mas permite continuar sem coordenadas em ambiente de dev
       if (process.env.NODE_ENV === 'development') {
         return addressData;
       }
       
-      // Em produção, propaga o erro para tratamento adequado
       throw new AppError(`Erro ao processar coordenadas do endereço: ${error.message}`, 'ADDRESS_PROCESSING_ERROR');
     }
   }
@@ -158,7 +149,6 @@ class LocationService {
    * @returns {Promise<Array>} - Lista de estabelecimentos próximos
    */  async findNearbyBusinesses(addressId, { radius = 10, limit = 10 } = {}) {
     try {
-      // Validação do ID
       if (!addressId || isNaN(parseInt(addressId))) {
         throw new AppError('ID de endereço inválido', 'INVALID_ADDRESS_ID', 400);
       }
@@ -177,11 +167,9 @@ class LocationService {
         hasCoordinates: Boolean(address.latitude) && Boolean(address.longitude)
       })}`);
 
-      // Se o endereço não tem coordenadas, tenta geocodificá-lo primeiro
       if (!address.latitude || !address.longitude) {
         console.log(`Endereço sem coordenadas, tentando geocodificar...`);
         
-        // Verifica se o endereço tem campos necessários para geocodificação
         if (!address.street || !address.city || !address.state) {
           throw new AppError('Endereço incompleto, impossível geocodificar', 'INCOMPLETE_ADDRESS', 400);
         }
@@ -189,7 +177,6 @@ class LocationService {
         try {
           const updatedAddress = await this.processAddress(address);
           
-          // Atualiza o endereço com as coordenadas
           if (updatedAddress.latitude && updatedAddress.longitude) {
             console.log(`Coordenadas obtidas: ${updatedAddress.latitude}, ${updatedAddress.longitude}`);
             await this.addressRepository.update(addressId, { 
@@ -209,20 +196,17 @@ class LocationService {
 
       console.log(`Usando coordenadas: ${address.latitude}, ${address.longitude}`);
 
-      // Buscar todos os estabelecimentos com endereços
       const businesses = await this.businessRepository.findAllWithAddress();
       console.log(`Encontrados ${businesses.length} estabelecimentos com endereço`);
       
       if (!businesses || businesses.length === 0) {
         console.log('Nenhum estabelecimento encontrado no banco de dados');
-        return []; // Retorna array vazio em vez de falhar
+        return []; 
       }
       
-      // Filtrar estabelecimentos por distância
       const nearbyBusinesses = [];
       
       for (const business of businesses) {
-        // Verificar se o negócio tem endereço com coordenadas
         const businessAddress = business.address;
         if (!businessAddress || !businessAddress.latitude || !businessAddress.longitude) {
           console.log(`Negócio ${business.id} ignorado - endereço sem coordenadas`);
@@ -230,16 +214,13 @@ class LocationService {
         }
 
         try {
-          // Calcular distância usando a fórmula de Haversine
           const distance = this.calculateDistance(
             address.latitude, address.longitude,
             businessAddress.latitude, businessAddress.longitude
           );
 
-          // Adicionar a distância ao objeto de negócio para ordenação posterior
           business.distance = distance;
           
-          // Filtrar por raio (em km)
           const isNearby = distance <= radius;
           if (isNearby) {
             console.log(`Negócio ${business.id} está a ${distance.toFixed(2)}km de distância`);
@@ -247,13 +228,10 @@ class LocationService {
           }
         } catch (err) {
           console.error(`Erro ao calcular distância para negócio ${business.id}:`, err);
-          // Continua para o próximo negócio sem incluir este
         }
       }
       
-      // Ordenar por distância e limitar resultados
       nearbyBusinesses.sort((a, b) => {
-        // Proteção contra valores undefined ou NaN
         const distA = typeof a.distance === 'number' ? a.distance : Infinity;
         const distB = typeof b.distance === 'number' ? b.distance : Infinity;
         return distA - distB;
@@ -278,7 +256,6 @@ class LocationService {
    * @param {number} lon2 - Longitude do ponto 2
    * @returns {number} - Distância em quilômetros
    */  calculateDistance(lat1, lon1, lat2, lon2) {
-    // Validação de entrada para evitar cálculos com valores inválidos
     if (
       lat1 === null || lat1 === undefined || isNaN(parseFloat(lat1)) ||
       lon1 === null || lon1 === undefined || isNaN(parseFloat(lon1)) ||
@@ -288,22 +265,20 @@ class LocationService {
       throw new Error('Coordenadas inválidas para cálculo de distância');
     }
     
-    // Conversão para números para garantir
     const latitude1 = parseFloat(lat1);
     const longitude1 = parseFloat(lon1);
     const latitude2 = parseFloat(lat2);
     const longitude2 = parseFloat(lon2);
     
-    const R = 6371; // Raio da Terra em km
+    const R = 6371; 
     const dLat = this.deg2rad(latitude2 - latitude1);
     const dLon = this.deg2rad(longitude2 - longitude1);
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
               Math.cos(this.deg2rad(latitude1)) * Math.cos(this.deg2rad(latitude2)) * 
               Math.sin(dLon/2) * Math.sin(dLon/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    const distance = R * c; // Distância em km
+    const distance = R * c; 
     
-    // Evita valores negativos ou NaN
     return isNaN(distance) ? Infinity : Math.max(0, distance);
   }
 

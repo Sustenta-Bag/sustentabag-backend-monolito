@@ -9,12 +9,12 @@ class Client {
     createdAt = new Date()
   ) {
     this.id = id;
-    this.name = name; // Nome do cliente
-    this.email = email; // Email do cliente
-    this.cpf = cpf; // CPF do cliente
-    this.phone = phone; // Telefone do cliente
-    this.status = status; // 0 = inativo, 1 = ativo
-    this.createdAt = createdAt; // Data de criação do cliente
+    this.name = name; 
+    this.email = email; 
+    this.cpf = cpf; 
+    this.phone = phone; 
+    this.status = status; 
+    this.createdAt = createdAt; 
   }
 
   updateStatus(newStatus) {

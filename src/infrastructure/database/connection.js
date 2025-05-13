@@ -44,10 +44,8 @@ export const syncDatabase = async (force = false) => {
     console.log("Iniciando sincronização dos modelos com o banco de dados...");
     console.log("Modelos disponíveis:", Object.keys(sequelize.models));
     
-    // Desativar restrições de chave estrangeira temporariamente
     await sequelize.query('SET CONSTRAINTS ALL DEFERRED');
     
-    // Criar tabelas SEM dependências primeiro
     if (sequelize.models.User) {
       console.log("Sincronizando modelo de Usuários...");
       await sequelize.models.User.sync({ force });
@@ -58,7 +56,6 @@ export const syncDatabase = async (force = false) => {
       await sequelize.models.AddressModel.sync({ force });
     }
     
-    // Depois criar tabelas que têm dependências (mas não são dependidas por outras)
     if (sequelize.models.BusinessModel) {
       console.log("Sincronizando modelo de Empresas...");
       await sequelize.models.BusinessModel.sync({ force });
@@ -69,13 +66,11 @@ export const syncDatabase = async (force = false) => {
       await sequelize.models.ClientModel.sync({ force });
     }
     
-    // Por último, criar tabelas que dependem de outras
     if (sequelize.models.BagModel) {
       console.log("Sincronizando modelo de Sacolas...");
       await sequelize.models.BagModel.sync({ force });
     }
     
-    // Reativar as restrições
     await sequelize.query('SET CONSTRAINTS ALL IMMEDIATE');
     
     console.log('Modelos sincronizados com o banco de dados com sucesso.');

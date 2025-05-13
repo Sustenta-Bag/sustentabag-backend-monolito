@@ -1,12 +1,9 @@
-// Utility script to verify Firebase configuration and connection
 import { config } from 'dotenv';
 import { initializeApp } from "firebase/app";
 import { getAuth, signInAnonymously } from "firebase/auth";
 
-// Load environment variables
 config();
 
-// Print environment variables without values
 console.log('Checking Firebase environment variables:');
 console.log({
   FIREBASE_API_KEY: process.env.FIREBASE_API_KEY ? 'Defined' : 'Undefined',

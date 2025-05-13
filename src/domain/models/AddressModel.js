@@ -18,7 +18,7 @@ class AddressModel extends Model {
         allowNull: false,
         field: 'CEP',
         validate: {
-          is: /^\d{5}-?\d{3}$/ // Formato: 12345-678 ou 12345678
+          is: /^\d{5}-?\d{3}$/ 
         }
       },
       state: {
@@ -26,7 +26,7 @@ class AddressModel extends Model {
         allowNull: false,
         field: 'Estado',
         validate: {
-          is: /^[A-Z]{2}$/ // Formato: 2 letras maiúsculas
+          is: /^[A-Z]{2}$/ 
         }
       },
       city: {
@@ -44,7 +44,7 @@ class AddressModel extends Model {
         allowNull: false,
         field: 'Numero',
         validate: {
-          is: /^\d+$/ // Formato: apenas números
+          is: /^\d+$/ 
         }
       },      complement: {
         type: DataTypes.STRING(255),

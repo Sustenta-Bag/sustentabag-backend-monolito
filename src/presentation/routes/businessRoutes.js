@@ -28,7 +28,6 @@ export const setupBusinessRoutes = (router, options = {}) => {
   const businessService = new BusinessService(businessRepository, addressRepository, diskStorage);
   const businessController = new BusinessController(businessService);
 
-  // Public route for registration - no authentication required
   router.post(`/`,
 /*
   #swagger.path = '/api/businesses'
@@ -64,7 +63,6 @@ export const setupBusinessRoutes = (router, options = {}) => {
     businessController.createBusiness.bind(businessController)
   );
 
-  // Public route for listing businesses
   router.get(`/`,
     /*
     #swagger.path = '/api/businesses'
@@ -74,8 +72,6 @@ export const setupBusinessRoutes = (router, options = {}) => {
     businessController.listBusinesses.bind(businessController)
   );
 
-  // IMPORTANTE: Mover a rota /active para antes da rota /:id
-  // Public route for getting active businesses
   router.get(`/active`,
     /*
     #swagger.path = '/api/businesses/active'
@@ -86,7 +82,6 @@ export const setupBusinessRoutes = (router, options = {}) => {
     businessController.getActiveBusiness.bind(businessController)
   );
 
-  // Public route for getting a specific business
   router.get(`/:id`,
     /*
     #swagger.path = '/api/businesses/{id}'
@@ -102,7 +97,6 @@ export const setupBusinessRoutes = (router, options = {}) => {
     businessController.getBusiness.bind(businessController)
   );
 
-  // Protected route - only the business itself can update
   router.put(`/:id`,
     /*
     #swagger.path = '/api/businesses/{id}'
@@ -130,7 +124,6 @@ export const setupBusinessRoutes = (router, options = {}) => {
     businessController.updateBusiness.bind(businessController)
   );
 
-  // Protected route - only admin should be able to delete a business
   router.delete(`/:id`,
     /*
     #swagger.path = '/api/businesses/{id}'
@@ -152,8 +145,6 @@ export const setupBusinessRoutes = (router, options = {}) => {
     businessController.deleteBusiness.bind(businessController)
   );
 
-
-  // Protected route - only business can change its status
   router.patch(
     `/:id/status`,
     /*

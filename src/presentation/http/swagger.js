@@ -29,7 +29,6 @@ const doc = {
   ],
   components: {
     schemas: {
-      // Location Schemas
       NearbyBusinessesResponse: {
         count: 3,
         data: [{
@@ -48,7 +47,6 @@ const doc = {
         }]
       },
       
-      // Auth Schemas
       AuthRegisterRequest: {
         entityType: "client",
         userData: {
@@ -72,7 +70,6 @@ const doc = {
         newPassword: "novaSenha456"
       },
       
-      // User Schema
       User: {
         id: 1,
         email: "usuario@example.com",
@@ -83,7 +80,6 @@ const doc = {
         createdAt: "2023-01-01T00:00:00Z"
       },
       
-      // Bag Schemas
       Bag: {
         id: 1,
         type: "Doce",
@@ -106,7 +102,6 @@ const doc = {
         status: 1
       },
       
-      // Business Schemas
       Business: {
         id: 1,
         legalName: "Sustenta Bag LTDA",
@@ -134,7 +129,6 @@ const doc = {
         logo: "file_binary_data"
       },
       
-      // Address Schemas
       Address: {
         id: 1,
         zipCode: "12345678",
@@ -156,7 +150,6 @@ const doc = {
         complement: "Apto 45"
       },
       
-      // Client Schemas
       Client: {
         id: 1,
         name: "João Silva",
@@ -195,7 +188,6 @@ const doc = {
         token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
       },
       
-      // Error Schemas
       Error: {
         statusCode: 400,
         errorCode: "BAG_NOT_FOUND",

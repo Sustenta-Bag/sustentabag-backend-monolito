@@ -5,7 +5,6 @@ import AppError from "../../infrastructure/errors/AppError.js";
 
 class FirebaseService {  constructor() {
     try {
-      // Log environment variables availability (without showing actual values)
       console.log("Firebase config check:", {
         apiKey: process.env.FIREBASE_API_KEY ? "Definido" : "Não definido",
         authDomain: process.env.FIREBASE_AUTH_DOMAIN ? "Definido" : "Não definido",
@@ -24,7 +23,6 @@ class FirebaseService {  constructor() {
         appId: process.env.FIREBASE_APP_ID,
       };
       
-      // Validate mandatory config
       if (!firebaseConfig.apiKey) {
         console.error("Erro crítico: FIREBASE_API_KEY não encontrada nas variáveis de ambiente");
         throw new Error("Firebase API Key não configurada");
@@ -35,7 +33,6 @@ class FirebaseService {  constructor() {
       console.log("Firebase Auth SDK inicializado com sucesso");
     } catch (error) {
       console.error("Erro ao inicializar Firebase Auth SDK:", error);
-      // Continue execution but mark service as unavailable
       this.authInitialized = false;
       return;
     }
@@ -74,10 +71,9 @@ class FirebaseService {  constructor() {
     }
   }
   async createUser(userData) {
-    // Check if auth was initialized successfully
     if (!this.authInitialized) {
       console.warn("Firebase Auth não foi inicializado. Criação de usuário Firebase não disponível.");
-      return null; // Return null to signal firebase user wasn't created but continue with local database
+      return null;
     }
     
     try {
@@ -142,9 +138,8 @@ class FirebaseService {  constructor() {
         return false;
       }
 
-      // Teste a conexão antes de tentar atualizar
       const docRef = admin.firestore().collection("users").doc(firebaseUid);
-      await docRef.get(); // Verifica se consegue acessar o documento
+      await docRef.get();
 
       await docRef.update({
         localId: localId,
@@ -153,12 +148,10 @@ class FirebaseService {  constructor() {
       return true;
     } catch (error) {
       console.error("Erro ao atualizar ID local no Firestore:", error);
-      // Não falhe a operação principal se o Firestore falhar
       return false;
     }
   }
 
-  // Add these methods to the FirebaseService class
 
   async verifyIdToken(idToken) {
     try {

@@ -20,7 +20,6 @@ export const setupBagRoutes = (router, options = {}) => {
   const bagService = new BagService(bagRepository);
   const bagController = new BagController(bagService);
   
-  // Create bag - Business only
   router.post(`/`,
     /*
     #swagger.path = '/api/bags'
@@ -45,7 +44,6 @@ export const setupBagRoutes = (router, options = {}) => {
     validateCreateBag, 
     bagController.createBag.bind(bagController));
   
-  // Get all bags - Any authenticated user
   router.get(`/`,
     /*
     #swagger.path = '/api/bags'
@@ -61,7 +59,6 @@ export const setupBagRoutes = (router, options = {}) => {
     requireAnyRole,
     bagController.getAllBags.bind(bagController));
   
-  // Get bag by ID - Any authenticated user
   router.get(`/:id`,
     /*
     #swagger.path = '/api/bags/{id}'
@@ -82,7 +79,6 @@ export const setupBagRoutes = (router, options = {}) => {
     validateBagId, 
     bagController.getBag.bind(bagController));
   
-  // Update bag - Business only
   router.put(`/:id`,
     /*
     #swagger.path = '/api/bags/{id}'
@@ -111,7 +107,6 @@ export const setupBagRoutes = (router, options = {}) => {
     validateUpdateBag, 
     bagController.updateBag.bind(bagController));
   
-  // Delete bag - Business only
   router.delete(`/:id`,
     /*
     #swagger.path = '/api/bags/{id}'
@@ -136,7 +131,6 @@ export const setupBagRoutes = (router, options = {}) => {
     validateBagId, 
     bagController.deleteBag.bind(bagController));
 
-  // Get bags by business ID - Any authenticated user
   router.get(`/business/:idBusiness`,
     /*
     #swagger.path = '/api/bags/business/{idBusiness}'
@@ -153,7 +147,6 @@ export const setupBagRoutes = (router, options = {}) => {
     validateBusinessId, 
     bagController.getBagsByBusiness.bind(bagController));
 
-  // Get active bags by business ID - Any authenticated user
   router.get(`/business/:idBusiness/active`,
     /*
     #swagger.path = '/api/bags/business/{idBusiness}/active'
@@ -170,7 +163,6 @@ export const setupBagRoutes = (router, options = {}) => {
     validateBusinessId, 
     bagController.getActiveBagsByBusiness.bind(bagController));
 
-  // Change bag status - Business only
   router.patch(`/:id/status`,
     /*
     #swagger.path = '/api/bags/{id}/status'

@@ -62,16 +62,15 @@ class UserModel extends Model {
       }
     }, {
       sequelize: sequelizeInstance,
-      tableName: 'usuarios', // Alterado para minúsculas
+      tableName: 'usuarios', 
       timestamps: true,
-      modelName: 'User' // Nome explícito do modelo
+      modelName: 'User' 
     });
 
     return this;
   }
 
   static associate(models) {
-    // No direct associations as we're using a generic entityId with role distinction
   }
 }
 

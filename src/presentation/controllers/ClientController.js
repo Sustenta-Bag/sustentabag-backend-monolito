@@ -10,7 +10,6 @@ class ClientController {
     try {
       const client = await this.clientService.createClient(req.body);
 
-      // Remove sensitive data before sending response
       const { password, ...clientData } = client;
 
       return res.status(201).json(clientData);
@@ -23,7 +22,6 @@ class ClientController {
     try {
       const client = await this.clientService.getClient(req.params.id);
 
-      // Remove sensitive data before sending response
       const { password, ...clientData } = client;
 
       return res.json(clientData);
@@ -36,7 +34,6 @@ class ClientController {
     try {
       const clients = await this.clientService.getAllClients();
 
-      // Remove sensitive data before sending response
       const clientsData = clients.map((client) => {
         const { password, ...clientData } = client;
         return clientData;
@@ -55,7 +52,6 @@ class ClientController {
         req.body
       );
 
-      // Remove sensitive data before sending response
       const { password, ...clientData } = client;
 
       return res.json(clientData);
@@ -77,7 +73,6 @@ class ClientController {
     try {
       const clients = await this.clientService.getActiveClients();
 
-      // Remove sensitive data before sending response
       const clientsData = clients.map((client) => {
         const { password, ...clientData } = client;
         return clientData;
@@ -100,7 +95,6 @@ class ClientController {
         req.body.status
       );
 
-      // Remove sensitive data before sending response
       const { password, ...clientData } = client;
 
       return res.json(clientData);
@@ -126,19 +120,16 @@ class ClientController {
         throw new AppError("Credenciais inválidas", "INVALID_CREDENTIALS", 401);
       }
   
-      // Find the user associated with this client
       const user = await this.userRepository.findByEntityId(client.id, "client");
       if (!user) {
         throw new AppError("Usuário não encontrado", "USER_NOT_FOUND", 404);
       }
   
-      // Verify password from user record
       const passwordMatch = await bcrypt.compare(password, user.password);
       if (!passwordMatch) {
         throw new AppError("Credenciais inválidas", "INVALID_CREDENTIALS", 401);
       }
   
-      // Generate JWT token
       const token = jwt.sign(
         { 
           userId: user.id, 
