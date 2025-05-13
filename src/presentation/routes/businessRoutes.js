@@ -2,7 +2,7 @@ import multer from 'multer';
 import { multerConfig } from '../../config/multer.js';
 import { DiskStorage } from '../../infrastructure/storage/diskStorage.js';
 
-import BusinessController from '../controllers/BusinessController.js';
+import BusinessController from '../controllers/businessController.js';
 import BusinessService from '../../application/services/BusinessService.js';
 import PostgresBusinessRepository from '../../infrastructure/repositories/PostgresBusinessRepository.js';
 import PostgresAddressRepository from '../../infrastructure/repositories/PostgresAddressRepository.js';

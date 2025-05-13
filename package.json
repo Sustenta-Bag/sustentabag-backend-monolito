@@ -3,14 +3,10 @@
   "version": "1.0.0",
   "description": "Microservice for bag management with DDD architecture",
   "main": "src/index.js",
-  "type": "module",
-  "scripts": {
+  "type": "module",  "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
-    "start:watch": "node --watch src/server.js",
+    "dev": "nodemon src/server.js",    "start:watch": "node --watch src/server.js",
     "swagger": "node src/presentation/http/swagger.js",
-    "swagger:generate": "node src/scripts/generate-swagger.js",
-    "swagger:watch": "node --watch src/presentation/http/swagger.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js tests/unit",
     "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js tests/integration",
     "test:all": "node --experimental-vm-modules node_modules/jest/bin/jest.js",

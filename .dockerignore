@@ -2,8 +2,9 @@ node_modules
 npm-debug.log
 .git
 .gitignore
-.env
-.env.*
+# Allow .env file to be copied
+# .env.* files are still ignored
+*.env.*
 *.md
 !README.md
 .dockerignore

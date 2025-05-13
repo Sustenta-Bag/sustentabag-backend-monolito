@@ -1,4 +1,4 @@
-import AddressController from '../controllers/AddressController.js';
+import AddressController from '../controllers/addressController.js';
 import AddressService from '../../application/services/AddressService.js';
 import LocationService from '../../application/services/LocationService.js';
 import PostgresAddressRepository from '../../infrastructure/repositories/PostgresAddressRepository.js';

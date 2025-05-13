@@ -21,9 +21,33 @@ const doc = {
       url: "/",
       description: "Servidor de API",
     },
+  ],  tags: [
+    {
+      name: "Location",
+      description: "Operações relacionadas a localização geográfica"
+    }
   ],
   components: {
     schemas: {
+      // Location Schemas
+      NearbyBusinessesResponse: {
+        count: 3,
+        data: [{
+          id: 1,
+          name: "Example Business",
+          legalName: "Example Business Ltd.",
+          logo: "/uploads/logos/example.png",
+          distance: 2.34,
+          address: {
+            street: "Main Street",
+            number: "123",
+            city: "Example City",
+            state: "EX",
+            zipCode: "12345678"
+          }
+        }]
+      },
+      
       // Auth Schemas
       AuthRegisterRequest: {
         entityType: "client",
@@ -207,7 +231,8 @@ const outputFile = "../../config/swagger.json";
 const endpointsFiles = [
   "../routes.js",
   "../routes/*.js",
-  "../docs/*.js"
+  "../docs/*.js",
+  "../../application/modules/*.js"
 ];
 
 swaggerAutogen({ openapi: "3.0.0" })(outputFile, endpointsFiles, doc)

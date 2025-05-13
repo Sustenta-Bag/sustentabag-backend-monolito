@@ -27,18 +27,26 @@ class ClientService {
     const hashedPassword = await bcrypt.hash(clientData.password, 10);
 
     let firebaseUser = null;
-    
-
-    try {
+        try {
       console.log("Criando usuário no Firebase...");
       // Criar usuário no Firebase
       firebaseUser = await this.firebaseService.createUser({
         ...clientData,
         password: clientData.password,
       });
-      console.log("Usuário criado no Firebase com ID:", firebaseUser.uid);
+      
+      // Check if Firebase user was created successfully
+      if (firebaseUser && firebaseUser.uid) {
+        console.log("Usuário criado no Firebase com ID:", firebaseUser.uid);
+      } else {
+        console.warn("Firebase não inicializado ou indisponível. Continuando sem integração Firebase.");
+      }
     } catch (firebaseError) {
       console.error("Erro ao criar usuário no Firebase:", firebaseError);
+      // Log specific error details but continue with local user creation
+      if (firebaseError.code === 'auth/invalid-api-key') {
+        console.error("Erro na chave de API do Firebase. Verifique as variáveis de ambiente.");
+      }
       // Continuamos com a criação do usuário local mesmo se falhar no Firebase
     }
 

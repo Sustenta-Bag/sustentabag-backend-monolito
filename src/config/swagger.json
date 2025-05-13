@@ -20,6 +20,12 @@
       "description": "Servidor de API"
     }
   ],
+  "tags": [
+    {
+      "name": "Location",
+      "description": "Operações relacionadas a localização geográfica"
+    }
+  ],
   "paths": {
     "/api/addresses": {
       "post": {
@@ -2193,10 +2199,307 @@
           }
         }
       }
+    },
+    "/api/location/nearby/{addressId}": {
+      "get": {
+        "tags": [
+          "Location"
+        ],
+        "summary": "Find businesses near an address",
+        "description": "Returns a list of nearby businesses based on an address ID",
+        "parameters": [
+          {
+            "name": "addressId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the reference address"
+          },
+          {
+            "name": "radius",
+            "in": "query",
+            "description": "Search radius in kilometers",
+            "required": false,
+            "default": 10,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results to return",
+            "required": false,
+            "default": 10,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of nearby businesses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "description": "Total number of businesses found"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "description": "Business ID"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "Business name"
+                          },
+                          "legalName": {
+                            "type": "string",
+                            "description": "Business legal name"
+                          },
+                          "logo": {
+                            "type": "string",
+                            "description": "URL to business logo"
+                          },
+                          "distance": {
+                            "type": "number",
+                            "description": "Distance in kilometers"
+                          },
+                          "address": {
+                            "type": "object",
+                            "properties": {
+                              "street": {
+                                "type": "string"
+                              },
+                              "number": {
+                                "type": "string"
+                              },
+                              "city": {
+                                "type": "string"
+                              },
+                              "state": {
+                                "type": "string"
+                              },
+                              "zipCode": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Address not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/location/geocode": {
+      "post": {
+        "tags": [
+          "Location"
+        ],
+        "summary": "Geocode an address",
+        "description": "Convert an address to geographic coordinates",
+        "responses": {
+          "200": {
+            "description": "Successfully geocoded address",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "latitude": {
+                      "type": "number"
+                    },
+                    "longitude": {
+                      "type": "number"
+                    },
+                    "fullAddress": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid address data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error or geocoding error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "street": {
+                    "type": "string"
+                  },
+                  "number": {
+                    "type": "string"
+                  },
+                  "city": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string"
+                  },
+                  "zipCode": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "street",
+                  "number",
+                  "city",
+                  "state",
+                  "zipCode"
+                ]
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "NearbyBusinessesResponse": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number",
+            "example": 3
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "example": 1
+                },
+                "name": {
+                  "type": "string",
+                  "example": "Example Business"
+                },
+                "legalName": {
+                  "type": "string",
+                  "example": "Example Business Ltd."
+                },
+                "logo": {
+                  "type": "string",
+                  "example": "/uploads/logos/example.png"
+                },
+                "distance": {
+                  "type": "number",
+                  "example": 2.34
+                },
+                "address": {
+                  "type": "object",
+                  "properties": {
+                    "street": {
+                      "type": "string",
+                      "example": "Main Street"
+                    },
+                    "number": {
+                      "type": "string",
+                      "example": "123"
+                    },
+                    "city": {
+                      "type": "string",
+                      "example": "Example City"
+                    },
+                    "state": {
+                      "type": "string",
+                      "example": "EX"
+                    },
+                    "zipCode": {
+                      "type": "string",
+                      "example": "12345678"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "xml": {
+          "name": "NearbyBusinessesResponse"
+        }
+      },
       "AuthRegisterRequest": {
         "type": "object",
         "properties": {

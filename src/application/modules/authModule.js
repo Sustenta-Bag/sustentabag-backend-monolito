@@ -2,7 +2,7 @@ import express from 'express';
 import UserModel from '../../domain/models/UserModel.js';
 import UserRepository from '../../infrastructure/repositories/UserRepository.js';
 import AuthService from '../services/AuthService.js';
-import AuthController from '../../presentation/controllers/AuthController.js';
+import AuthController from '../../presentation/controllers/authController.js';
 import authRoutes from '../../presentation/routes/authRoutes.js';
 
 export const initializeModels = (sequelize) => {

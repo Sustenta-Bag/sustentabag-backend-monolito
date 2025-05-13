@@ -30,21 +30,26 @@ async function runMigrations() {
       completedMigrations = results.map(row => row.name);
     } catch (error) {
       console.error('Error checking migrations table:', error);
-    }
-
-    for (const file of migrationFiles) {
+    }    for (const file of migrationFiles) {
       if (!completedMigrations.includes(file)) {
         console.log(`Running migration: ${file}`);
         
-        const migrationPath = path.join(migrationsDir, file);
-        const migration = await import(migrationPath);
+        try {
+          const migrationPath = path.join(migrationsDir, file);
+          // Converter o caminho para formato de URL para ESM
+          const fileUrl = `file://${migrationPath.replace(/\\/g, '/')}`;
+          const migration = await import(fileUrl);
           await migration.up(sequelize);
-        
-        await sequelize.query('INSERT INTO migrations (name) VALUES ($1)', {
-          bind: [file]
-        });
-        
-        console.log(`Completed migration: ${file}`);
+          
+          await sequelize.query('INSERT INTO migrations (name) VALUES ($1)', {
+            bind: [file]
+          });
+          
+          console.log(`Completed migration: ${file}`);
+        } catch (err) {
+          console.error(`Migration error: ${err}`);
+          throw err;
+        }
       } else {
         console.log(`Skipping already executed migration: ${file}`);
       }

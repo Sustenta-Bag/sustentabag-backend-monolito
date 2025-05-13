@@ -18,9 +18,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - sustentabag-network
-
-  # API da Sustentabag
+      - sustentabag-network  # API da Sustentabag
   api:
     build:
       context: .
@@ -29,6 +27,8 @@ services:
     restart: unless-stopped
     ports:
       - "4041:4041"
+    env_file:
+      - ./.env
     environment:
       - NODE_ENV=production
       - PORT=4041
@@ -40,6 +40,15 @@ services:
       - DB_SCHEMA=public
       - JWT_SECRET=sustentabag_secret_key
       - JWT_EXPIRATION=24h
+      # Firebase Configuration - using explicit values for reliability
+      - FIREBASE_API_KEY=${FIREBASE_API_KEY}
+      - FIREBASE_AUTH_DOMAIN=${FIREBASE_AUTH_DOMAIN}
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+      - FIREBASE_STORAGE_BUCKET=${FIREBASE_STORAGE_BUCKET}
+      - FIREBASE_MESSAGING_SENDER_ID=${FIREBASE_MESSAGING_SENDER_ID}      - FIREBASE_APP_ID=${FIREBASE_APP_ID}
+      - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+      # Private key needs special handling for newlines
+      - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
     depends_on:
       db:
         condition: service_healthy
