@@ -66,8 +66,9 @@ class LocationService {
         );
       }
       
+      let timeoutId;
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout na requisição de geocodificação')), 10000);
+        timeoutId = setTimeout(() => reject(new Error('Timeout na requisição de geocodificação')), 10000);
       });
       
       const geocodePromise = this.geocodingClient
@@ -79,27 +80,33 @@ class LocationService {
         })
         .send();
       
-      const response = await Promise.race([geocodePromise, timeoutPromise]);
+      try {
+        const response = await Promise.race([geocodePromise, timeoutPromise]);
+        clearTimeout(timeoutId); // Clear the timeout when request completes successfully
 
-      if (
-        !response.body ||
-        !response.body.features ||
-        response.body.features.length === 0
-      ) {
-        console.warn(`Nenhum resultado encontrado para o endereço: "${query}"`);
-        throw new AppError('Não foi possível geocodificar este endereço', 'GEOCODING_ERROR', 400);
-      }
+        if (
+          !response.body ||
+          !response.body.features ||
+          response.body.features.length === 0
+        ) {
+          console.warn(`Nenhum resultado encontrado para o endereço: "${query}"`);
+          throw new AppError('Não foi possível geocodificar este endereço', 'GEOCODING_ERROR', 400);
+        }
 
-      const feature = response.body.features[0];
-      console.log(`Resultado encontrado: ${feature.place_name}`);
-      
-      const [lng, lat] = feature.center;
-      
-      if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
-        throw new AppError('Coordenadas inválidas retornadas pelo serviço', 'INVALID_COORDINATES', 400);
+        const feature = response.body.features[0];
+        console.log(`Resultado encontrado: ${feature.place_name}`);
+        
+        const [lng, lat] = feature.center;
+        
+        if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+          throw new AppError('Coordenadas inválidas retornadas pelo serviço', 'INVALID_COORDINATES', 400);
+        }
+        
+        return { latitude: lat, longitude: lng };
+      } catch (error) {
+        clearTimeout(timeoutId); // Also clear timeout if there's an error
+        throw error;
       }
-      
-      return { latitude: lat, longitude: lng };
     } catch (error) {
       console.error('Erro durante geocodificação:', error);
       

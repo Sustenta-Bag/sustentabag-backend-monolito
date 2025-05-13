@@ -20,7 +20,6 @@ describe('LocationService', () => {
       update: jest.fn()
     };
     
-    // Use the testing option to bypass token validation
     locationService = new LocationService(
       mockBusinessRepository, 
       mockAddressRepository, 
