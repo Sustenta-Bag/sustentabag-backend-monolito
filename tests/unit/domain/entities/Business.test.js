@@ -1,222 +1,148 @@
 import Business from '../../../../src/domain/entities/Business.js';
 
-describe('Business Entity Unit Tests', () => {
-  // Dados de teste para reuso
-  const businessData = {
-    id: 1,
-    legalName: 'Sustenta Bag LTDA',
-    cnpj: '12345678000199',
-    appName: 'Sustenta Bag App',
-    cellphone: '11987654321',
-    description: 'Empresa especializada em sacolas sustentáveis',
-    logo: 'logo.png',
-    delivery: true,
-    deliveryTax: 5.99,
-    idAddress: 5,
-    status: 1,
-    createdAt: new Date('2023-01-01')
-  };
+describe('Business Entity', () => {
+  let business;
+  const currentDate = new Date();
 
-  describe('Constructor', () => {
-    test('should initialize with all properties correctly', () => {
-      const business = new Business(
-        businessData.id,
-        businessData.legalName,
-        businessData.cnpj,
-        businessData.appName,
-        businessData.cellphone,
-        businessData.description,
-        businessData.logo,
-        businessData.delivery,
-        businessData.deliveryTax,
-        businessData.idAddress,
-        businessData.status,
-        businessData.createdAt
-      );
+  beforeEach(() => {
+    business = new Business(
+      1,
+      'Test Business',
+      '12345678901234',
+      'Test App',
+      '11987654321',
+      'Test Description',
+      'logo.png',
+      true,
+      5.0,
+      1,
+      1,
+      currentDate
+    );
+  });
 
-      expect(business.id).toBe(businessData.id);
-      expect(business.legalName).toBe(businessData.legalName);
-      expect(business.cnpj).toBe(businessData.cnpj);
-      expect(business.appName).toBe(businessData.appName);
-      expect(business.cellphone).toBe(businessData.cellphone);
-      expect(business.description).toBe(businessData.description);
-      expect(business.logo).toBe(businessData.logo);
-      expect(business.delivery).toBe(businessData.delivery);
-      expect(business.deliveryTax).toBe(businessData.deliveryTax);
-      expect(business.idAddress).toBe(businessData.idAddress);
-      expect(business.status).toBe(businessData.status);
-      expect(business.createdAt).toEqual(businessData.createdAt);
+  test('should initialize with all properties correctly', () => {
+    expect(business.id).toBe(1);
+    expect(business.legalName).toBe('Test Business');
+    expect(business.cnpj).toBe('12345678901234');
+    expect(business.appName).toBe('Test App');
+    expect(business.cellphone).toBe('11987654321');
+    expect(business.description).toBe('Test Description');
+    expect(business.logo).toBe('logo.png');
+    expect(business.delivery).toBe(true);
+    expect(business.deliveryTax).toBe(5.0);
+    expect(business.idAddress).toBe(1);
+    expect(business.status).toBe(1);
+    expect(business.createdAt).toBe(currentDate);
+  });
+
+  test('should initialize with default values when not provided', () => {
+    const partialBusiness = new Business(
+      1,
+      'Test Business',
+      '12345678901234',
+      'Test App',
+      '11987654321',
+      'Test Description',
+      'logo.png',
+      true,
+      5.0,
+      1
+    );
+
+    expect(partialBusiness.status).toBe(1);
+    expect(partialBusiness.createdAt).toBeInstanceOf(Date);
+  });
+
+  describe('Update methods', () => {
+    test('updateStatus should update status property', () => {
+      const updatedBusiness = business.updateStatus(0);
+      
+      expect(updatedBusiness.status).toBe(0);
+      expect(updatedBusiness).toBe(business); // Ensures it returns this
     });
 
-    test('should initialize with default status when not provided', () => {
-      const business = new Business(
-        businessData.id,
-        businessData.legalName,
-        businessData.cnpj,
-        businessData.appName,
-        businessData.cellphone,
-        businessData.description,
-        businessData.logo,
-        businessData.delivery,
-        businessData.deliveryTax,
-        businessData.idAddress
-      );
-
-      expect(business.status).toBe(1);
+    test('updateDescription should update description property', () => {
+      const updatedBusiness = business.updateDescription('New Description');
+      
+      expect(updatedBusiness.description).toBe('New Description');
+      expect(updatedBusiness).toBe(business);
     });
 
-    test('should initialize with default createdAt when not provided', () => {
-      const beforeCreation = new Date();
-      const business = new Business(
-        businessData.id,
-        businessData.legalName,
-        businessData.cnpj,
-        businessData.appName,
-        businessData.cellphone,
-        businessData.description,
-        businessData.logo,
-        businessData.delivery,
-        businessData.deliveryTax,
-        businessData.idAddress,
-        businessData.status
-      );
-      const afterCreation = new Date();
+    test('updateDelivery should update delivery property', () => {
+      const updatedBusiness = business.updateDelivery(false);
+      
+      expect(updatedBusiness.delivery).toBe(false);
+      expect(updatedBusiness).toBe(business);
+    });
 
-      expect(business.createdAt).toBeInstanceOf(Date);
-      expect(business.createdAt >= beforeCreation).toBeTruthy();
-      expect(business.createdAt <= afterCreation).toBeTruthy();
+    test('updateDeliveryTax should update deliveryTax property', () => {
+      const updatedBusiness = business.updateDeliveryTax(10.0);
+      
+      expect(updatedBusiness.deliveryTax).toBe(10.0);
+      expect(updatedBusiness).toBe(business);
+    });
+
+    test('updateLogo should update logo property', () => {
+      const updatedBusiness = business.updateLogo('new-logo.png');
+      
+      expect(updatedBusiness.logo).toBe('new-logo.png');
+      expect(updatedBusiness).toBe(business);
+    });
+
+    test('updateCellphone should update cellphone property', () => {
+      const updatedBusiness = business.updateCellphone('11999998888');
+      
+      expect(updatedBusiness.cellphone).toBe('11999998888');
+      expect(updatedBusiness).toBe(business);
+    });
+
+    test('updateLegalName should update legalName property', () => {
+      const updatedBusiness = business.updateLegalName('New Legal Name');
+      
+      expect(updatedBusiness.legalName).toBe('New Legal Name');
+      expect(updatedBusiness).toBe(business);
+    });
+
+    test('updateCnpj should update cnpj property', () => {
+      const updatedBusiness = business.updateCnpj('98765432109876');
+      
+      expect(updatedBusiness.cnpj).toBe('98765432109876');
+      expect(updatedBusiness).toBe(business);
+    });
+
+    test('updateAppName should update appName property', () => {
+      const updatedBusiness = business.updateAppName('New App Name');
+      
+      expect(updatedBusiness.appName).toBe('New App Name');
+      expect(updatedBusiness).toBe(business);
+    });
+
+    test('updateIdAddress should update idAddress property', () => {
+      const updatedBusiness = business.updateIdAddress(2);
+      
+      expect(updatedBusiness.idAddress).toBe(2);
+      expect(updatedBusiness).toBe(business);
     });
   });
 
-  describe('Methods', () => {
-    test('updateStatus should change status and return this', () => {
-      const business = new Business(
-        businessData.id,
-        businessData.legalName,
-        businessData.cnpj,
-        businessData.appName,
-        businessData.cellphone,
-        businessData.description,
-        businessData.logo,
-        businessData.delivery,
-        businessData.deliveryTax,
-        businessData.idAddress,
-        1
-      );
+  describe('Status change methods', () => {
+    test('deactivate should set status to 0', () => {
+      const deactivatedBusiness = business.deactivate();
       
-      const returnValue = business.updateStatus(0);
-      
-      expect(business.status).toBe(0);
-      expect(returnValue).toBe(business);
+      expect(deactivatedBusiness.status).toBe(0);
+      expect(deactivatedBusiness).toBe(business);
     });
 
-    test('updateDescription should change description and return this', () => {
-      const business = new Business(
-        businessData.id,
-        businessData.legalName,
-        businessData.cnpj,
-        businessData.appName,
-        businessData.cellphone,
-        businessData.description
-      );
+    test('activate should set status to 1', () => {
+      // First deactivate
+      business.deactivate();
       
-      const newDescription = 'Nova descrição da empresa';
-      const returnValue = business.updateDescription(newDescription);
+      // Then activate
+      const activatedBusiness = business.activate();
       
-      expect(business.description).toBe(newDescription);
-      expect(returnValue).toBe(business);
-    });
-
-    test('updateDelivery should change delivery and return this', () => {
-      const business = new Business(
-        businessData.id,
-        businessData.legalName,
-        businessData.cnpj,
-        businessData.appName,
-        businessData.cellphone,
-        businessData.description,
-        businessData.logo,
-        true
-      );
-      
-      const returnValue = business.updateDelivery(false);
-      
-      expect(business.delivery).toBe(false);
-      expect(returnValue).toBe(business);
-    });
-
-    test('deactivate should set status to 0 and return this', () => {
-      const business = new Business(
-        businessData.id,
-        businessData.legalName,
-        businessData.cnpj,
-        businessData.appName,
-        businessData.cellphone,
-        businessData.description,
-        businessData.logo,
-        businessData.delivery,
-        businessData.deliveryTax,
-        businessData.idAddress,
-        1
-      );
-      
-      const returnValue = business.deactivate();
-      
-      expect(business.status).toBe(0);
-      expect(returnValue).toBe(business);
-    });
-
-    test('activate should set status to 1 and return this', () => {
-      const business = new Business(
-        businessData.id,
-        businessData.legalName,
-        businessData.cnpj,
-        businessData.appName,
-        businessData.cellphone,
-        businessData.description,
-        businessData.logo,
-        businessData.delivery,
-        businessData.deliveryTax,
-        businessData.idAddress,
-        0
-      );
-      
-      const returnValue = business.activate();
-      
-      expect(business.status).toBe(1);
-      expect(returnValue).toBe(business);
-    });
-    
-    test('methods should support chaining', () => {
-      const business = new Business(
-        businessData.id,
-        businessData.legalName,
-        businessData.cnpj,
-        businessData.appName,
-        businessData.cellphone,
-        businessData.description,
-        businessData.logo,
-        businessData.delivery,
-        businessData.deliveryTax,
-        businessData.idAddress,
-        1
-      );
-      
-      business
-        .updateLegalName('Nova Empresa LTDA')
-        .updateCellphone('11999998888')
-        .updateDelivery(false)
-        .deactivate();
-      
-      expect(business.legalName).toBe('Nova Empresa LTDA');
-      expect(business.cellphone).toBe('11999998888');
-      expect(business.delivery).toBe(false);
-      expect(business.status).toBe(0);
-      
-      business.activate().updateDescription('Empresa reativada');
-      
-      expect(business.status).toBe(1);
-      expect(business.description).toBe('Empresa reativada');
+      expect(activatedBusiness.status).toBe(1);
+      expect(activatedBusiness).toBe(business);
     });
   });
 });

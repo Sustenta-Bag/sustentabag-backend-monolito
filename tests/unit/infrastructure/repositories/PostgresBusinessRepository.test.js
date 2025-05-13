@@ -1,76 +1,107 @@
 import PostgresBusinessRepository from '../../../../src/infrastructure/repositories/PostgresBusinessRepository.js';
 import Business from '../../../../src/domain/entities/Business.js';
+import Address from '../../../../src/domain/entities/Address.js';
 import { jest } from '@jest/globals';
 
 describe('PostgresBusinessRepository', () => {
-  let mockBusinessModel;
   let repository;
-
-  const businessData = {
-    id: 1,
-    legalName: 'Sustenta Bag LTDA',
-    cnpj: '12345678000199',
-    appName: 'Sustenta Bag App',
-    cellphone: '11987654321',
-    description: 'Empresa especializada em sacolas sustentáveis',
-    logo: 'logo.png',
-    delivery: true,
-    deliveryTax: 5.99,
-    idAddress: 5,
-    status: 1,
-    createdAt: new Date('2023-01-01')
-  };
-
+  let mockBusinessModel;
+  let mockAddressModel;
+  
   beforeEach(() => {
-    mockBusinessModel = {
-      create: jest.fn(),
-      findByPk: jest.fn(),
-      findOne: jest.fn(),
-      findAll: jest.fn(),
-      update: jest.fn(),
-      destroy: jest.fn()
+    // Mock data
+    const mockBusinessData = {
+      idBusiness: 1,
+      legalName: 'Test Business',
+      cnpj: '12345678901234',
+      appName: 'Test App',
+      cellphone: '11987654321',
+      description: 'Test Description',
+      logo: 'logo.png',
+      password: 'hashedPassword',
+      delivery: true,
+      deliveryTax: 5.0,
+      idAddress: 1,
+      status: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     
-    repository = new PostgresBusinessRepository(mockBusinessModel);
+    // Mock address data
+    const mockAddressData = {
+      id: 1,
+      zipCode: '12345678',
+      state: 'SP',
+      city: 'São Paulo',
+      street: 'Test Street',
+      number: '123',
+      complement: 'Apt 1',
+      latitude: -23.5505,
+      longitude: -46.6333,
+      status: true,
+      createdAt: new Date()
+    };
+    
+    // Create mock models
+    mockBusinessModel = {
+      create: jest.fn().mockResolvedValue(mockBusinessData),
+      findByPk: jest.fn().mockResolvedValue(mockBusinessData),
+      findOne: jest.fn().mockResolvedValue(mockBusinessData),
+      findAll: jest.fn().mockResolvedValue([mockBusinessData]),
+      update: jest.fn().mockResolvedValue([1]),
+      destroy: jest.fn().mockResolvedValue(1),
+      belongsTo: jest.fn(),
+      associations: {
+        address: { /* mock association */ }
+      }
+    };
+    
+    mockAddressModel = {
+      findByPk: jest.fn().mockResolvedValue(mockAddressData)
+    };
+    
+    // Create repository with mock models
+    repository = new PostgresBusinessRepository(mockBusinessModel, mockAddressModel);
+
+    // Mock console methods to avoid noise in tests
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
   });
-
-  // describe('create', () => {
-  //   test('should create a business and return domain entity', async () => {
-  //     const mockBusinessRecord = {
-  //       ...businessData,
-  //       toJSON: () => businessData
-  //     };
+  
+  afterEach(() => {
+    // Restore console methods
+    console.log.mockRestore();
+    console.warn.mockRestore();
+    console.error.mockRestore();
+  });
+  
+  describe('create', () => {
+    test('should create a business and return domain entity', async () => {
+      const businessData = {
+        legalName: 'New Business',
+        cnpj: '12345678901234',
+        appName: 'New App',
+        cellphone: '11987654321'
+      };
       
-  //     mockBusinessModel.create.mockResolvedValue(mockBusinessRecord);
+      const result = await repository.create(businessData);
       
-  //     const result = await repository.create(businessData);
-      
-  //     expect(mockBusinessModel.create).toHaveBeenCalledWith(businessData);
-  //     expect(result).toBeInstanceOf(Business);
-  //     expect(result.id).toBe(businessData.id);
-  //     expect(result.legalName).toBe(businessData.legalName);
-  //     expect(result.cnpj).toBe(businessData.cnpj);
-  //   });
-  // });
-
+      expect(mockBusinessModel.create).toHaveBeenCalledWith(businessData);
+      expect(result).toBeInstanceOf(Business);
+    });
+  });
+  
   describe('findById', () => {
-    // test('should find a business by id and return domain entity', async () => {
-    //   const mockBusinessRecord = {
-    //     ...businessData,
-    //     toJSON: () => businessData
-    //   };
+    test('should find a business by id and return domain entity', async () => {
+      const result = await repository.findById(1);
       
-    //   mockBusinessModel.findByPk.mockResolvedValue(mockBusinessRecord);
-      
-    //   const result = await repository.findById(1);
-      
-    //   expect(mockBusinessModel.findByPk).toHaveBeenCalledWith(1);
-    //   expect(result).toBeInstanceOf(Business);
-    //   expect(result.id).toBe(businessData.id);
-    // });
+      expect(mockBusinessModel.findByPk).toHaveBeenCalledWith(1);
+      expect(result).toBeInstanceOf(Business);
+    });
     
     test('should return null when business not found', async () => {
-      mockBusinessModel.findByPk.mockResolvedValue(null);
+      mockBusinessModel.findByPk.mockResolvedValueOnce(null);
       
       const result = await repository.findById(999);
       
@@ -78,143 +109,351 @@ describe('PostgresBusinessRepository', () => {
       expect(result).toBeNull();
     });
   });
-
-  describe('findByCnpj', () => {
-    test('should find a business by CNPJ and return domain entity', async () => {
-      const mockBusinessRecord = {
-        ...businessData,
-        toJSON: () => businessData
+  
+  describe('findByIdWithAddress', () => {
+    test('should find a business with its address', async () => {
+      // Mock business with address
+      const mockBusinessWithAddress = {
+        idBusiness: 1,
+        legalName: 'Test Business',
+        cnpj: '12345678901234',
+        appName: 'Test App',
+        cellphone: '11987654321',
+        status: true,
+        address: {
+          id: 1,
+          zipCode: '12345678',
+          state: 'SP',
+          city: 'São Paulo',
+          street: 'Test Street',
+          number: '123',
+          latitude: -23.5505,
+          longitude: -46.6333
+        }
       };
       
-      mockBusinessModel.findOne.mockResolvedValue(mockBusinessRecord);
+      mockBusinessModel.findByPk.mockResolvedValueOnce(mockBusinessWithAddress);
       
-      const result = await repository.findByCnpj('12345678000199');
+      const result = await repository.findByIdWithAddress(1);
       
-      expect(mockBusinessModel.findOne).toHaveBeenCalledWith({
-        where: { cnpj: '12345678000199' }
+      expect(mockBusinessModel.findByPk).toHaveBeenCalledWith(1, {
+        include: [{ 
+          model: mockAddressModel, 
+          as: 'address',
+          required: false
+        }]
       });
+      
       expect(result).toBeInstanceOf(Business);
-      expect(result.cnpj).toBe('12345678000199');
+      expect(result.address).toBeInstanceOf(Address);
+      expect(result.address.city).toBe('São Paulo');
     });
     
-    test('should return null when business not found by CNPJ', async () => {
-      mockBusinessModel.findOne.mockResolvedValue(null);
+    test('should configure association if not found', async () => {
+      // Mock associations not found
+      const tempAssociations = mockBusinessModel.associations;
+      mockBusinessModel.associations = null;
       
-      const result = await repository.findByCnpj('99999999000199');
+      // Mock business with address
+      const mockBusinessWithAddress = {
+        idBusiness: 1,
+        legalName: 'Test Business',
+        cnpj: '12345678901234',
+        address: {
+          id: 1,
+          zipCode: '12345678',
+          state: 'SP'
+        }
+      };
+      
+      mockBusinessModel.findByPk.mockResolvedValueOnce(mockBusinessWithAddress);
+      
+      await repository.findByIdWithAddress(1);
+      
+      expect(mockBusinessModel.belongsTo).toHaveBeenCalledWith(mockAddressModel, {
+        foreignKey: 'idAddress',
+        targetKey: 'id',
+        as: 'address'
+      });
+      
+      // Restore associations for other tests
+      mockBusinessModel.associations = tempAssociations;
+    });
+    
+    test('should return null when business not found', async () => {
+      mockBusinessModel.findByPk.mockResolvedValueOnce(null);
+      
+      const result = await repository.findByIdWithAddress(999);
+      
+      expect(result).toBeNull();
+    });
+    
+    test('should return business without address when address is not found', async () => {
+      // Mock business without address
+      const mockBusinessWithoutAddress = {
+        idBusiness: 1,
+        legalName: 'Test Business',
+        cnpj: '12345678901234',
+        address: null
+      };
+      
+      mockBusinessModel.findByPk.mockResolvedValueOnce(mockBusinessWithoutAddress);
+      
+      const result = await repository.findByIdWithAddress(1);
+      
+      expect(result).toBeInstanceOf(Business);
+      expect(result.address).toBeUndefined();
+    });
+    
+    test('should handle errors', async () => {
+      mockBusinessModel.findByPk.mockRejectedValueOnce(new Error('Database error'));
+      
+      await expect(repository.findByIdWithAddress(1)).rejects.toThrow('Database error');
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+  
+  describe('findAllWithAddress', () => {
+    test('should find all businesses with their addresses', async () => {
+      // Mock businesses with addresses
+      const mockBusinessesWithAddresses = [
+        {
+          idBusiness: 1,
+          legalName: 'Business 1',
+          cnpj: '12345678901234',
+          status: true,
+          address: {
+            id: 1,
+            zipCode: '12345678',
+            state: 'SP',
+            city: 'São Paulo',
+            street: 'Street 1',
+            number: '123',
+            latitude: -23.5505,
+            longitude: -46.6333
+          }
+        },
+        {
+          idBusiness: 2,
+          legalName: 'Business 2',
+          cnpj: '23456789012345',
+          status: true,
+          address: {
+            id: 2,
+            zipCode: '87654321',
+            state: 'RJ',
+            city: 'Rio de Janeiro',
+            street: 'Street 2',
+            number: '456',
+            latitude: -22.9068,
+            longitude: -43.1729
+          }
+        }
+      ];
+      
+      mockBusinessModel.findAll.mockResolvedValueOnce(mockBusinessesWithAddresses);
+      
+      const results = await repository.findAllWithAddress();
+      
+      expect(mockBusinessModel.findAll).toHaveBeenCalledWith({
+        include: [{ 
+          model: mockAddressModel, 
+          as: 'address',
+          required: false
+        }],
+        where: { status: true }
+      });
+      
+      expect(results).toHaveLength(2);
+      expect(results[0]).toBeInstanceOf(Business);
+      expect(results[0].address).toBeInstanceOf(Address);
+      expect(results[1]).toBeInstanceOf(Business);
+      expect(results[1].address).toBeInstanceOf(Address);
+    });
+    
+    test('should configure association if not found', async () => {
+      // Mock associations not found
+      const tempAssociations = mockBusinessModel.associations;
+      mockBusinessModel.associations = null;
+      
+      await repository.findAllWithAddress();
+      
+      expect(mockBusinessModel.belongsTo).toHaveBeenCalledWith(mockAddressModel, {
+        foreignKey: 'idAddress',
+        targetKey: 'id',
+        as: 'address'
+      });
+      
+      // Restore associations for other tests
+      mockBusinessModel.associations = tempAssociations;
+    });
+    
+    test('should handle businesses without addresses', async () => {
+      // Mock businesses with and without addresses
+      const mockBusinessesMixedAddresses = [
+        {
+          idBusiness: 1,
+          legalName: 'Business 1',
+          status: true,
+          address: {
+            id: 1,
+            zipCode: '12345678',
+            state: 'SP',
+            city: 'São Paulo'
+          }
+        },
+        {
+          idBusiness: 2,
+          legalName: 'Business 2',
+          status: true,
+          address: null
+        }
+      ];
+      
+      mockBusinessModel.findAll.mockResolvedValueOnce(mockBusinessesMixedAddresses);
+      
+      const results = await repository.findAllWithAddress();
+      
+      expect(results).toHaveLength(2);
+      expect(results[0].address).toBeInstanceOf(Address);
+      expect(results[1].address).toBeUndefined();
+    });
+    
+    test('should handle errors', async () => {
+      mockBusinessModel.findAll.mockRejectedValueOnce(new Error('Database error'));
+      
+      await expect(repository.findAllWithAddress()).rejects.toThrow('Database error');
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+  
+  describe('findAll', () => {
+    test('should find all businesses', async () => {
+      const results = await repository.findAll();
+      
+      expect(mockBusinessModel.findAll).toHaveBeenCalledWith({});
+      expect(results).toHaveLength(1);
+      expect(results[0]).toBeInstanceOf(Business);
+    });
+    
+    test('should pass options to findAll', async () => {
+      const options = { where: { status: true } };
+      
+      await repository.findAll(options);
+      
+      expect(mockBusinessModel.findAll).toHaveBeenCalledWith(options);
+    });
+  });
+  
+  describe('findByCnpj', () => {
+    test('should find a business by CNPJ', async () => {
+      const cnpj = '12345678901234';
+      
+      const result = await repository.findByCnpj(cnpj);
       
       expect(mockBusinessModel.findOne).toHaveBeenCalledWith({
-        where: { cnpj: '99999999000199' }
+        where: { cnpj: cnpj }
       });
+      expect(result).toBeInstanceOf(Business);
+    });
+    
+    test('should return null when business not found', async () => {
+      mockBusinessModel.findOne.mockResolvedValueOnce(null);
+      
+      const result = await repository.findByCnpj('99999999999999');
+      
       expect(result).toBeNull();
     });
   });
-
-  // describe('findAll', () => {
-  //   test('should return all businesses as domain entities', async () => {
-  //     const mockBusinessRecords = [
-  //       {
-  //         ...businessData,
-  //         id: 1,
-  //         toJSON: () => ({ ...businessData, id: 1 })
-  //       },
-  //       {
-  //         ...businessData,
-  //         id: 2,
-  //         cnpj: '98765432000199',
-  //         appName: 'Outro App',
-  //         toJSON: () => ({ ...businessData, id: 2, cnpj: '98765432000199', appName: 'Outro App' })
-  //       }
-  //     ];
+  
+  describe('findActiveBusiness', () => {
+    test('should find all active businesses', async () => {
+      const results = await repository.findActiveBusiness();
       
-  //     mockBusinessModel.findAll.mockResolvedValue(mockBusinessRecords);
+      expect(mockBusinessModel.findAll).toHaveBeenCalledWith({
+        where: { status: true }
+      });
+      expect(results).toHaveLength(1);
+      expect(results[0]).toBeInstanceOf(Business);
+    });
+  });
+  
+  describe('update', () => {
+    test('should update a business', async () => {
+      const id = 1;
+      const businessData = { legalName: 'Updated Business' };
       
-  //     const results = await repository.findAll();
+      const result = await repository.update(id, businessData);
       
-  //     expect(mockBusinessModel.findAll).toHaveBeenCalled();
-  //     expect(results).toHaveLength(2);
-  //     expect(results[0]).toBeInstanceOf(Business);
-  //     expect(results[1]).toBeInstanceOf(Business);
-  //     expect(results[0].id).toBe(1);
-  //     expect(results[1].id).toBe(2);
-  //     expect(results[1].cnpj).toBe('98765432000199');
-  //   });
-  // });
-
-  // describe('findActiveBusinesses', () => {
-  //   test('should find active businesses and return domain entities', async () => {
-  //     const mockBusinessRecords = [
-  //       {
-  //         ...businessData,
-  //         id: 1,
-  //         status: 1,
-  //         toJSON: () => ({ ...businessData, id: 1, status: 1 })
-  //       },
-  //       {
-  //         ...businessData,
-  //         id: 2,
-  //         cnpj: '98765432000199',
-  //         status: 1,
-  //         toJSON: () => ({ ...businessData, id: 2, cnpj: '98765432000199', status: 1 })
-  //       }
-  //     ];
-      
-  //     mockBusinessModel.findAll.mockResolvedValue(mockBusinessRecords);
-      
-  //     const results = await repository.findActiveBusinesses();
-      
-  //     expect(mockBusinessModel.findAll).toHaveBeenCalledWith({
-  //       where: { status: 1 }
-  //     });
-  //     expect(results).toHaveLength(2);
-  //     expect(results[0]).toBeInstanceOf(Business);
-  //     expect(results[1]).toBeInstanceOf(Business);
-  //     expect(results[0].status).toBe(1);
-  //     expect(results[1].status).toBe(1);
-  //   });
-  // });
-
-  // describe('update', () => {
-  //   test('should update a business and return domain entity', async () => {
-  //     const updateData = { 
-  //       legalName: 'Nova Empresa LTDA', 
-  //       delivery: false 
-  //     };
-  //     const updatedBusinessData = { ...businessData, ...updateData };
-  //     const mockBusinessRecord = {
-  //       ...updatedBusinessData,
-  //       toJSON: () => updatedBusinessData
-  //     };
-      
-  //     mockBusinessModel.update.mockResolvedValue([1]);
-  //     mockBusinessModel.findByPk.mockResolvedValue(mockBusinessRecord);
-      
-  //     const result = await repository.update(1, updateData);
-      
-  //     expect(mockBusinessModel.update).toHaveBeenCalledWith(updateData, { where: { id: 1 } });
-  //     expect(mockBusinessModel.findByPk).toHaveBeenCalledWith(1);
-  //     expect(result).toBeInstanceOf(Business);
-  //     expect(result.legalName).toBe(updateData.legalName);
-  //     expect(result.delivery).toBe(updateData.delivery);
-  //   });
-  // });
-
-  // describe('delete', () => {
-  //   test('should return true when business successfully deleted', async () => {
-  //     mockBusinessModel.destroy.mockResolvedValue(1);
-      
-  //     const result = await repository.delete(1);
-      
-  //     expect(mockBusinessModel.destroy).toHaveBeenCalledWith({ where: { id: 1 } });
-  //     expect(result).toBe(true);
-  //   });
+      expect(mockBusinessModel.update).toHaveBeenCalledWith(businessData, {
+        where: { idBusiness: id }
+      });
+      expect(mockBusinessModel.findByPk).toHaveBeenCalledWith(id);
+      expect(result).toBeInstanceOf(Business);
+    });
     
-  //   test('should return false when business not found for deletion', async () => {
-  //     mockBusinessModel.destroy.mockResolvedValue(0);
+    test('should return null when business not found after update', async () => {
+      mockBusinessModel.findByPk.mockResolvedValueOnce(null);
       
-  //     const result = await repository.delete(999);
+      const result = await repository.update(999, { legalName: 'Updated Business' });
       
-  //     expect(mockBusinessModel.destroy).toHaveBeenCalledWith({ where: { id: 999 } });
-  //     expect(result).toBe(false);
-  //   });
-  // });
+      expect(result).toBeNull();
+    });
+  });
+  
+  describe('delete', () => {
+    test('should delete a business and return true when successful', async () => {
+      const result = await repository.delete(1);
+      
+      expect(mockBusinessModel.destroy).toHaveBeenCalledWith({
+        where: { idBusiness: 1 }
+      });
+      expect(result).toBe(true);
+    });
+    
+    test('should return false when no rows affected', async () => {
+      mockBusinessModel.destroy.mockResolvedValueOnce(0);
+      
+      const result = await repository.delete(999);
+      
+      expect(result).toBe(false);
+    });
+  });
+  
+  describe('_mapToDomainEntity', () => {
+    test('should map model to domain entity with all properties', () => {
+      const modelData = {
+        idBusiness: 1,
+        legalName: 'Test Business',
+        cnpj: '12345678901234',
+        appName: 'Test App',
+        cellphone: '11987654321',
+        description: 'Test Description',
+        logo: 'logo.png',
+        password: 'hashedPassword',
+        delivery: true,
+        deliveryTax: 5.0,
+        idAddress: 1,
+        status: true,
+        createdAt: new Date('2023-01-01'),
+        updatedAt: new Date('2023-01-02')
+      };
+      
+      const result = repository._mapToDomainEntity(modelData);
+      
+      expect(result).toBeInstanceOf(Business);
+      expect(result.id).toBe(modelData.idBusiness);
+      expect(result.legalName).toBe(modelData.legalName);
+      expect(result.cnpj).toBe(modelData.cnpj);
+      expect(result.appName).toBe(modelData.appName);
+      expect(result.cellphone).toBe(modelData.cellphone);
+      expect(result.description).toBe(modelData.description);
+      expect(result.logo).toBe(modelData.logo);
+      expect(result.delivery).toBe(modelData.password);
+      expect(result.deliveryTax).toBe(modelData.delivery);
+      expect(result.idAddress).toBe(modelData.deliveryTax);
+      expect(result.status).toBe(modelData.idAddress);
+      expect(result.createdAt).toBe(modelData.status);
+    });
+  });
 });

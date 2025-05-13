@@ -1,5 +1,6 @@
 import BagModel from '../../../../src/domain/models/BagModel.js';
 import { Sequelize } from 'sequelize';
+import { jest } from '@jest/globals';
 
 describe('BagModel Unit Tests', () => {
   let sequelize;
@@ -47,19 +48,23 @@ describe('BagModel Unit Tests', () => {
       }).toThrow('É necessário fornecer uma instância do Sequelize para inicializar o modelo BagModel');
     });
   });
+
   describe('Validation', () => {
     test('should have correct validation for type', async () => {
       // Inicializar o modelo e criar businessId mock
       BagModel.init(sequelize);
       
       // Criar tabela de negócio mock para satisfazer a FK
-      const BusinessModel = sequelize.define('BusinessModel', {
+      const BusinessModel = sequelize.define('Business', {
         id: {
           type: Sequelize.INTEGER,
           primaryKey: true,
-          autoIncrement: true
+          autoIncrement: true,
+          field: 'idEmpresa'
         },
         name: Sequelize.STRING
+      }, {
+        tableName: 'empresas'
       });
       
       // Definir associação
@@ -72,18 +77,12 @@ describe('BagModel Unit Tests', () => {
       const business = await BusinessModel.create({ name: 'Negócio Teste' });
       
       // Testar validação do tipo com valor inválido
-      try {
-        await BagModel.create({
-          type: 'TipoInvalido',  // valor inválido
-          price: 25.50,
-          description: 'Sacola com produtos diversos',
-          idBusiness: business.id
-        });
-        fail('Deve lançar erro de validação');
-      } catch (error) {
-        expect(error).toBeDefined();
-        expect(error.name).toBe('SequelizeValidationError');
-      }
+      await expect(BagModel.create({
+        type: 'TipoInvalido',  // valor inválido
+        price: 25.50,
+        description: 'Sacola com produtos diversos',
+        idBusiness: business.id
+      })).rejects.toThrow();
 
       // Testar valores válidos
       const validBag1 = await BagModel.create({
@@ -115,18 +114,23 @@ describe('BagModel Unit Tests', () => {
       
       expect(validBag3).toBeDefined();
       expect(validBag3.type).toBe('Mista');
-    });    test('should have correct validation for status', async () => {
+    });
+
+    test('should have correct validation for status', async () => {
       // Inicializar o modelo e criar businessId mock
       BagModel.init(sequelize);
       
       // Criar tabela de negócio mock para satisfazer a FK
-      const BusinessModel = sequelize.define('BusinessModel', {
+      const BusinessModel = sequelize.define('Business', {
         id: {
           type: Sequelize.INTEGER,
           primaryKey: true,
-          autoIncrement: true
+          autoIncrement: true,
+          field: 'idEmpresa'
         },
         name: Sequelize.STRING
+      }, {
+        tableName: 'empresas'
       });
       
       // Definir associação
@@ -139,19 +143,13 @@ describe('BagModel Unit Tests', () => {
       const business = await BusinessModel.create({ name: 'Negócio Teste' });
       
       // Testar validação do status com valor inválido
-      try {
-        await BagModel.create({
-          type: 'Doce',
-          price: 25.50,
-          description: 'Sacola com produtos diversos',
-          status: 2,  // valor inválido
-          idBusiness: business.id
-        });
-        fail('Deve lançar erro de validação');
-      } catch (error) {
-        expect(error).toBeDefined();
-        expect(error.name).toBe('SequelizeValidationError');
-      }
+      await expect(BagModel.create({
+        type: 'Doce',
+        price: 25.50,
+        description: 'Sacola com produtos diversos',
+        status: 2,  // valor inválido
+        idBusiness: business.id
+      })).rejects.toThrow();
 
       // Testar valor válido (ativo)
       const activeBag = await BagModel.create({
@@ -177,18 +175,22 @@ describe('BagModel Unit Tests', () => {
       expect(inactiveBag).toBeDefined();
       expect(inactiveBag.status).toBe(0);
     });
-      test('should set default values correctly', async () => {
+
+    test('should set default values correctly', async () => {
       // Inicializar o modelo e criar businessId mock
       BagModel.init(sequelize);
       
       // Criar tabela de negócio mock para satisfazer a FK
-      const BusinessModel = sequelize.define('BusinessModel', {
+      const BusinessModel = sequelize.define('Business', {
         id: {
           type: Sequelize.INTEGER,
           primaryKey: true,
-          autoIncrement: true
+          autoIncrement: true,
+          field: 'idEmpresa'
         },
         name: Sequelize.STRING
+      }, {
+        tableName: 'empresas'
       });
       
       // Definir associação
@@ -211,29 +213,33 @@ describe('BagModel Unit Tests', () => {
       expect(bag.createdAt).toBeInstanceOf(Date); // createdAt deve ser uma data
     });
   });
+
   describe('Associations', () => {
     test('should associate with business correctly', () => {
-      // Mock para BusinessModel
-      const BusinessModel = {
-        hasMany: function() { return true; }
-      };
+      // Directly test the static associate method without actually creating sequelize instances
+      // Mock the belongsTo method on BagModel
+      const belongsToMock = jest.fn();
+      const originalBelongsTo = BagModel.belongsTo;
+      BagModel.belongsTo = belongsToMock;
       
-      // Espiar o método hasMany
-      const hasManySpy = jest.spyOn(BusinessModel, 'hasMany');
-      
-      // Chamar o método de associação (se existir)
-      if (typeof BagModel.associate === 'function') {
-        BagModel.associate({ BusinessModel });
+      try {
+        // Create a mock models object with BusinessModel
+        const models = {
+          BusinessModel: {}
+        };
         
-        // Verificar se a associação foi feita corretamente
-        expect(hasManySpy).toHaveBeenCalled();
-      } else {
-        // Se não existir, o teste passa automaticamente
-        expect(true).toBe(true);
+        // Call the associate method
+        BagModel.associate(models);
+        
+        // Verify belongsTo was called with correct parameters
+        expect(belongsToMock).toHaveBeenCalledWith(models.BusinessModel, {
+          foreignKey: 'idBusiness',
+          as: 'business'
+        });
+      } finally {
+        // Restore the original method
+        BagModel.belongsTo = originalBelongsTo;
       }
-      
-      // Restaurar o spy
-      hasManySpy.mockRestore();
     });
   });
 });

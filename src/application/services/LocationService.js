@@ -3,11 +3,30 @@ import geocodingService from '@mapbox/mapbox-sdk/services/geocoding.js';
 import AppError from '../../infrastructure/errors/AppError.js';
 
 class LocationService {
-  constructor(businessRepository, addressRepository, mapboxToken) {
+  constructor(businessRepository, addressRepository, mapboxToken, options = {}) {
     this.businessRepository = businessRepository;
     this.addressRepository = addressRepository;
-    this.mapboxClient = mapboxSdk({ accessToken: mapboxToken });
-    this.geocodingClient = geocodingService(this.mapboxClient);
+    
+    if (options.isTesting) {
+      this.mapboxClient = options.mockClient || {};
+      this.geocodingClient = options.mockGeocoding || {
+        forwardGeocode: () => ({
+          send: async () => ({
+            body: {
+              features: [
+                {
+                  place_name: 'Test Address',
+                  center: [10.1234, -23.5678]
+                }
+              ]
+            }
+          })
+        })
+      };
+    } else {
+      this.mapboxClient = mapboxSdk({ accessToken: mapboxToken });
+      this.geocodingClient = geocodingService(this.mapboxClient);
+    }
   }
 
   /**

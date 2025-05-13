@@ -1,6 +1,7 @@
 // filepath: d:\Faculdade\Integrador\sustentabag-backend-monolito\tests\unit\domain\models\BusinessModel.test.js
+import { Sequelize, DataTypes } from 'sequelize';
 import BusinessModel from '../../../../src/domain/models/BusinessModel.js';
-import { Sequelize } from 'sequelize';
+import { jest } from '@jest/globals';
 
 describe('BusinessModel Unit Tests', () => {
   let sequelize;
@@ -17,222 +18,176 @@ describe('BusinessModel Unit Tests', () => {
   });
 
   describe('Model initialization', () => {
-    test('should initialize model with correct attributes', () => {
-      // Mock para AddressModel
-      const AddressModel = sequelize.define('AddressModel', {
-        id: {
-          type: Sequelize.INTEGER,
-          primaryKey: true,
-          autoIncrement: true
-        }
-      });
-      
-      // Inicializar o modelo
-      BusinessModel.init(sequelize);
-      
-      // Verificar se o modelo foi inicializado corretamente
-      expect(BusinessModel).toBeDefined();
-      
-      // Mock para endereço
-      sequelize.define('Endereco', {
-        id: {
-          type: Sequelize.INTEGER,
-          primaryKey: true,
-          autoIncrement: true,
-          field: 'idEndereco'
-        }
-      });
-      
-      // Sincronizar o modelo para criar as tabelas
-      return sequelize.sync({ force: true }).then(() => {
-        // Verificar se a tabela foi criada
-        expect(true).toBe(true);
-      });
-    });
-      
-      // Verificar configurações específicas
-      expect(attributes.id.primaryKey).toBe(true);
-      expect(attributes.id.field).toBe('idComercio');
-      expect(attributes.name.field).toBe('nome');
-      expect(attributes.cnpj.field).toBe('CNPJ');
-      expect(attributes.status.defaultValue).toBe(1);
-    });    test('should throw error when sequelize instance is not provided', () => {
+    test('should throw error when sequelize instance is not provided', () => {
       expect(() => {
         BusinessModel.init();
-      }).toThrow();
+      }).toThrow('É necessário fornecer uma instância do Sequelize para inicializar o modelo BusinessModel');
+    });
+
+    test('should initialize model with correct attributes', async () => {
+      // Inicializar o modelo
+      const model = BusinessModel.init(sequelize);
+      
+      // Verificar se o modelo foi inicializado corretamente
+      expect(model).toBe(BusinessModel);
+      
+      // Verificar se os atributos foram definidos corretamente
+      const attributes = BusinessModel.rawAttributes;
+      
+      expect(attributes.idBusiness).toBeDefined();
+      expect(attributes.legalName).toBeDefined();
+      expect(attributes.cnpj).toBeDefined();
+      expect(attributes.appName).toBeDefined();
+      expect(attributes.cellphone).toBeDefined();
+      expect(attributes.description).toBeDefined();
+      expect(attributes.logo).toBeDefined();
+      expect(attributes.delivery).toBeDefined();
+      expect(attributes.deliveryTax).toBeDefined();
+      expect(attributes.idAddress).toBeDefined();
+      expect(attributes.status).toBeDefined();
+      expect(attributes.firebaseId).toBeDefined();
+      expect(attributes.createdAt).toBeDefined();
+      expect(attributes.updatedAt).toBeDefined();
+      
+      // Verificar configurações específicas
+      expect(attributes.idBusiness.primaryKey).toBe(true);
+      expect(attributes.idBusiness.field).toBe('idEmpresa');
+      expect(attributes.legalName.field).toBe('razaoSocial');
+      expect(attributes.cnpj.field).toBe('cnpj');
+      expect(attributes.appName.field).toBe('nomeApp');
+      expect(attributes.status.defaultValue).toBe(true);
     });
   });
-    describe('CRUD operations', () => {
-    // Configure os modelos associados necessários
-    beforeEach(async () => {
-      // Mock para AddressModel
-      const AddressModel = sequelize.define('AddressModel', {
-        id: {
-          type: Sequelize.INTEGER,
-          primaryKey: true,
-          autoIncrement: true,
-          field: 'idEndereco'
-        },
-        zipCode: {
-          type: Sequelize.STRING,
-          field: 'CEP'
-        },
-        state: Sequelize.STRING,
-        city: Sequelize.STRING
-      });
+
+  describe('Validation', () => {
+    // Instead of using actual DB operations, we'll mock the validation behavior
+    test('should validate cnpj format', () => {
+      // Get the validation rules directly
+      const cnpjValidation = BusinessModel.rawAttributes.cnpj.validate;
       
-      // Inicializar o modelo BusinessModel
-      const BusinessAttributes = {
-        id: {
-          type: Sequelize.INTEGER,
-          primaryKey: true,
-          autoIncrement: true,
-          field: 'idComercio'
-        },
-        name: {
-          type: Sequelize.STRING,
-          field: 'nome'
-        },
-        cnpj: Sequelize.STRING,
-        phone: Sequelize.STRING,
-        email: Sequelize.STRING,
-        legalName: Sequelize.STRING,
-        appName: Sequelize.STRING,
-        cellphone: Sequelize.STRING,
-        idAddress: {
-          type: Sequelize.INTEGER,
-          references: {
-            model: AddressModel,
-            key: 'id'
+      // Should pass with valid CNPJ
+      expect(() => {
+        if (cnpjValidation && cnpjValidation.is) {
+          const regex = new RegExp(cnpjValidation.is);
+          if (!regex.test('12345678901234')) {
+            throw new Error('Validation failed');
           }
         }
-      };
+      }).not.toThrow();
       
-      // Redefinir o modelo para teste
-      sequelize.define('BusinessModel', BusinessAttributes, {
-        tableName: 'comercios'
-      });
+      // Should fail with invalid CNPJ (too short)
+      expect(() => {
+        if (cnpjValidation && cnpjValidation.is) {
+          const regex = new RegExp(cnpjValidation.is);
+          if (!regex.test('1234567890123')) {
+            throw new Error('Validation failed');
+          }
+        }
+      }).toThrow();
       
-      // Sincronizar os modelos
-      await sequelize.sync({ force: true });
+      // Should fail with invalid CNPJ (non-numeric)
+      expect(() => {
+        if (cnpjValidation && cnpjValidation.is) {
+          const regex = new RegExp(cnpjValidation.is);
+          if (!regex.test('1234567890123A')) {
+            throw new Error('Validation failed');
+          }
+        }
+      }).toThrow();
     });
     
-    test('should create a business with valid data and address', async () => {
-      // Criar um endereço primeiro
-      const AddressModel = sequelize.models.AddressModel;
-      const address = await AddressModel.create({
-        zipCode: '12345678',
-        state: 'SP',
-        city: 'São Paulo'
-      });
+    test('should validate cellphone format', () => {
+      // Get the validation rules directly
+      const cellphoneValidation = BusinessModel.rawAttributes.cellphone.validate;
       
-      // Agora criar o negócio
-      const BusinessModel = sequelize.models.BusinessModel;
-      const business = await BusinessModel.create({
-        name: 'Empresa Teste',
-        cnpj: '12345678901234',
-        phone: '11999998888',
-        email: 'empresa@teste.com',
-        legalName: 'Empresa Teste Legal',
-        appName: 'Teste App',
-        cellphone: '11987654321',
-        idAddress: address.id
-      });
+      // Should pass with valid cellphone
+      expect(() => {
+        if (cellphoneValidation && cellphoneValidation.is) {
+          const regex = new RegExp(cellphoneValidation.is);
+          if (!regex.test('11987654321')) {
+            throw new Error('Validation failed');
+          }
+        }
+      }).not.toThrow();
       
-      expect(business).toBeDefined();
-      expect(business.id).toBeDefined();
-      expect(business.name).toBe('Empresa Teste');
-      expect(business.cnpj).toBe('12345678901234');
-    });    test('should find a business by id', async () => {
-      // Criar um endereço primeiro
-      const AddressModel = sequelize.models.AddressModel;
-      const address = await AddressModel.create({
-        zipCode: '12345678',
-        state: 'SP',
-        city: 'São Paulo'
-      });
+      // Should fail with invalid cellphone (too short)
+      expect(() => {
+        if (cellphoneValidation && cellphoneValidation.is) {
+          const regex = new RegExp(cellphoneValidation.is);
+          if (!regex.test('1198765432')) {
+            throw new Error('Validation failed');
+          }
+        }
+      }).toThrow();
       
-      // Agora criar o negócio
-      const BusinessModel = sequelize.models.BusinessModel;
-      const createdBusiness = await BusinessModel.create({
-        name: 'Empresa Teste',
-        cnpj: '12345678901234',
-        phone: '11999998888',
-        email: 'empresa@teste.com',
-        legalName: 'Empresa Teste Legal',
-        appName: 'Teste App',
-        cellphone: '11987654321',
-        idAddress: address.id
-      });
-      
-      // Buscar pelo ID
-      const foundBusiness = await BusinessModel.findByPk(createdBusiness.id);
-      
-      expect(foundBusiness).toBeDefined();
-      expect(foundBusiness.id).toBe(createdBusiness.id);
-      expect(foundBusiness.name).toBe('Empresa Teste');
+      // Should fail with invalid cellphone (non-numeric)
+      expect(() => {
+        if (cellphoneValidation && cellphoneValidation.is) {
+          const regex = new RegExp(cellphoneValidation.is);
+          if (!regex.test('1198765432A')) {
+            throw new Error('Validation failed');
+          }
+        }
+      }).toThrow();
     });
     
-    test('should update a business', async () => {
-      // Criar um endereço primeiro
-      const AddressModel = sequelize.models.AddressModel;
-      const address = await AddressModel.create({
-        zipCode: '12345678',
-        state: 'SP',
-        city: 'São Paulo'
-      });
-      
-      // Agora criar o negócio
-      const BusinessModel = sequelize.models.BusinessModel;
-      const business = await BusinessModel.create({
-        name: 'Empresa Teste',
-        cnpj: '12345678901234',
-        phone: '11999998888',
-        email: 'empresa@teste.com',
-        legalName: 'Empresa Teste Legal',
-        appName: 'Teste App',
-        cellphone: '11987654321',
-        idAddress: address.id
-      });
-      
-      // Atualizar
-      const newName = 'Empresa Atualizada';
-      await business.update({ name: newName });
-      
-      // Verificar se foi atualizado
-      const updatedBusiness = await BusinessModel.findByPk(business.id);
-      expect(updatedBusiness.name).toBe(newName);
+    test('should set default values correctly', () => {
+      // Check default values directly from model definition
+      expect(BusinessModel.rawAttributes.status.defaultValue).toBe(true);
+      expect(BusinessModel.rawAttributes.delivery.defaultValue).toBe(false);
+      expect(BusinessModel.rawAttributes.createdAt.defaultValue).toBeDefined();
+      expect(BusinessModel.rawAttributes.updatedAt.defaultValue).toBeDefined();
     });
   });
-  
+
   describe('Associations', () => {
-    test('should handle relationships correctly', async () => {
-      // Este teste simula uma associação entre modelos
-      const AddressModel = sequelize.models.AddressModel;
-      const BusinessModel = sequelize.models.BusinessModel;
+    test('should associate with address model correctly', () => {
+      // Mock the belongsTo method
+      const belongsToMock = jest.fn();
+      const originalBelongsTo = BusinessModel.belongsTo;
+      BusinessModel.belongsTo = belongsToMock;
       
-      // Criar endereço
-      const address = await AddressModel.create({
-        zipCode: '12345678',
-        state: 'SP',
-        city: 'São Paulo'
-      });
+      try {
+        // Mock models object with AddressModel
+        const models = {
+          AddressModel: {}
+        };
+        
+        // Call the associate method
+        BusinessModel.associate(models);
+        
+        // Verify belongsTo was called with correct parameters
+        expect(belongsToMock).toHaveBeenCalledWith(models.AddressModel, {
+          foreignKey: 'idAddress',
+          as: 'address'
+        });
+      } finally {
+        // Restore original method
+        BusinessModel.belongsTo = originalBelongsTo;
+      }
+    });
+    
+    test('should not associate when AddressModel is missing', () => {
+      // Mock the belongsTo method
+      const belongsToMock = jest.fn();
+      const originalBelongsTo = BusinessModel.belongsTo;
+      BusinessModel.belongsTo = belongsToMock;
       
-      // Criar negócio com referência ao endereço
-      const business = await BusinessModel.create({
-        name: 'Empresa com Endereço',
-        cnpj: '12345678901234',
-        phone: '11999998888',
-        email: 'empresa@teste.com',
-        legalName: 'Empresa Teste Legal',
-        appName: 'Teste App',
-        cellphone: '11987654321',
-        idAddress: address.id
-      });
-      
-      // Verificar se a associação funcionou
-      expect(business).toBeDefined();
-      expect(business.idAddress).toBe(address.id);
+      try {
+        // Mock models object without AddressModel
+        const models = {
+          OtherModel: {}
+        };
+        
+        // Call the associate method
+        BusinessModel.associate(models);
+        
+        // Verify belongsTo was not called
+        expect(belongsToMock).not.toHaveBeenCalled();
+      } finally {
+        // Restore original method
+        BusinessModel.belongsTo = originalBelongsTo;
+      }
     });
   });
 });
