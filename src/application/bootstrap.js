@@ -5,22 +5,29 @@ import * as addressModule from './modules/addressModule.js';
 import * as businessModule from './modules/businessModule.js';
 import * as authModule from './modules/authModule.js';
 import * as locationModule from './modules/locationModule.js';
+import setupAssociations from '../infrastructure/database/associations.js';
 
 export const initializeModules = (sequelize) => {
+  // Inicializa todos os modelos
   const bagModels = bagModule.initializeModels(sequelize);
   const clientModels = clientModule.initializeModels(sequelize);
   const addressModels = addressModule.initializeModels(sequelize);
   const businessModels = businessModule.initializeModels(sequelize);
   const authModels = authModule.initializeModels(sequelize);
   
+  const allModels = {
+    ...bagModels,
+    ...clientModels,
+    ...addressModels,
+    ...businessModels,
+    ...authModels
+  };
+  
+  // Configura as associações entre os modelos
+  setupAssociations(allModels);
+  
   return {
-    models: {
-      ...bagModels,
-      ...clientModels,
-      ...addressModels,
-      ...businessModels,
-      ...authModels
-    }
+    models: allModels
   };
 };
 

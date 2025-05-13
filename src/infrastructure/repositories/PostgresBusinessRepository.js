@@ -20,46 +20,35 @@ class PostgresBusinessRepository extends BusinessRepository {
     const record = await this.BusinessModel.findByPk(id);
     if (!record) return null;
     return this._mapToDomainEntity(record);
-  }
-  async findByIdWithAddress(id) {
-    const record = await this.BusinessModel.findByPk(id, {
-      include: [{ model: this.AddressModel, as: 'address' }]
-    });
-    if (!record) return null;
-
-    const business = this._mapToDomainEntity(record);
-
-    if (record.address) {
-      const addr = record.address;
-      business.address = new Address(
-        addr.id,
-        addr.zipCode,
-        addr.state,
-        addr.city,
-        addr.street,
-        addr.number,
-        addr.complement,
-        addr.latitude,
-        addr.longitude,
-        addr.status,
-        addr.createdAt
-      );
-    }
-
-    return business;
-  }
-
-  async findAllWithAddress() {
-    const records = await this.BusinessModel.findAll({
-      include: [{ model: this.AddressModel, as: 'address' }],
-      where: { status: 1 }
-    });
-
-    return records.map(record => {
-      const business = this._mapToDomainEntity(record);
+  }  async findByIdWithAddress(id) {
+    try {
+      // Verificando se a associação está configurada
+      if (!this.BusinessModel.associations || !this.BusinessModel.associations.address) {
+        console.warn('Associação entre Business e Address não encontrada. Tentando configurar manualmente...');
+        
+        // Tenta configurar a associação manualmente, caso não esteja configurada
+        this.BusinessModel.belongsTo(this.AddressModel, {
+          foreignKey: 'idAddress',
+          targetKey: 'id',
+          as: 'address'
+        });
+      }
       
+      const record = await this.BusinessModel.findByPk(id, {
+        include: [{ 
+          model: this.AddressModel, 
+          as: 'address',
+          required: false // Torna o join LEFT JOIN em vez de INNER JOIN
+        }]
+      });
+      
+      if (!record) return null;
+
+      const business = this._mapToDomainEntity(record);
+
       if (record.address) {
         const addr = record.address;
+        console.log(`Empresa ${business.id} tem endereço: ID=${addr.id}`);
         business.address = new Address(
           addr.id,
           addr.zipCode,
@@ -73,10 +62,68 @@ class PostgresBusinessRepository extends BusinessRepository {
           addr.status,
           addr.createdAt
         );
+      } else {
+        console.log(`Empresa ${business.id} não tem endereço associado`);
       }
-      
+
       return business;
-    });
+    } catch (error) {
+      console.error(`Erro ao buscar empresa ID=${id} com endereço:`, error);
+      throw error;
+    }
+  }
+  async findAllWithAddress() {
+    try {
+      // Verificando se a associação está configurada
+      if (!this.BusinessModel.associations || !this.BusinessModel.associations.address) {
+        console.warn('Associação entre Business e Address não encontrada. Tentando configurar manualmente...');
+        
+        // Tenta configurar a associação manualmente, caso não esteja configurada
+        this.BusinessModel.belongsTo(this.AddressModel, {
+          foreignKey: 'idAddress',
+          targetKey: 'id',
+          as: 'address'
+        });
+      }      const records = await this.BusinessModel.findAll({
+        include: [{ 
+          model: this.AddressModel, 
+          as: 'address',
+          required: false // Torna o join LEFT JOIN em vez de INNER JOIN
+        }],
+        where: { status: true } // Corrigido para boolean true
+      });
+
+      console.log(`Encontrados ${records.length} registros de empresas`);
+
+      return records.map(record => {
+        const business = this._mapToDomainEntity(record);
+        
+        if (record.address) {
+          const addr = record.address;
+          console.log(`Empresa ${business.id} tem endereço: ID=${addr.id}`);
+          business.address = new Address(
+            addr.id,
+            addr.zipCode,
+            addr.state,
+            addr.city,
+            addr.street,
+            addr.number,
+            addr.complement,
+            addr.latitude,
+            addr.longitude,
+            addr.status,
+            addr.createdAt
+          );
+        } else {
+          console.log(`Empresa ${business.id} não tem endereço associado`);
+        }
+        
+        return business;
+      });
+    } catch (error) {
+      console.error('Erro ao buscar empresas com endereços:', error);
+      throw error;
+    }
   }
 
   async findAll(options = {}) {
@@ -91,10 +138,9 @@ class PostgresBusinessRepository extends BusinessRepository {
     if (!record) return null;
     return this._mapToDomainEntity(record);
   }
-
   async findActiveBusiness() {
     const records = await this.BusinessModel.findAll({
-      where: { status: 1 }
+      where: { status: true } // Corrigido para boolean true
     });
     return records.map(r => this._mapToDomainEntity(r));
   }
