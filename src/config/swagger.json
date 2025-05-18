@@ -1737,35 +1737,6 @@
         }
       }
     },
-    "/api/clients/auth/login": {
-      "post": {
-        "tags": [
-          "Client"
-        ],
-        "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#components/schemas/LoginInput"
-              }
-            },
-            "application/xml": {
-              "schema": {
-                "$ref": "#components/schemas/LoginInput"
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
     "/api/clients": {
       "post": {
         "tags": [
