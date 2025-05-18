@@ -1,29 +1,37 @@
-import dotenv from 'dotenv';
-import express from 'express';
-import { setupAddressRoutes } from '../../presentation/routes/addressRoutes.js';
-import { errorHandler } from '../../presentation/middleware/errorHandler.js';
-import AddressModel from '../../domain/models/AddressModel.js';
+import dotenv from "dotenv";
+import express from "express";
+import { setupAddressRoutes } from "../../presentation/routes/addressRoutes.js";
+import { errorHandler } from "../../presentation/middleware/errorHandler.js";
+import AddressModel from "../../domain/models/AddressModel.js";
+import PostgresAddressRepository from "../../infrastructure/repositories/PostgresAddressRepository.js";
 
 dotenv.config();
 
 export const setupAddressModule = (options = {}) => {
   const router = express.Router();
-  
+
   setupAddressRoutes(router, options);
-  
+
   router.use(errorHandler);
-  
+
   return router;
 };
 
 export const initializeModels = (sequelizeInstance) => {
   if (!sequelizeInstance) {
-    throw new Error('É necessário fornecer uma instância do Sequelize para inicializar os modelos');
+    throw new Error(
+      "É necessário fornecer uma instância do Sequelize para inicializar os modelos"
+    );
   }
-  
+
   AddressModel.init(sequelizeInstance);
-  
+
   return {
-    AddressModel
+    AddressModel,
   };
+};
+
+export const getAddressRepository = (sequelizeInstance) => {
+  AddressModel.init(sequelizeInstance);
+  return new PostgresAddressRepository();
 };

@@ -1,47 +1,73 @@
 import AppError from "../../infrastructure/errors/AppError.js";
-import RabbitMQPublisher from "../../application/services/RabbitMQPublisher.js"; // Assuming you have a RabbitMQ publisher set up
+import RabbitMQPublisher from "../../application/services/RabbitMQPublisher.js";
+import { getRepositoryService } from "../../application/services/RepositoryService.js";
 
 class BagController {
   constructor(bagService) {
     this.bagService = bagService;
-  }
-
-  async createBag(req, res, next) {
+    this.repositoryService = getRepositoryService();
+  }  async createBag(req, res, next) {
     try {
       const bag = await this.bagService.createBag(req.body);
 
-      if (res.status(201)) {
-        const data = {
-          to: "GG7YEvoNUYh1qohZUmTSJRHu9fa2", //data.payload.fcmToken
-          notification: {
-            title: "Novo produto criado",
-            body: `Uma nova bolsa do tipo ${bag.type} foi criada.`,
-          },
-          data: {
-            type: "BAG_CREATED",
-            payload: {
-              type: bag.type,
-            },
-          },
-        };
+      try {
+        const userId = req.user.userId;
+        const userRepository = this.repositoryService.getUserRepository();
 
-        // const message = {
-        //   to: data.to || data.payload.fcmToken, // Usa o token fornecido ou o token do payload
-        //   notification: {
-        //     title: data.notification.title,
-        //     body: data.notification.body,
-        //   },
-        //   data: {
-        //     type: "single",
-        //     payload: {
-        //       ...data.payload,
-        //       timestamp: timestamp,
-        //       correlationId: messageId,
-        //     },
-        //   },
-        // };
+        console.log("User ID:", userId);
+        console.log(userRepository)
+        // TODO - OBS: Essa parte do código deve ser implmentada para utilizar a lista de usuários
+        // que estão na lista de favoritos da empresa. Como não foi implementado eu deixei
+        // o to: como o FCM Token de um usuário específico para teste.
+         const data = {
+              to: "c0_upvfUQr62sCIQOfCfrl:APA91bFgN19CkI73zEpcoeY1VjbB2ZbSZrK2xHDPBU3oTMY-0Uet1JVbf1tOAzrEtP08uJrliS2KVd-Vp80_YW2pA_RyKs_YQPz58WZhwJ0xaqJ1Ag4msRE",
+              notification: {
+                title: "Novo produto criado",
+                body: `Uma nova bolsa do tipo ${bag.type} foi criada.`,
+              },
+              type: "single",
+              data: {
+                type: "BAG_CREATED",
+                payload: {
+                  type: bag.type,
+                  bagId: bag.id,
+                },
+              },
+            };
 
-        await RabbitMQPublisher(data);
+            await RabbitMQPublisher(data);
+
+        // if (userRepository) {
+        //   const user = await userRepository.findById(userId);
+          
+          
+        //   // Se o usuário tiver um token FCM, enviamos a notificação
+        //   if (user && user.fcmToken) {
+        //     const data = {
+        //       to: user.fcmToken,
+        //       notification: {
+        //         title: "Novo produto criado",
+        //         body: `Uma nova bolsa do tipo ${bag.type} foi criada.`,
+        //       },
+        //       type: "single",
+        //       data: {
+        //         type: "BAG_CREATED",
+        //         payload: {
+        //           type: bag.type,
+        //           bagId: bag.id,
+        //         },
+        //       },
+        //     };
+
+        //     await RabbitMQPublisher(data);
+        //     console.log(`Notificação enviada para o usuário ${userId} com token ${user.fcmToken}`);
+        //   } else {
+        //     console.log(`Usuário ${userId} não possui token FCM para notificações`);
+        //   }
+        // }
+      } catch (notificationError) {
+        // Não falha a criação da sacola se a notificação falhar
+        console.error("Erro ao enviar notificação:", notificationError);
       }
 
       return res.status(201).json(bag);

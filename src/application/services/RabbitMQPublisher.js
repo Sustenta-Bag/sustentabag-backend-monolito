@@ -24,15 +24,14 @@ export default async (data) => { // TODO - Refatorar para um serviço de mensage
     // Adicionar identificadores úteis à mensagem
     const messageId = v4();
     const timestamp = new Date();
-    
-    const message = {
-      to: "token FCM ", // data.to e se for bulk :  "to": ["token1", "token2", "token3"],
+      const message = {
+      to: data.to, // Usar o token FCM fornecido nos dados
       notification: {
         title: data.notification.title,
         body: data.notification.body,
       },
       data: {
-        type: "single", // "type": "bulk",
+        type: data.type || "single", // Usar "bulk" para notificações em massa
         payload: {
           ...data.payload,
           timestamp: timestamp,

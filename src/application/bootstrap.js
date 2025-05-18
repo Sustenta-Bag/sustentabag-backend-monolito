@@ -32,6 +32,9 @@ export const setupModuleRouters = (options = {}) => {
   // Initialize client and business repositories first
   const clientRepository = clientModule.getClientRepository(options.sequelizeInstance);
   const businessRepository = businessModule.getBusinessRepository(options.sequelizeInstance);
+  const bagRepository = bagModule.getBagRepository(options.sequelizeInstance);
+  const addressRepository = addressModule.getAddressRepository(options.sequelizeInstance);
+  const userRepository = authModule.getUserRepository(options.sequelizeInstance);
   
   // Set up routers with proper dependencies
   const bagRouter = bagModule.setupBagModule({
@@ -66,5 +69,20 @@ export const setupModuleRouters = (options = {}) => {
     addresRouter,
     businessRouter,
     authRouter
+  };
+};
+
+export const getRepositories = async (sequelizeInstance) => {
+  if (!sequelizeInstance) {
+    const module = await import('../infrastructure/database/sequelize.js');
+    sequelizeInstance = module.sequelize;
+  }
+
+  return {
+    clientRepository: clientModule.getClientRepository(sequelizeInstance),
+    businessRepository: businessModule.getBusinessRepository(sequelizeInstance),
+    bagRepository: bagModule.getBagRepository(sequelizeInstance),
+    addressRepository: addressModule.getAddressRepository(sequelizeInstance),
+    userRepository: authModule.getUserRepository(sequelizeInstance)
   };
 };
