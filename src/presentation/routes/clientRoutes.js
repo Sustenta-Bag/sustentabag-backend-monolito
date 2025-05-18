@@ -20,21 +20,6 @@ export const setupClientRoutes = (router, options = {}) => {
   const clientService = new ClientService(clientRepository);
   const clientController = new ClientController(clientService);
   
-  // This route should be deprecated in favor of the unified auth system
-  router.post(`/auth/login`,
-    /*
-    #swagger.path = '/api/clients/auth/login'
-    #swagger.tags = ["Client"]
-    #swagger.requestBody = {
-      required: true,
-      schema: { $ref: '#components/schemas/LoginInput' },
-    }
-    #swagger.responses[200]
-    #swagger.deprecated = true
-    */
-    validateLogin, 
-    clientController.login.bind(clientController)
-  );
 
   // Public route for registration
   router.post(`/`,

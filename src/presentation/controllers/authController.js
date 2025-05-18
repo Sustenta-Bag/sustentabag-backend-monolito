@@ -131,7 +131,6 @@ class AuthController {
       next(error);
     }
   }
-
   async updateDeviceToken(req, res, next) {
     try {
       const { deviceToken } = req.body;
@@ -148,6 +147,26 @@ class AuthController {
       await this.authService.updateDeviceToken(userId, deviceToken);
 
       return res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getFcmToken(req, res, next) {
+    try {
+      const { userId } = req.params;
+
+      if (!userId) {
+        throw new AppError(
+          "ID do usuário é obrigatório",
+          "MISSING_USER_ID",
+          400
+        );
+      }
+
+      const fcmToken = await this.authService.getDeviceToken(userId);
+      
+      return res.status(200).json({ token: fcmToken });
     } catch (error) {
       next(error);
     }
