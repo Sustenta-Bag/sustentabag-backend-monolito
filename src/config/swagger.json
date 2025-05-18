@@ -813,6 +813,59 @@
         }
       }
     },
+    "/api/auth/user/{userId}/fcm-token": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Obter token FCM do usuário",
+        "description": "Obtém o token FCM registrado para o usuário",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID do usuário"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token FCM obtido com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "example": "cSM76L5hQJKZZhXs-DsmFA:APA91bHgT1uQ..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/bags": {
       "post": {
         "tags": [
