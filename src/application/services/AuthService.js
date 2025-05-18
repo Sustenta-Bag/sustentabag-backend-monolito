@@ -298,9 +298,17 @@ class AuthService {
       } catch (error) {
         console.error("Erro ao atualizar token FCM no Firestore:", error);
       }
+    }    return true;
+  }
+
+  async getDeviceToken(userId) {
+    const user = await this.userRepository.findById(userId);
+
+    if (!user) {
+      throw new AppError("Usuário não encontrado", "USER_NOT_FOUND", 404);
     }
 
-    return true;
+    return user.fcmToken || null;
   }
 }
 

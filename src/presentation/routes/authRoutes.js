@@ -334,5 +334,42 @@ export default (authController) => (router) => {
     authController.updateDeviceToken.bind(authController)
   );
 
+  router.get(
+    "/user/:userId/fcm-token",
+    /*
+    #swagger.path = '/api/auth/user/{userId}/fcm-token'
+    #swagger.tags = ['Authentication']
+    #swagger.summary = 'Obter token FCM do usuário'
+    #swagger.description = 'Obtém o token FCM registrado para o usuário'
+    #swagger.parameters['userId'] = {
+      in: 'path',
+      description: 'ID do usuário',
+      required: true,
+      type: 'string'
+    }
+    #swagger.responses[200] = {
+      description: 'Token FCM obtido com sucesso',
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              token: { 
+                type: "string", 
+                example: "cSM76L5hQJKZZhXs-DsmFA:APA91bHgT1uQ..." 
+              }
+            }
+          }
+        }
+      }
+    }
+    #swagger.responses[404] = {
+      description: 'Usuário não encontrado',
+      schema: { $ref: "#/components/schemas/Error" }
+    }
+    */
+    authController.getFcmToken.bind(authController)
+  );
+
   return router;
 };
