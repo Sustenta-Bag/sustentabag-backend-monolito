@@ -3,9 +3,10 @@ import geocodingService from '@mapbox/mapbox-sdk/services/geocoding.js';
 import AppError from '../../infrastructure/errors/AppError.js';
 
 class LocationService {
-  constructor(businessRepository, addressRepository, mapboxToken, options = {}) {
+  constructor(businessRepository, addressRepository, clientRepository, mapboxToken, options = {}) {
     this.businessRepository = businessRepository;
     this.addressRepository = addressRepository;
+    this.clientRepository = clientRepository;
     
     if (options.isTesting) {
       this.mapboxClient = options.mockClient || {};
@@ -23,9 +24,13 @@ class LocationService {
           })
         })
       };
-    } else {
+    } else if (mapboxToken) {
       this.mapboxClient = mapboxSdk({ accessToken: mapboxToken });
       this.geocodingClient = geocodingService(this.mapboxClient);
+    } else {
+      console.warn('MAPBOX_ACCESS_TOKEN não definido. Serviço de geocodificação estará indisponível.');
+      this.mapboxClient = null;
+      this.geocodingClient = null;
     }
   }
 
@@ -35,6 +40,14 @@ class LocationService {
    * @returns {Promise<{latitude: number, longitude: number}>} - Coordenadas do endereço
    */  async geocodeAddress(address) {
     try {
+      if (!this.mapboxClient || !this.geocodingClient) {
+        throw new AppError(
+          'Serviço de geocodificação não disponível. Verifique a variável MAPBOX_ACCESS_TOKEN.', 
+          'GEOCODING_SERVICE_UNAVAILABLE',
+          503
+        );
+      }
+
       if (!address) {
         throw new AppError('Dados de endereço não fornecidos', 'GEOCODING_ERROR', 400);
       }
@@ -57,14 +70,6 @@ class LocationService {
       
       const query = queryParts.join(', ');
       console.log(`Enviando consulta de geocodificação: "${query}"`);
-      
-      if (!this.mapboxClient || !this.geocodingClient) {
-        throw new AppError(
-          'Serviço de geocodificação não configurado. Verifique a variável MAPBOX_ACCESS_TOKEN.', 
-          'GEOCODING_SERVICE_UNAVAILABLE',
-          500
-        );
-      }
       
       let timeoutId;
       const timeoutPromise = new Promise((_, reject) => {
@@ -146,6 +151,11 @@ class LocationService {
       
       if (addressData.latitude && addressData.longitude) {
         console.log(`Endereço já possui coordenadas: ${addressData.latitude}, ${addressData.longitude}`);
+        return addressData;
+      }
+
+      if (!this.mapboxClient || !this.geocodingClient) {
+        console.warn('Serviço de geocodificação não disponível. Retornando endereço sem coordenadas.');
         return addressData;
       }
       
@@ -310,6 +320,49 @@ class LocationService {
 
   deg2rad(deg) {
     return deg * (Math.PI/180);
+  }
+
+  /**
+   * Busca estabelecimentos próximos ao endereço de um cliente
+   * @param {number} clientId - ID do cliente
+   * @param {Object} options - Opções de busca como raio e limite
+   * @returns {Promise<Array>} - Lista de estabelecimentos próximos
+   */
+  async findNearbyBusinessesByClient(clientId, { radius = 10, limit = 10 } = {}) {
+    try {
+      if (!clientId || isNaN(parseInt(clientId))) {
+        throw new AppError('ID do cliente inválido', 'INVALID_CLIENT_ID', 400);
+      }
+
+      console.log(`Buscando cliente com ID: ${clientId}`);
+      const client = await this.clientRepository.findByIdWithAddress(clientId);
+
+      if (!client) {
+        throw new AppError(`Cliente não encontrado com o ID ${clientId}`, 'CLIENT_NOT_FOUND', 404);
+      }
+
+      if (!client.address) {
+        throw new AppError('Cliente não possui endereço cadastrado', 'CLIENT_NO_ADDRESS', 400);
+      }
+
+      console.log(`Cliente encontrado com endereço: ${JSON.stringify({
+        id: client.id,
+        addressId: client.address.id,
+        street: client.address.street,
+        city: client.address.city,
+        hasCoordinates: Boolean(client.address.latitude) && Boolean(client.address.longitude)
+      })}`);
+
+      return this.findNearbyBusinesses(client.address.id, { radius, limit });
+    } catch (error) {
+      console.error('Erro ao buscar estabelecimentos próximos ao cliente:', error);
+      if (error instanceof AppError) throw error;
+      throw new AppError(
+        `Erro ao buscar estabelecimentos próximos ao cliente: ${error.message}`,
+        'LOCATION_SERVICE_ERROR',
+        500
+      );
+    }
   }
 }
 

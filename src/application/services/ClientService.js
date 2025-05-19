@@ -4,9 +4,10 @@ import bcrypt from "bcrypt";
 import FirebaseService from "./FirebaseService.js";
 
 class ClientService {
-  constructor(clientRepository) {
+  constructor(clientRepository, authService) {
     this.clientRepository = clientRepository;
     this.firebaseService = new FirebaseService();
+    this.authService = authService;
   }
 
   async createClient(clientData, userData) {
@@ -70,15 +71,23 @@ class ClientService {
     }
   }
 
-  async getClient(id) {
-    const client = await this.clientRepository.findById(id);
+  async getClient(id, { includeAddress = false } = {}) {
+    let client;
+    if (includeAddress) {
+      client = await this.clientRepository.findByIdWithAddress(id);
+    } else {
+      client = await this.clientRepository.findById(id);
+    }
     if (!client) {
       throw AppError.notFound("Cliente", id);
     }
     return client;
   }
 
-  async getAllClients() {
+  async getAllClients({ includeAddress = false } = {}) {
+    if (includeAddress) {
+      return await this.clientRepository.findAllWithAddress();
+    }
     return await this.clientRepository.findAll();
   }
 
@@ -116,6 +125,11 @@ class ClientService {
       clientData.password = await bcrypt.hash(clientData.password, 10);
     }
 
+    if (clientData.idAddress) {
+      // Aqui você pode adicionar uma validação do endereço se necessário
+      // Por exemplo, verificar se o endereço existe
+    }
+
     const client = await this.clientRepository.update(id, clientData);
     return client;
   }
@@ -128,7 +142,11 @@ class ClientService {
     return result;
   }
 
-  async getActiveClients() {
+  async getActiveClients({ includeAddress = false } = {}) {
+    if (includeAddress) {
+      const clients = await this.clientRepository.findAllWithAddress();
+      return clients.filter(client => client.status === 1);
+    }
     return await this.clientRepository.findActiveClients();
   }
 

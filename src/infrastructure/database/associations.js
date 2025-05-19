@@ -23,6 +23,23 @@ const setupAssociations = (models) => {
     console.warn('Não foi possível configurar associação entre Business e Address. Modelos não disponíveis.');
   }
   
+  if (models.ClientModel && models.AddressModel) {
+    console.log('Configurando associação entre Client e Address');
+    
+    models.ClientModel.belongsTo(models.AddressModel, {
+      foreignKey: 'idAddress',
+      targetKey: 'id',
+      as: 'address'
+    });
+    
+    models.AddressModel.hasMany(models.ClientModel, {
+      foreignKey: 'idAddress',
+      sourceKey: 'id',
+      as: 'clients'
+    });
+  } else {
+    console.warn('Não foi possível configurar associação entre Client e Address. Modelos não disponíveis.');
+  }
 };
 
 export default setupAssociations;

@@ -5,6 +5,7 @@ class Client {
     email,
     cpf,
     phone,
+    idAddress = null,
     status = 1,
     createdAt = new Date()
   ) {
@@ -12,7 +13,8 @@ class Client {
     this.name = name; 
     this.email = email; 
     this.cpf = cpf; 
-    this.phone = phone; 
+    this.phone = phone;
+    this.idAddress = idAddress;
     this.status = status; 
     this.createdAt = createdAt; 
   }
@@ -34,6 +36,11 @@ class Client {
 
   updatePhone(newPhone) {
     this.phone = newPhone;
+    return this;
+  }
+
+  updateIdAddress(newIdAddress) {
+    this.idAddress = newIdAddress;
     return this;
   }
 

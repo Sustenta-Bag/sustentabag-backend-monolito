@@ -1,6 +1,9 @@
 import ClientController from '../controllers/ClientController.js';
 import ClientService from '../../application/services/ClientService.js';
 import PostgresClientRepository from '../../infrastructure/repositories/PostgresClientRepository.js';
+import AuthService from '../../application/services/AuthService.js';
+import UserRepository from '../../infrastructure/repositories/UserRepository.js';
+import PostgresBusinessRepository from '../../infrastructure/repositories/PostgresBusinessRepository.js';
 import { 
   validateCreateClient, 
   validateUpdateClient, 
@@ -17,7 +20,11 @@ import {
 
 export const setupClientRoutes = (router, options = {}) => {
   const clientRepository = options.clientRepository || new PostgresClientRepository();
-  const clientService = new ClientService(clientRepository);
+  const userRepository = options.userRepository || new UserRepository();
+  const businessRepository = options.businessRepository || new PostgresBusinessRepository();
+
+  const authService = new AuthService(userRepository, clientRepository, businessRepository);
+  const clientService = new ClientService(clientRepository, authService);
   const clientController = new ClientController(clientService);
   
   router.post(`/auth/login`,
@@ -175,6 +182,6 @@ export const setupClientRoutes = (router, options = {}) => {
     authenticate,
     requireClientRole,
     validateStatusUpdate,
-    clientController.changeClientStatus.bind(clientController)
+    clientController.updateStatus.bind(clientController)
   );
 };

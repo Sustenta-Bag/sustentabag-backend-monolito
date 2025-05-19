@@ -1,5 +1,6 @@
 import AppError from "../../infrastructure/errors/AppError.js";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 class ClientController {
   constructor(clientService) {
@@ -9,10 +10,7 @@ class ClientController {
   async createClient(req, res, next) {
     try {
       const client = await this.clientService.createClient(req.body);
-
-      const { password, ...clientData } = client;
-
-      return res.status(201).json(clientData);
+      return res.status(201).json(client);
     } catch (error) {
       next(error);
     }
@@ -20,11 +18,9 @@ class ClientController {
 
   async getClient(req, res, next) {
     try {
-      const client = await this.clientService.getClient(req.params.id);
-
-      const { password, ...clientData } = client;
-
-      return res.json(clientData);
+      const includeAddress = req.query.includeAddress === 'true';
+      const client = await this.clientService.getClient(req.params.id, { includeAddress });
+      return res.json(client);
     } catch (error) {
       next(error);
     }
@@ -32,14 +28,9 @@ class ClientController {
 
   async getAllClients(req, res, next) {
     try {
-      const clients = await this.clientService.getAllClients();
-
-      const clientsData = clients.map((client) => {
-        const { password, ...clientData } = client;
-        return clientData;
-      });
-
-      return res.json(clientsData);
+      const includeAddress = req.query.includeAddress === 'true';
+      const clients = await this.clientService.getAllClients({ includeAddress });
+      return res.json(clients);
     } catch (error) {
       next(error);
     }
@@ -47,14 +38,8 @@ class ClientController {
 
   async updateClient(req, res, next) {
     try {
-      const client = await this.clientService.updateClient(
-        req.params.id,
-        req.body
-      );
-
-      const { password, ...clientData } = client;
-
-      return res.json(clientData);
+      const client = await this.clientService.updateClient(req.params.id, req.body);
+      return res.json(client);
     } catch (error) {
       next(error);
     }
@@ -69,35 +54,20 @@ class ClientController {
     }
   }
 
-  async getActiveClients(req, res, next) {
+  async updateStatus(req, res, next) {
     try {
-      const clients = await this.clientService.getActiveClients();
-
-      const clientsData = clients.map((client) => {
-        const { password, ...clientData } = client;
-        return clientData;
-      });
-
-      return res.json(clientsData);
+      const client = await this.clientService.updateStatus(req.params.id, req.body.status);
+      return res.json(client);
     } catch (error) {
       next(error);
     }
   }
 
-  async changeClientStatus(req, res, next) {
+  async getActiveClients(req, res, next) {
     try {
-      if (req.body.status === undefined) {
-        throw new AppError("Status não fornecido", "MISSING_STATUS");
-      }
-
-      const client = await this.clientService.changeClientStatus(
-        req.params.id,
-        req.body.status
-      );
-
-      const { password, ...clientData } = client;
-
-      return res.json(clientData);
+      const includeAddress = req.query.includeAddress === 'true';
+      const clients = await this.clientService.getActiveClients({ includeAddress });
+      return res.json(clients);
     } catch (error) {
       next(error);
     }
@@ -105,47 +75,34 @@ class ClientController {
 
   async login(req, res, next) {
     try {
-      const { cpf, password } = req.body;
-  
-      if (!cpf || !password) {
-        throw new AppError(
-          "CPF e senha são obrigatórios",
-          "MISSING_CREDENTIALS",
-          400
-        );
-      }
-  
-      const client = await this.clientService.findByCpf(cpf);
+      const { email, password } = req.body;
+
+      const client = await this.clientService.findByEmail(email);
       if (!client) {
-        throw new AppError("Credenciais inválidas", "INVALID_CREDENTIALS", 401);
+        throw new AppError("Email ou senha inválidos", "INVALID_CREDENTIALS");
       }
-  
-      const user = await this.userRepository.findByEntityId(client.id, "client");
-      if (!user) {
-        throw new AppError("Usuário não encontrado", "USER_NOT_FOUND", 404);
+
+      const isValid = await bcrypt.compare(password, client.password);
+      if (!isValid) {
+        throw new AppError("Email ou senha inválidos", "INVALID_CREDENTIALS");
       }
-  
-      const passwordMatch = await bcrypt.compare(password, user.password);
-      if (!passwordMatch) {
-        throw new AppError("Credenciais inválidas", "INVALID_CREDENTIALS", 401);
-      }
-  
+
       const token = jwt.sign(
-        { 
-          userId: user.id, 
-          email: user.email, 
-          role: user.role, 
-          entityId: client.id,
-          firebaseId: user.firebaseId
-        },
-        process.env.JWT_SECRET || "sustentabag_secret_key",
-        { expiresIn: process.env.JWT_EXPIRATION || "24h" }
+        { id: client.id, role: "client" },
+        process.env.JWT_SECRET,
+        { expiresIn: "1d" }
       );
-  
+
       return res.json({
-        user,
-        client,
         token,
+        client: {
+          id: client.id,
+          name: client.name,
+          email: client.email,
+          cpf: client.cpf,
+          phone: client.phone,
+          status: client.status
+        }
       });
     } catch (error) {
       next(error);

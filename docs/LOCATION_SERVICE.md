@@ -6,6 +6,7 @@ This module provides location-based services for the Sustenta-bag application, a
 
 - Geocoding of addresses to obtain geographic coordinates
 - Finding nearby businesses within a specified radius
+- Finding nearby businesses based on logged-in client's address
 - Distance calculation between locations
 - Integration with Mapbox API for enhanced geolocation services
 
@@ -23,7 +24,51 @@ This module provides location-based services for the Sustenta-bag application, a
 
 ## API Endpoints
 
-### Find Nearby Businesses
+### Find Nearby Businesses by Logged-in Client
+
+```
+GET /api/location/nearby/client
+```
+
+Find businesses near the logged-in client's address. This endpoint requires authentication with a client role.
+
+**Authentication**:
+- Requires a valid JWT token in the Authorization header
+- Token must be from a user with role "client"
+
+**Parameters**:
+- `radius` (query, optional): Search radius in kilometers (default: 10)
+- `limit` (query, optional): Maximum number of results to return (default: 10)
+
+**Response**:
+```json
+{
+  "count": 3,
+  "data": [
+    {
+      "id": 1,
+      "name": "Example Business",
+      "legalName": "Example Business Ltd.",
+      "logo": "/uploads/logos/example.png",
+      "distance": 2.34,
+      "address": {
+        "street": "Main Street",
+        "number": "123",
+        "city": "Example City",
+        "state": "EX",
+        "zipCode": "12345678"
+      }
+    }
+  ]
+}
+```
+
+**Error Responses**:
+- `400 Bad Request`: Client has no address
+- `401 Unauthorized`: Authentication required or invalid token
+- `403 Forbidden`: Access allowed only for clients
+
+### Find Nearby Businesses by Address ID
 
 ```
 GET /api/location/nearby/:addressId

@@ -30,6 +30,15 @@ class ClientModel extends Model {
           allowNull: true,
           field: 'telefone',
         },
+        idAddress: {
+          type: DataTypes.INTEGER,
+          allowNull: true,
+          field: 'idEndereco',
+          references: {
+            model: 'enderecos',
+            key: 'id'
+          }
+        },
         status: {
           type: DataTypes.INTEGER,
           allowNull: false,
@@ -52,6 +61,15 @@ class ClientModel extends Model {
         updatedAt: 'dataAtualizacao',
       }
     );
+  }
+
+  static associate(models) {
+    if (models.AddressModel) {
+      this.belongsTo(models.AddressModel, {
+        foreignKey: 'idAddress',
+        as: 'address'
+      });
+    }
   }
 }
 
