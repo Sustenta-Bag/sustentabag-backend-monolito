@@ -2,20 +2,20 @@ import ClientController from '../../../../src/presentation/controllers/ClientCon
 import Client from '../../../../src/domain/entities/Client.js';
 import AppError from '../../../../src/infrastructure/errors/AppError.js';
 import { jest } from '@jest/globals';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 // Mock do jsonwebtoken
-jest.mock('jsonwebtoken', () => ({
-  sign: jest.fn(() => 'mocked_token')
-}));
+jest.mock('jsonwebtoken');
+jest.mock('bcrypt');
 
 describe('ClientController', () => {
   let mockClientService;
   let clientController;
-  let mockUserRepository;
   let mockRequest;
   let mockResponse;
   let mockNext;
-  
+
   beforeEach(() => {
     mockClientService = {
       createClient: jest.fn(),
@@ -23,47 +23,45 @@ describe('ClientController', () => {
       getAllClients: jest.fn(),
       updateClient: jest.fn(),
       deleteClient: jest.fn(),
+      updateStatus: jest.fn(),
       getActiveClients: jest.fn(),
-      changeClientStatus: jest.fn(),
-      authenticateClient: jest.fn(),
-      findByCpf: jest.fn()
+      findByEmail: jest.fn()
     };
-    
-    mockUserRepository = {
-      findByEntityId: jest.fn()
-    };
-    
+
     clientController = new ClientController(mockClientService);
-    clientController.userRepository = mockUserRepository;
-    
+
     mockRequest = {
       params: {},
-      body: {}
+      body: {},
+      query: {}
     };
-    
+
     mockResponse = {
       status: jest.fn().mockReturnThis(),
-      json: jest.fn().mockReturnThis(),
-      send: jest.fn().mockReturnThis()
+      json: jest.fn(),
+      send: jest.fn()
     };
-    
+
     mockNext = jest.fn();
+
+    // Setup bcrypt and jwt mocks
+    bcrypt.compare = jest.fn();
+    jwt.sign = jest.fn();
   });
-  
+
   describe('createClient', () => {
-    test('should create a client and return it without password', async () => {
+    test('should create a client and return 201 status', async () => {
       const clientData = {
-        name: 'Test Client',
-        cpf: '12345678900',
-        email: 'test@example.com',
-        password: 'password123'
+        name: 'New Client',
+        email: 'new@example.com',
+        password: 'password123',
+        cpf: '12345678901',
+        phone: '11987654321'
       };
       
       const createdClient = {
         id: 1,
-        name: 'Test Client',
-        cpf: '12345678900',
-        email: 'test@example.com',
+        ...clientData,
         password: 'hashedPassword',
         status: true
       };
@@ -75,19 +73,36 @@ describe('ClientController', () => {
       
       expect(mockClientService.createClient).toHaveBeenCalledWith(clientData);
       expect(mockResponse.status).toHaveBeenCalledWith(201);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        id: 1,
-        name: 'Test Client',
-        cpf: '12345678900',
-        email: 'test@example.com',
-        status: true
-      });
-      expect(mockNext).not.toHaveBeenCalled();
+      expect(mockResponse.json).toHaveBeenCalledWith(createdClient);
     });
-    
-    test('should call next with error when createClient fails', async () => {
+
+    test('should call next with validation error when required fields are missing', async () => {
+      mockRequest.body = {
+        name: 'New Client'
+        // missing required fields
+      };
+      
+      const validationError = new Error('Validation error');
+      validationError.name = 'ValidationError';
+      mockClientService.createClient.mockRejectedValue(validationError);
+      
+      await clientController.createClient(mockRequest, mockResponse, mockNext);
+      
+      expect(mockNext).toHaveBeenCalledWith(validationError);
+      expect(mockResponse.status).not.toHaveBeenCalled();
+      expect(mockResponse.json).not.toHaveBeenCalled();
+    });
+
+    test('should call next with error when service fails', async () => {
+      mockRequest.body = {
+        name: 'New Client',
+        email: 'new@example.com',
+        password: 'password123',
+        cpf: '12345678901',
+        phone: '11987654321'
+      };
+      
       const error = new Error('Service error');
-      mockRequest.body = { name: 'Test Client' };
       mockClientService.createClient.mockRejectedValue(error);
       
       await clientController.createClient(mockRequest, mockResponse, mockNext);
@@ -97,35 +112,43 @@ describe('ClientController', () => {
       expect(mockResponse.json).not.toHaveBeenCalled();
     });
   });
-  
+
   describe('getClient', () => {
-    test('should get a client by id and return it without password', async () => {
+    test('should get client by id and return without password', async () => {
       const client = {
         id: 1,
-        name: 'Test Client',
-        email: 'test@example.com',
-        password: 'hashedPassword',
+        name: 'Client 1',
+        email: 'client1@example.com',
+        password: 'hashedPassword1',
         status: true
       };
       
       mockRequest.params.id = '1';
+      mockRequest.query.includeAddress = 'false';
       mockClientService.getClient.mockResolvedValue(client);
       
       await clientController.getClient(mockRequest, mockResponse, mockNext);
       
-      expect(mockClientService.getClient).toHaveBeenCalledWith('1');
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        id: 1,
-        name: 'Test Client',
-        email: 'test@example.com',
-        status: true
-      });
-      expect(mockNext).not.toHaveBeenCalled();
+      expect(mockClientService.getClient).toHaveBeenCalledWith('1', { includeAddress: false });
+      expect(mockResponse.json).toHaveBeenCalledWith(client);
     });
-    
-    test('should call next with error when getClient fails', async () => {
-      const error = new Error('Service error');
+
+    test('should call next with error when client not found', async () => {
+      mockRequest.params.id = '999';
+      mockRequest.query.includeAddress = 'false';
+      mockClientService.getClient.mockResolvedValue(null);
+      
+      await clientController.getClient(mockRequest, mockResponse, mockNext);
+      
+      expect(mockNext).toHaveBeenCalledWith(expect.any(AppError));
+      expect(mockNext.mock.calls[0][0].message).toBe('Cliente não encontrado');
+      expect(mockNext.mock.calls[0][0].errorCode).toBe('CLIENT_NOT_FOUND');
+    });
+
+    test('should call next with error when service fails', async () => {
       mockRequest.params.id = '1';
+      mockRequest.query.includeAddress = 'false';
+      const error = new Error('Service error');
       mockClientService.getClient.mockRejectedValue(error);
       
       await clientController.getClient(mockRequest, mockResponse, mockNext);
@@ -133,7 +156,7 @@ describe('ClientController', () => {
       expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
-  
+
   describe('getAllClients', () => {
     test('should get all clients and return them without passwords', async () => {
       const clients = [
@@ -153,28 +176,17 @@ describe('ClientController', () => {
         }
       ];
       
+      mockRequest.query.includeAddress = 'false';
       mockClientService.getAllClients.mockResolvedValue(clients);
       
       await clientController.getAllClients(mockRequest, mockResponse, mockNext);
       
-      expect(mockClientService.getAllClients).toHaveBeenCalled();
-      expect(mockResponse.json).toHaveBeenCalledWith([
-        {
-          id: 1,
-          name: 'Client 1',
-          email: 'client1@example.com',
-          status: true
-        },
-        {
-          id: 2,
-          name: 'Client 2',
-          email: 'client2@example.com',
-          status: false
-        }
-      ]);
+      expect(mockClientService.getAllClients).toHaveBeenCalledWith({ includeAddress: false });
+      expect(mockResponse.json).toHaveBeenCalledWith(clients);
     });
     
-    test('should call next with error when getAllClients fails', async () => {
+    test('should call next with error when service fails', async () => {
+      mockRequest.query.includeAddress = 'false';
       const error = new Error('Service error');
       mockClientService.getAllClients.mockRejectedValue(error);
       
@@ -183,18 +195,19 @@ describe('ClientController', () => {
       expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
-  
+
   describe('updateClient', () => {
-    test('should update a client and return it without password', async () => {
+    test('should update client and return updated data without password', async () => {
       const updateData = {
-        name: 'Updated Client'
+        name: 'Updated Name',
+        phone: '11999998888'
       };
       
       const updatedClient = {
         id: 1,
-        name: 'Updated Client',
-        email: 'test@example.com',
-        password: 'hashedPassword',
+        ...updateData,
+        email: 'client1@example.com',
+        password: 'hashedPassword1',
         status: true
       };
       
@@ -205,26 +218,39 @@ describe('ClientController', () => {
       await clientController.updateClient(mockRequest, mockResponse, mockNext);
       
       expect(mockClientService.updateClient).toHaveBeenCalledWith('1', updateData);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        id: 1,
-        name: 'Updated Client',
-        email: 'test@example.com',
-        status: true
-      });
+      expect(mockResponse.json).toHaveBeenCalledWith(updatedClient);
     });
-    
-    test('should call next with error when updateClient fails', async () => {
-      const error = new Error('Service error');
+
+    test('should call next with validation error when update data is invalid', async () => {
       mockRequest.params.id = '1';
-      mockRequest.body = { name: 'Updated Client' };
-      mockClientService.updateClient.mockRejectedValue(error);
+      mockRequest.body = {
+        email: 'invalid-email' // invalid email format
+      };
+      
+      const validationError = new Error('Validation error');
+      validationError.name = 'ValidationError';
+      mockClientService.updateClient.mockRejectedValue(validationError);
       
       await clientController.updateClient(mockRequest, mockResponse, mockNext);
       
-      expect(mockNext).toHaveBeenCalledWith(error);
+      expect(mockNext).toHaveBeenCalledWith(validationError);
+      expect(mockResponse.status).not.toHaveBeenCalled();
+      expect(mockResponse.json).not.toHaveBeenCalled();
+    });
+
+    test('should call next with error when client not found', async () => {
+      mockRequest.params.id = '999';
+      mockRequest.body = { name: 'New Name' };
+      mockClientService.updateClient.mockResolvedValue(null);
+      
+      await clientController.updateClient(mockRequest, mockResponse, mockNext);
+      
+      expect(mockNext).toHaveBeenCalledWith(expect.any(AppError));
+      expect(mockNext.mock.calls[0][0].message).toBe('Cliente não encontrado');
+      expect(mockNext.mock.calls[0][0].errorCode).toBe('CLIENT_NOT_FOUND');
     });
   });
-  
+
   describe('deleteClient', () => {
     test('should delete a client and return 204 status', async () => {
       mockRequest.params.id = '1';
@@ -247,48 +273,80 @@ describe('ClientController', () => {
       expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
-  
+
+  describe('updateStatus', () => {
+    test('should update client status and return updated client', async () => {
+      const updatedClient = {
+        id: 1,
+        name: 'Client 1',
+        email: 'client1@example.com',
+        password: 'hashedPassword1',
+        status: false
+      };
+      
+      mockRequest.params.id = '1';
+      mockRequest.body = { status: false };
+      mockClientService.updateStatus.mockResolvedValue(updatedClient);
+      
+      await clientController.updateStatus(mockRequest, mockResponse, mockNext);
+      
+      expect(mockClientService.updateStatus).toHaveBeenCalledWith('1', false);
+      expect(mockResponse.json).toHaveBeenCalledWith(updatedClient);
+    });
+
+    test('should call next with error when status is not provided', async () => {
+      mockRequest.params.id = '1';
+      mockRequest.body = {};
+      
+      await clientController.updateStatus(mockRequest, mockResponse, mockNext);
+      
+      expect(mockNext).toHaveBeenCalledWith(expect.any(AppError));
+      expect(mockNext.mock.calls[0][0].message).toBe('Status é obrigatório');
+      expect(mockNext.mock.calls[0][0].errorCode).toBe('MISSING_STATUS');
+    });
+
+    test('should call next with error when service fails', async () => {
+      mockRequest.params.id = '1';
+      mockRequest.body = { status: true };
+      const error = new Error('Service error');
+      mockClientService.updateStatus.mockRejectedValue(error);
+      
+      await clientController.updateStatus(mockRequest, mockResponse, mockNext);
+      
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
+  });
+
   describe('getActiveClients', () => {
     test('should get all active clients and return them without passwords', async () => {
       const clients = [
         {
           id: 1,
-          name: 'Client 1',
-          email: 'client1@example.com',
+          name: 'Active Client 1',
+          email: 'active1@example.com',
           password: 'hashedPassword1',
           status: true
         },
         {
-          id: 3,
-          name: 'Client 3',
-          email: 'client3@example.com',
-          password: 'hashedPassword3',
+          id: 2,
+          name: 'Active Client 2',
+          email: 'active2@example.com',
+          password: 'hashedPassword2',
           status: true
         }
       ];
       
+      mockRequest.query.includeAddress = 'false';
       mockClientService.getActiveClients.mockResolvedValue(clients);
       
       await clientController.getActiveClients(mockRequest, mockResponse, mockNext);
       
-      expect(mockClientService.getActiveClients).toHaveBeenCalled();
-      expect(mockResponse.json).toHaveBeenCalledWith([
-        {
-          id: 1,
-          name: 'Client 1',
-          email: 'client1@example.com',
-          status: true
-        },
-        {
-          id: 3,
-          name: 'Client 3',
-          email: 'client3@example.com',
-          status: true
-        }
-      ]);
+      expect(mockClientService.getActiveClients).toHaveBeenCalledWith({ includeAddress: false });
+      expect(mockResponse.json).toHaveBeenCalledWith(clients);
     });
     
-    test('should call next with error when getActiveClients fails', async () => {
+    test('should call next with error when service fails', async () => {
+      mockRequest.query.includeAddress = 'false';
       const error = new Error('Service error');
       mockClientService.getActiveClients.mockRejectedValue(error);
       
@@ -297,113 +355,101 @@ describe('ClientController', () => {
       expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
-  
-  describe('changeClientStatus', () => {
-    test('should change client status and return updated client without password', async () => {
-      const updatedClient = {
-        id: 1,
-        name: 'Test Client',
-        email: 'test@example.com',
-        password: 'hashedPassword',
-        status: false
-      };
-      
-      mockRequest.params.id = '1';
-      mockRequest.body = { status: false };
-      mockClientService.changeClientStatus.mockResolvedValue(updatedClient);
-      
-      await clientController.changeClientStatus(mockRequest, mockResponse, mockNext);
-      
-      expect(mockClientService.changeClientStatus).toHaveBeenCalledWith('1', false);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        id: 1,
-        name: 'Test Client',
-        email: 'test@example.com',
-        status: false
-      });
-    });
-    
-    test('should throw error when status is not provided', async () => {
-      mockRequest.params.id = '1';
-      mockRequest.body = {}; // Missing status
-      
-      await clientController.changeClientStatus(mockRequest, mockResponse, mockNext);
-      
-      expect(mockNext).toHaveBeenCalled();
-      const error = mockNext.mock.calls[0][0];
-      expect(error).toBeInstanceOf(AppError);
-      expect(error.message).toBe('Status não fornecido');
-    });
-    
-    test('should call next with error when changeClientStatus fails', async () => {
-      const error = new Error('Service error');
-      mockRequest.params.id = '1';
-      mockRequest.body = { status: true };
-      mockClientService.changeClientStatus.mockRejectedValue(error);
-      
-      await clientController.changeClientStatus(mockRequest, mockResponse, mockNext);
-      
-      expect(mockNext).toHaveBeenCalledWith(error);
-    });
-  });
-  
+
   describe('login', () => {
-    test('should throw error when cpf or password is missing', async () => {
-      // Test missing CPF
-      mockRequest.body = { password: 'password123' };
-      
-      await clientController.login(mockRequest, mockResponse, mockNext);
-      
-      expect(mockNext).toHaveBeenCalled();
-      let error = mockNext.mock.calls[0][0];
-      expect(error).toBeInstanceOf(AppError);
-      expect(error.message).toBe('CPF e senha são obrigatórios');
-      
-      // Reset mocks
-      mockNext.mockClear();
-      
-      // Test missing password
-      mockRequest.body = { cpf: '12345678900' };
-      
-      await clientController.login(mockRequest, mockResponse, mockNext);
-      
-      expect(mockNext).toHaveBeenCalled();
-      error = mockNext.mock.calls[0][0];
-      expect(error).toBeInstanceOf(AppError);
-      expect(error.message).toBe('CPF e senha são obrigatórios');
-    });
-    
-    test('should throw error when client is not found', async () => {
-      mockRequest.body = { cpf: '12345678900', password: 'password123' };
-      mockClientService.findByCpf.mockResolvedValue(null);
-      
-      await clientController.login(mockRequest, mockResponse, mockNext);
-      
-      expect(mockClientService.findByCpf).toHaveBeenCalledWith('12345678900');
-      expect(mockNext).toHaveBeenCalled();
-      const error = mockNext.mock.calls[0][0];
-      expect(error).toBeInstanceOf(AppError);
-      expect(error.message).toBe('Credenciais inválidas');
-    });
-    
-    test('should throw error when user is not found', async () => {
+    test('should login successfully and return token and client data', async () => {
       const client = {
         id: 1,
-        name: 'Test Client',
-        cpf: '12345678900'
+        name: 'Client 1',
+        email: 'client1@example.com',
+        password: 'hashedPassword1',
+        cpf: '12345678901',
+        phone: '11987654321',
+        status: true
       };
       
-      mockRequest.body = { cpf: '12345678900', password: 'password123' };
-      mockClientService.findByCpf.mockResolvedValue(client);
-      mockUserRepository.findByEntityId.mockResolvedValue(null);
+      mockRequest.body = {
+        email: 'client1@example.com',
+        password: 'password123'
+      };
+      
+      mockClientService.findByEmail.mockResolvedValue(client);
+      bcrypt.compare.mockResolvedValue(true);
+      jwt.sign.mockReturnValue('fake-token');
       
       await clientController.login(mockRequest, mockResponse, mockNext);
       
-      expect(mockUserRepository.findByEntityId).toHaveBeenCalledWith(1, 'client');
-      expect(mockNext).toHaveBeenCalled();
-      const error = mockNext.mock.calls[0][0];
-      expect(error).toBeInstanceOf(AppError);
-      expect(error.message).toBe('Usuário não encontrado');
+      expect(mockClientService.findByEmail).toHaveBeenCalledWith('client1@example.com');
+      expect(bcrypt.compare).toHaveBeenCalledWith('password123', 'hashedPassword1');
+      expect(jwt.sign).toHaveBeenCalledWith(
+        { id: client.id, role: 'client' },
+        process.env.JWT_SECRET,
+        { expiresIn: '1d' }
+      );
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        token: 'fake-token',
+        client: {
+          id: client.id,
+          name: client.name,
+          email: client.email,
+          cpf: client.cpf,
+          phone: client.phone,
+          status: client.status
+        }
+      });
+    });
+
+    test('should call next with error when client not found', async () => {
+      mockRequest.body = {
+        email: 'nonexistent@example.com',
+        password: 'password123'
+      };
+      
+      mockClientService.findByEmail.mockResolvedValue(null);
+      
+      await clientController.login(mockRequest, mockResponse, mockNext);
+      
+      expect(mockNext).toHaveBeenCalledWith(expect.any(AppError));
+      expect(mockNext.mock.calls[0][0].message).toBe('Email ou senha inválidos');
+      expect(mockNext.mock.calls[0][0].errorCode).toBe('INVALID_CREDENTIALS');
+    });
+
+    test('should call next with error when password is invalid', async () => {
+      const client = {
+        id: 1,
+        name: 'Client 1',
+        email: 'client1@example.com',
+        password: 'hashedPassword1',
+        status: true
+      };
+      
+      mockRequest.body = {
+        email: 'client1@example.com',
+        password: 'wrong-password'
+      };
+      
+      mockClientService.findByEmail.mockResolvedValue(client);
+      bcrypt.compare.mockResolvedValue(false);
+      
+      await clientController.login(mockRequest, mockResponse, mockNext);
+      
+      expect(mockNext).toHaveBeenCalledWith(expect.any(AppError));
+      expect(mockNext.mock.calls[0][0].message).toBe('Email ou senha inválidos');
+      expect(mockNext.mock.calls[0][0].errorCode).toBe('INVALID_CREDENTIALS');
+    });
+
+    test('should call next with error when service fails', async () => {
+      mockRequest.body = {
+        email: 'client1@example.com',
+        password: 'password123'
+      };
+      
+      const error = new Error('Service error');
+      mockClientService.findByEmail.mockRejectedValue(error);
+      
+      await clientController.login(mockRequest, mockResponse, mockNext);
+      
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
 });

@@ -41,6 +41,7 @@ class LocationController {
   }
 
   async findNearbyBusinessesByClient(req, res, next) {
+    console.log('Entrou em findNearbyBusinessesByClient no LocationController');
     try {
       const { radius, limit } = req.query;
       const clientId = req.user.entityId;

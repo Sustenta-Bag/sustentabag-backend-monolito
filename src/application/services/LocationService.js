@@ -337,6 +337,9 @@ class LocationService {
       console.log(`Buscando cliente com ID: ${clientId}`);
       const client = await this.clientRepository.findByIdWithAddress(clientId);
 
+      // Add log here to inspect the client object
+      console.log(`Resultado de findByIdWithAddress para cliente ${clientId}:`, JSON.stringify(client, null, 2));
+
       if (!client) {
         throw new AppError(`Cliente não encontrado com o ID ${clientId}`, 'CLIENT_NOT_FOUND', 404);
       }
@@ -352,6 +355,9 @@ class LocationService {
         city: client.address.city,
         hasCoordinates: Boolean(client.address.latitude) && Boolean(client.address.longitude)
       })}`);
+
+      // Add log here to show the address ID being passed to findNearbyBusinesses
+      console.log(`Passando addressId ${client.address.id} para findNearbyBusinesses`);
 
       return this.findNearbyBusinesses(client.address.id, { radius, limit });
     } catch (error) {

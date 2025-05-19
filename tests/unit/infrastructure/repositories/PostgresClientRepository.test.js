@@ -4,6 +4,7 @@ import { jest } from '@jest/globals';
 
 describe('PostgresClientRepository', () => {
   let mockClientModel;
+  let mockAddressModel;
   let repository;
 
   const clientData = {
@@ -18,41 +19,70 @@ describe('PostgresClientRepository', () => {
   };
 
   beforeEach(() => {
+    mockAddressModel = {
+      id: 1,
+      street: 'Test Street',
+      city: 'Test City',
+      state: 'TS',
+      zipCode: '12345678'
+    };
+
     mockClientModel = {
       create: jest.fn(),
       findByPk: jest.fn(),
       findOne: jest.fn(),
       findAll: jest.fn(),
       update: jest.fn(),
-      destroy: jest.fn()
+      destroy: jest.fn(),
+      belongsTo: jest.fn(),
+      hasOne: jest.fn(),
+      associations: {
+        address: {
+          target: mockAddressModel
+        }
+      }
     };
+
+    Object.defineProperty(mockClientModel, 'AddressModel', {
+      get: () => mockAddressModel
+    });
     
     repository = new PostgresClientRepository(mockClientModel);
+    
+    repository.ClientModel = mockClientModel;
+    repository.AddressModel = mockAddressModel;
   });
 
-  // describe('create', () => {
-  //   test('should create a client and return domain entity', async () => {
-  //     const mockClientRecord = {
-  //       ...clientData,
-  //       toJSON: () => clientData
-  //     };
+  describe('create', () => {
+    test('should create a client and return domain entity', async () => {
+      const mockClientRecord = {
+        ...clientData,
+        toJSON: () => ({ ...clientData })
+      };
       
-  //     mockClientModel.create.mockResolvedValue(mockClientRecord);
+      mockClientModel.create.mockResolvedValue(mockClientRecord);
       
-  //     const result = await repository.create(clientData);
+      const result = await repository.create(clientData);
       
-  //     expect(mockClientModel.create).toHaveBeenCalledWith(clientData);
-  //     expect(result).toBeInstanceOf(Client);
-  //     expect(result.id).toBe(clientData.id);
-  //     expect(result.name).toBe(clientData.name);
-  //     expect(result.email).toBe(clientData.email);
-  //     expect(result.cpf).toBe(clientData.cpf);
-  //     expect(result.password).toBe(clientData.password);
-  //     expect(result.phone).toBe(clientData.phone);
-  //     expect(result.status).toBe(clientData.status);
-  //     expect(result.createdAt).toEqual(clientData.createdAt);
-  //   });
-  // });
+      expect(mockClientModel.create).toHaveBeenCalledWith(clientData);
+      expect(result).toBeInstanceOf(Client);
+      expect(result.id).toBe(clientData.id);
+      expect(result.name).toBe(clientData.name);
+      expect(result.email).toBe(clientData.email);
+      expect(result.cpf).toBe(clientData.cpf);
+      expect(result.phone).toBe(clientData.phone);
+      expect(result.status).toBe(clientData.status);
+      expect(result.createdAt).toEqual(clientData.createdAt);
+      expect(result.password).toBeUndefined();
+    });
+
+    test('should throw an error when create fails', async () => {
+      const error = new Error('Database error');
+      mockClientModel.create.mockRejectedValue(error);
+      
+      await expect(repository.create(clientData)).rejects.toThrow(error);
+    });
+  });
 
   describe('findById', () => {
     test('should find a client by id and return domain entity', async () => {
@@ -179,36 +209,226 @@ describe('PostgresClientRepository', () => {
     });
   });
 
-  describe('update', () => {
-    // test('should update a client and return domain entity', async () => {
-    //   const updateData = { name: 'João Santos Silva', phone: '11999998888' };
-    //   const updatedClientData = { ...clientData, ...updateData };
-    //   const mockClientRecord = {
-    //     ...updatedClientData,
-    //     toJSON: () => updatedClientData
-    //   };
+  describe('findByIdWithAddress', () => {
+    test('should find a client by id with address and return domain entity', async () => {
+      const mockClientRecord = {
+        ...clientData,
+        address: mockAddressModel,
+        toJSON: () => ({
+          ...clientData,
+          address: mockAddressModel
+        })
+      };
       
-    //   mockClientModel.update.mockResolvedValue([1]);
-    //   mockClientModel.findByPk.mockResolvedValue(mockClientRecord);
+      mockClientModel.findByPk.mockResolvedValue(mockClientRecord);
       
-    //   const result = await repository.update(1, updateData);
+      const result = await repository.findByIdWithAddress(1);
       
-    //   expect(mockClientModel.update).toHaveBeenCalledWith(updateData, { where: { id: 1 } });
-    //   expect(mockClientModel.findByPk).toHaveBeenCalledWith(1);
-    //   expect(result).toBeInstanceOf(Client);
-    //   expect(result.name).toBe(updateData.name);
-    //   expect(result.phone).toBe(updateData.phone);
-    // });
+      expect(mockClientModel.findByPk).toHaveBeenCalledWith(1, {
+        include: [{ 
+          model: mockAddressModel, 
+          as: 'address',
+          required: false 
+        }]
+      });
+      expect(result).toBeInstanceOf(Client);
+      expect(result.id).toBe(clientData.id);
+      expect(result.address).toBeDefined();
+      expect(result.address.street).toBe('Test Street');
+    });
     
-    test('should return null when client not found after update', async () => {
-      mockClientModel.update.mockResolvedValue([1]);
+    test('should return null when client not found with address', async () => {
       mockClientModel.findByPk.mockResolvedValue(null);
       
-      const result = await repository.update(999, { name: 'Novo Nome' });
+      const result = await repository.findByIdWithAddress(999);
       
-      expect(mockClientModel.update).toHaveBeenCalledWith({ name: 'Novo Nome' }, { where: { id: 999 } });
-      expect(mockClientModel.findByPk).toHaveBeenCalledWith(999);
+      expect(mockClientModel.findByPk).toHaveBeenCalledWith(999, {
+        include: [{ 
+          model: mockAddressModel, 
+          as: 'address',
+          required: false 
+        }]
+      });
       expect(result).toBeNull();
+    });
+
+    test('should throw error when findByIdWithAddress fails', async () => {
+      const error = new Error('Database error');
+      mockClientModel.findByPk.mockRejectedValue(error);
+      
+      await expect(repository.findByIdWithAddress(1)).rejects.toThrow(error);
+    });
+  });
+
+  describe('findAllWithAddress', () => {
+    test('should return all clients with addresses as domain entities', async () => {
+      const mockClientRecords = [
+        {
+          ...clientData,
+          id: 1,
+          address: mockAddressModel,
+          toJSON: () => ({
+            ...clientData,
+            id: 1,
+            address: mockAddressModel
+          })
+        },
+        {
+          ...clientData,
+          id: 2,
+          cpf: '98765432101',
+          email: 'outro@email.com',
+          address: {
+            ...mockAddressModel,
+            id: 2,
+            street: 'Test Street 2',
+            zipCode: '87654321'
+          },
+          toJSON: () => ({
+            ...clientData,
+            id: 2,
+            cpf: '98765432101',
+            email: 'outro@email.com',
+            address: {
+              ...mockAddressModel,
+              id: 2,
+              street: 'Test Street 2',
+              zipCode: '87654321'
+            }
+          })
+        }
+      ];
+      
+      mockClientModel.findAll.mockResolvedValue(mockClientRecords);
+      
+      const results = await repository.findAllWithAddress();
+      
+      expect(mockClientModel.findAll).toHaveBeenCalledWith({
+        include: [{ 
+          model: mockAddressModel, 
+          as: 'address',
+          required: false 
+        }]
+      });
+      expect(results).toHaveLength(2);
+      expect(results[0]).toBeInstanceOf(Client);
+      expect(results[1]).toBeInstanceOf(Client);
+      expect(results[0].address).toBeDefined();
+      expect(results[1].address).toBeDefined();
+      expect(results[0].address.street).toBe('Test Street');
+      expect(results[1].address.street).toBe('Test Street 2');
+    });
+    
+    test('should return empty array when no clients found with addresses', async () => {
+      mockClientModel.findAll.mockResolvedValue([]);
+      
+      const results = await repository.findAllWithAddress();
+      
+      expect(mockClientModel.findAll).toHaveBeenCalledWith({
+        include: [{ 
+          model: mockAddressModel, 
+          as: 'address',
+          required: false 
+        }]
+      });
+      expect(results).toEqual([]);
+    });
+
+    test('should throw error when findAllWithAddress fails', async () => {
+      const error = new Error('Database error');
+      mockClientModel.findAll.mockRejectedValue(error);
+      
+      await expect(repository.findAllWithAddress()).rejects.toThrow(error);
+    });
+  });
+
+  describe('update', () => {
+    test('should update a client and return domain entity with address', async () => {
+      const updateData = { name: 'João Santos Silva', phone: '11999998888' };
+      
+      // Create a mock address that will be included in the response
+      const mockAddress = {
+        ...mockAddressModel,
+        toJSON: () => ({
+          ...mockAddressModel,
+          street: 'Test Street',
+          city: 'Test City',
+          state: 'TS',
+          zipCode: '12345678'
+        })
+      };
+
+      // Create the mock client record with the address
+      const mockClientRecord = {
+        ...clientData,
+        ...updateData,
+        address: mockAddress,
+        toJSON: () => ({
+          ...clientData,
+          ...updateData,
+          address: {
+            ...mockAddressModel,
+            street: 'Test Street',
+            city: 'Test City',
+            state: 'TS',
+            zipCode: '12345678'
+          }
+        })
+      };
+      
+      // Reset mock before test
+      mockClientModel.findByPk.mockReset();
+      
+      // Mock the update to succeed
+      mockClientModel.update.mockResolvedValue([1]);
+      
+      // Mock findByPk to return the client with address
+      mockClientModel.findByPk.mockImplementation((id, options) => {
+        if (options && options.include && options.include[0].as === 'address') {
+          return Promise.resolve(mockClientRecord);
+        }
+        return Promise.resolve(null);
+      });
+      
+      const result = await repository.update(1, updateData, { includeAddress: true });
+      
+      // Verify the update call
+      expect(mockClientModel.update).toHaveBeenCalledWith(updateData, { where: { id: 1 } });
+      
+      // Verify the findByPk call was made with include options
+      expect(mockClientModel.findByPk).toHaveBeenCalledWith(1, {
+        include: [{ 
+          model: mockAddressModel,
+          as: 'address',
+          required: false
+        }]
+      });
+      
+      // Verify the result
+      expect(result).toBeInstanceOf(Client);
+      expect(result.name).toBe(updateData.name);
+      expect(result.phone).toBe(updateData.phone);
+      expect(result.address).toBeDefined();
+      expect(result.address.street).toBe('Test Street');
+    });
+
+    test('should update a client without address when includeAddress is false', async () => {
+      const updateData = { name: 'João Santos Silva' };
+      const updatedClientData = { ...clientData, ...updateData };
+      const mockClientRecord = {
+        ...updatedClientData,
+        toJSON: () => updatedClientData
+      };
+      
+      mockClientModel.update.mockResolvedValue([1]);
+      mockClientModel.findByPk.mockResolvedValue(mockClientRecord);
+      
+      const result = await repository.update(1, updateData, { includeAddress: false });
+      
+      expect(mockClientModel.findByPk).toHaveBeenCalledWith(1);
+      expect(result).toBeInstanceOf(Client);
+      expect(result.name).toBe(updateData.name);
+      expect(result.address).toBeUndefined();
     });
   });
 
@@ -233,47 +453,43 @@ describe('PostgresClientRepository', () => {
   });
 
   describe('findActiveClients', () => {
-    // test('should find active clients and return domain entities', async () => {
-    //   const mockClientRecords = [
-    //     {
-    //       ...clientData,
-    //       id: 1,
-    //       status: 1,
-    //       toJSON: () => ({ ...clientData, id: 1, status: 1 })
-    //     },
-    //     {
-    //       ...clientData,
-    //       id: 2,
-    //       cpf: '98765432101',
-    //       email: 'outro@email.com',
-    //       status: 1,
-    //       toJSON: () => ({ ...clientData, id: 2, cpf: '98765432101', email: 'outro@email.com', status: 1 })
-    //     }
-    //   ];
+    test('should find active clients and return domain entities', async () => {
+      const mockClientRecords = [
+        {
+          ...clientData,
+          id: 1,
+          status: 1,
+          toJSON: () => ({ ...clientData, id: 1, status: 1 })
+        },
+        {
+          ...clientData,
+          id: 2,
+          cpf: '98765432101',
+          email: 'outro@email.com',
+          status: 1,
+          toJSON: () => ({ ...clientData, id: 2, cpf: '98765432101', email: 'outro@email.com', status: 1 })
+        }
+      ];
       
-    //   mockClientModel.findAll.mockResolvedValue(mockClientRecords);
-      
-    //   const results = await repository.findActiveClients();
-      
-    //   expect(mockClientModel.findAll).toHaveBeenCalledWith({
-    //     where: { status: 1 }
-    //   });
-    //   expect(results).toHaveLength(2);
-    //   expect(results[0]).toBeInstanceOf(Client);
-    //   expect(results[1]).toBeInstanceOf(Client);
-    //   expect(results[0].status).toBe(1);
-    //   expect(results[1].status).toBe(1);
-    // });
-    
-    test('should return empty array when no active clients found', async () => {
-      mockClientModel.findAll.mockResolvedValue([]);
+      mockClientModel.findAll.mockResolvedValue(mockClientRecords);
       
       const results = await repository.findActiveClients();
       
       expect(mockClientModel.findAll).toHaveBeenCalledWith({
         where: { status: 1 }
       });
-      expect(results).toEqual([]);
+      expect(results).toHaveLength(2);
+      expect(results[0]).toBeInstanceOf(Client);
+      expect(results[1]).toBeInstanceOf(Client);
+      expect(results[0].status).toBe(1);
+      expect(results[1].status).toBe(1);
+    });
+    
+    test('should throw an error when findActiveClients fails', async () => {
+      const error = new Error('Database error');
+      mockClientModel.findAll.mockRejectedValue(error);
+      
+      await expect(repository.findActiveClients()).rejects.toThrow(error);
     });
   });
 });

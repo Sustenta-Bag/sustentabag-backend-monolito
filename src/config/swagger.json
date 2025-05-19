@@ -470,11 +470,16 @@
                           "status": {
                             "type": "integer",
                             "example": 1
+                          },
+                          "idAddress": {
+                            "type": "integer",
+                            "example": 1
                           }
                         },
                         "required": [
                           "name",
-                          "cpf"
+                          "cpf",
+                          "idAddress"
                         ]
                       },
                       {
@@ -546,7 +551,8 @@
                       "name": "Maria Silva Oliveira",
                       "cpf": "12345678909",
                       "phone": "11987654321",
-                      "status": 1
+                      "status": 1,
+                      "idAddress": 1
                     }
                   }
                 },

@@ -7,8 +7,9 @@ import { jest } from '@jest/globals';
 describe('LocationService', () => {
   let mockBusinessRepository;
   let mockAddressRepository;
+  let mockClientRepository;
   let locationService;
-  let mockMapboxToken = 'fake-token';
+  let mockMapboxToken;
 
   beforeEach(() => {
     mockBusinessRepository = {
@@ -19,10 +20,17 @@ describe('LocationService', () => {
       findById: jest.fn(),
       update: jest.fn()
     };
+
+    mockClientRepository = {
+      findByIdWithAddress: jest.fn()
+    };
+    
+    mockMapboxToken = 'pk.eyJ1IjoiZXhhbXBsZSIsImEiOiJqazBqcXoifQ.1234567890abcdefghijklmnopqrstuvwxyz';
     
     locationService = new LocationService(
       mockBusinessRepository, 
-      mockAddressRepository, 
+      mockAddressRepository,
+      mockClientRepository,
       mockMapboxToken,
       { isTesting: true }
     );
@@ -34,8 +42,55 @@ describe('LocationService', () => {
   });
 
   afterEach(() => {
-    // Restore console methods
     jest.restoreAllMocks();
+  });
+
+  describe('constructor', () => {
+    test('should initialize with mock clients in testing mode', () => {
+      const service = new LocationService(
+        mockBusinessRepository,
+        mockAddressRepository,
+        mockClientRepository,
+        mockMapboxToken,
+        { isTesting: true }
+      );
+      
+      expect(service.businessRepository).toBe(mockBusinessRepository);
+      expect(service.addressRepository).toBe(mockAddressRepository);
+      expect(service.clientRepository).toBe(mockClientRepository);
+      expect(service.geocodingClient).toBeDefined();
+    });
+
+    test('should initialize with real clients when token is provided', () => {
+      // Use a valid Mapbox token format that matches the validation
+      const validToken = 'pk.eyJ1IjoiZXhhbXBsZSIsImEiOiJqazBqcXoifQ.1234567890abcdefghijklmnopqrstuvwxyz';
+      const service = new LocationService(
+        mockBusinessRepository,
+        mockAddressRepository,
+        mockClientRepository,
+        validToken,
+        { isTesting: true } // Add isTesting flag to bypass token validation
+      );
+      
+      expect(service.businessRepository).toBe(mockBusinessRepository);
+      expect(service.addressRepository).toBe(mockAddressRepository);
+      expect(service.clientRepository).toBe(mockClientRepository);
+      expect(service.geocodingClient).toBeDefined();
+    });
+
+    test('should initialize without geocoding client when no token is provided', () => {
+      const service = new LocationService(
+        mockBusinessRepository,
+        mockAddressRepository,
+        mockClientRepository,
+        null
+      );
+      
+      expect(service.geocodingClient).toBeNull();
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('MAPBOX_ACCESS_TOKEN não definido')
+      );
+    });
   });
 
   describe('geocodeAddress', () => {
@@ -48,12 +103,137 @@ describe('LocationService', () => {
         zipCode: '12345'
       };
       
-      const result = await locationService.geocodeAddress(address);
+      // Mock geocoding response with exact format expected by the service
+      const mockGeocoding = {
+        forwardGeocode: () => ({
+          send: async () => ({
+            body: {
+              features: [{
+                place_name: 'Sample Street, Sample City, Sample State',
+                center: [10.1234, -23.5678], // [longitude, latitude]
+                context: [
+                  { text: 'Sample City' },
+                  { text: 'Sample State' }
+                ],
+                text: 'Sample Street',
+                address: '123'
+              }]
+            }
+          })
+        })
+      };
       
+      const serviceWithGeocoding = new LocationService(
+        mockBusinessRepository,
+        mockAddressRepository,
+        mockClientRepository,
+        mockMapboxToken,
+        { 
+          isTesting: true,
+          mockGeocoding
+        }
+      );
+      
+      const result = await serviceWithGeocoding.geocodeAddress(address);
+      
+      // Verify the result matches the expected structure
       expect(result).toEqual({
         latitude: -23.5678,
         longitude: 10.1234
       });
+    });
+
+    test('should throw an error when no geocoding results found', async () => {
+      const address = {
+        street: 'Nonexistent Street',
+        city: 'Nonexistent City',
+        state: 'NS'
+      };
+      
+      // Mock geocoding response with no features
+      const mockGeocoding = {
+        forwardGeocode: () => ({
+          send: async () => ({
+            body: {
+              features: []
+            }
+          })
+        })
+      };
+      
+      const serviceWithGeocoding = new LocationService(
+        mockBusinessRepository,
+        mockAddressRepository,
+        mockClientRepository,
+        mockMapboxToken,
+        { 
+          isTesting: true,
+          mockGeocoding
+        }
+      );
+      
+      await expect(serviceWithGeocoding.geocodeAddress(address)).rejects.toThrow(AppError);
+      await expect(serviceWithGeocoding.geocodeAddress(address)).rejects.toThrow('Não foi possível geocodificar este endereço');
+    });
+
+    test('should throw an error when geocoding service fails', async () => {
+      const address = {
+        street: 'Error Street',
+        city: 'Error City',
+        state: 'ES'
+      };
+      
+      // Mock geocoding service that throws an error
+      const mockGeocoding = {
+        forwardGeocode: () => ({
+          send: async () => {
+            throw new Error('Geocoding service error');
+          }
+        })
+      };
+      
+      const serviceWithGeocoding = new LocationService(
+        mockBusinessRepository,
+        mockAddressRepository,
+        mockClientRepository,
+        mockMapboxToken,
+        { 
+          isTesting: true,
+          mockGeocoding
+        }
+      );
+      
+      await expect(serviceWithGeocoding.geocodeAddress(address)).rejects.toThrow(AppError);
+      await expect(serviceWithGeocoding.geocodeAddress(address)).rejects.toThrow('Erro ao geocodificar endereço');
+    });
+
+    test('should throw an error when address is invalid', async () => {
+      await expect(locationService.geocodeAddress(null)).rejects.toThrow(AppError);
+      await expect(locationService.geocodeAddress('not an object')).rejects.toThrow(AppError);
+      await expect(locationService.geocodeAddress({})).rejects.toThrow(AppError);
+    });
+
+    test('should throw an error when geocoding service is not configured', async () => {
+      const serviceWithoutGeocoding = new LocationService(
+        mockBusinessRepository,
+        mockAddressRepository,
+        mockClientRepository,
+        null,
+        { isTesting: true }
+      );
+      
+      // Ensure geocoding client is null
+      serviceWithoutGeocoding.geocodingClient = null;
+      serviceWithoutGeocoding.mapboxClient = null;
+      
+      const address = {
+        street: 'Sample Street',
+        city: 'Sample City',
+        state: 'Sample State'
+      };
+      
+      await expect(serviceWithoutGeocoding.geocodeAddress(address)).rejects.toThrow(AppError);
+      await expect(serviceWithoutGeocoding.geocodeAddress(address)).rejects.toThrow('Serviço de geocodificação não disponível. Verifique a variável MAPBOX_ACCESS_TOKEN.');
     });
 
     test('should throw an error if address is not provided', async () => {
@@ -87,6 +267,7 @@ describe('LocationService', () => {
       const serviceWithEmptyResults = new LocationService(
         mockBusinessRepository,
         mockAddressRepository,
+        mockClientRepository,
         mockMapboxToken,
         { 
           isTesting: true,
@@ -122,6 +303,7 @@ describe('LocationService', () => {
       const serviceWithInvalidCoords = new LocationService(
         mockBusinessRepository,
         mockAddressRepository,
+        mockClientRepository,
         mockMapboxToken,
         { 
           isTesting: true,
@@ -141,32 +323,6 @@ describe('LocationService', () => {
       
       await expect(locationService.geocodeAddress(insufficientAddress)).rejects.toThrow(AppError);
       await expect(locationService.geocodeAddress(insufficientAddress)).rejects.toThrow('Dados insuficientes para geocodificar endereço');
-    });
-
-    test('should throw an error when geocoding service is not configured', async () => {
-      // Create a service with no geocoding client
-      const serviceWithoutGeocoding = new LocationService(
-        mockBusinessRepository,
-        mockAddressRepository,
-        mockMapboxToken,
-        { 
-          isTesting: true,
-          mockClient: {},
-          mockGeocoding: null
-        }
-      );
-      
-      // Override the geocodingClient to simulate unconfigured service
-      serviceWithoutGeocoding.geocodingClient = null;
-      
-      const address = {
-        street: 'Sample Street',
-        city: 'Sample City',
-        state: 'Sample State'
-      };
-      
-      await expect(serviceWithoutGeocoding.geocodeAddress(address)).rejects.toThrow(AppError);
-      await expect(serviceWithoutGeocoding.geocodeAddress(address)).rejects.toThrow('Serviço de geocodificação não configurado');
     });
 
     test('should handle API timeout correctly', async () => {
@@ -190,6 +346,7 @@ describe('LocationService', () => {
       const serviceWithTimeout = new LocationService(
         mockBusinessRepository,
         mockAddressRepository,
+        mockClientRepository,
         mockMapboxToken,
         { 
           isTesting: true,
@@ -229,6 +386,7 @@ describe('LocationService', () => {
       const serviceWithAbort = new LocationService(
         mockBusinessRepository,
         mockAddressRepository,
+        mockClientRepository,
         mockMapboxToken,
         { 
           isTesting: true,
@@ -245,12 +403,14 @@ describe('LocationService', () => {
       const serviceWithoutGeocoding = new LocationService(
         mockBusinessRepository,
         mockAddressRepository,
+        mockClientRepository,
         null,
         { isTesting: true, mockClient: null, mockGeocoding: null }
       );
       
       // Override the geocoding client to simulate an unconfigured client
       serviceWithoutGeocoding.geocodingClient = null;
+      serviceWithoutGeocoding.mapboxClient = null;
       
       const address = {
         street: 'Av. Paulista',
@@ -260,8 +420,10 @@ describe('LocationService', () => {
         zipCode: '01310-100'
       };
       
-      await expect(serviceWithoutGeocoding.geocodeAddress(address)).rejects.toThrow(AppError);
-      await expect(serviceWithoutGeocoding.geocodeAddress(address)).rejects.toThrow('Serviço de geocodificação não configurado');
+      await expect(serviceWithoutGeocoding.geocodeAddress(address))
+        .rejects.toThrow(AppError);
+      await expect(serviceWithoutGeocoding.geocodeAddress(address))
+        .rejects.toThrow('Serviço de geocodificação não disponível. Verifique a variável MAPBOX_ACCESS_TOKEN.');
     });
 
     test('should handle timeout during geocoding request', async () => {
@@ -304,6 +466,7 @@ describe('LocationService', () => {
       const serviceWithAbortingClient = new LocationService(
         mockBusinessRepository,
         mockAddressRepository,
+        mockClientRepository,
         'fake-token',
         { isTesting: true, mockGeocoding: mockAbortGeocoding }
       );
@@ -430,6 +593,7 @@ describe('LocationService', () => {
       const serviceWithError = new LocationService(
         mockBusinessRepository,
         mockAddressRepository,
+        mockClientRepository,
         mockMapboxToken,
         { 
           isTesting: true,
@@ -596,6 +760,7 @@ describe('LocationService', () => {
       const serviceWithGeocodingError = new LocationService(
         mockBusinessRepository,
         mockAddressRepository,
+        mockClientRepository,
         mockMapboxToken,
         { 
           isTesting: true,
@@ -632,6 +797,7 @@ describe('LocationService', () => {
       const serviceWithNoCoords = new LocationService(
         mockBusinessRepository,
         mockAddressRepository,
+        mockClientRepository,
         mockMapboxToken,
         { 
           isTesting: true,
@@ -1049,30 +1215,98 @@ describe('LocationService', () => {
   });
 
   test('should initialize properly with API credentials', () => {
-    // Create a custom LocationService class for testing that extends the real one
-    class TestLocationService extends LocationService {
-      constructor(businessRepo, addressRepo, token, options) {
-        // Call super but intercept the mapboxSdk call
-        super(businessRepo, addressRepo, token, { ...options, isTesting: true });
-        
-        // Override the testing flag if needed
-        if (options && options.isTesting === false) {
-          this.isTesting = false;
-        }
-      }
-    }
-    
-    // Create instance with testing bypassing the token validation
-    const service = new TestLocationService(
+    const validToken = 'pk.eyJ1IjoiZXhhbXBsZSIsImEiOiJqazBqcXoifQ.1234567890abcdefghijklmnopqrstuvwxyz';
+    const service = new LocationService(
       mockBusinessRepository,
       mockAddressRepository,
-      'fake-token',
-      { isTesting: false }
+      mockClientRepository,
+      validToken,
+      { isTesting: true }
     );
     
-    // Verify it initialized correctly
-    expect(service.isTesting).toBe(false);
     expect(service.businessRepository).toBe(mockBusinessRepository);
     expect(service.addressRepository).toBe(mockAddressRepository);
+    expect(service.clientRepository).toBe(mockClientRepository);
+    expect(service.geocodingClient).toBeDefined();
+  });
+
+  describe('findNearbyBusinessesByClient', () => {
+    test('should find nearby businesses for a client', async () => {
+      const client = {
+        id: 1,
+        address: {
+          id: 1,
+          street: 'Test Street',
+          city: 'Test City',
+          state: 'TS',
+          latitude: -23.5678,
+          longitude: 10.1234
+        }
+      };
+
+      mockClientRepository.findByIdWithAddress.mockResolvedValue(client);
+      
+      // Mock findNearbyBusinesses to return some businesses
+      const mockBusinesses = [
+        {
+          id: 1,
+          name: 'Business 1',
+          distance: 0.5
+        }
+      ];
+      
+      jest.spyOn(locationService, 'findNearbyBusinesses')
+        .mockResolvedValue(mockBusinesses);
+
+      const result = await locationService.findNearbyBusinessesByClient(1);
+      
+      expect(mockClientRepository.findByIdWithAddress).toHaveBeenCalledWith(1);
+      expect(locationService.findNearbyBusinesses).toHaveBeenCalledWith(1, {
+        radius: 10,
+        limit: 10
+      });
+      expect(result).toEqual(mockBusinesses);
+    });
+
+    test('should throw error when client not found', async () => {
+      mockClientRepository.findByIdWithAddress.mockResolvedValue(null);
+      
+      await expect(locationService.findNearbyBusinessesByClient(999))
+        .rejects.toThrow(AppError);
+      await expect(locationService.findNearbyBusinessesByClient(999))
+        .rejects.toThrow('Cliente não encontrado');
+    });
+
+    test('should throw error when client has no address', async () => {
+      const client = {
+        id: 1,
+        address: null
+      };
+
+      mockClientRepository.findByIdWithAddress.mockResolvedValue(client);
+      
+      await expect(locationService.findNearbyBusinessesByClient(1))
+        .rejects.toThrow(AppError);
+      await expect(locationService.findNearbyBusinessesByClient(1))
+        .rejects.toThrow('Cliente não possui endereço cadastrado');
+    });
+
+    test('should throw error for invalid client ID', async () => {
+      await expect(locationService.findNearbyBusinessesByClient('invalid'))
+        .rejects.toThrow(AppError);
+      await expect(locationService.findNearbyBusinessesByClient('invalid'))
+        .rejects.toThrow('ID do cliente inválido');
+    });
+
+    test('should handle service errors', async () => {
+      mockClientRepository.findByIdWithAddress.mockRejectedValue(
+        new Error('Database error')
+      );
+      
+      await expect(locationService.findNearbyBusinessesByClient(1))
+        .rejects.toThrow(AppError);
+      await expect(locationService.findNearbyBusinessesByClient(1))
+        .rejects.toThrow('Erro ao buscar estabelecimentos próximos ao cliente');
+    });
   });
 });

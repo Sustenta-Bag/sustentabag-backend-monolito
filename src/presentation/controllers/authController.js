@@ -28,7 +28,7 @@ class AuthController {
       let result;
 
       if (entityType === "client") {
-        result = await this.authService.registerClient(entityData, userData);
+        result = await this.authService.registerClient({...entityData, idAddress: entityData.idAddress }, userData);
       } else {
         result = await this.authService.registerBusiness(entityData, userData);
       }

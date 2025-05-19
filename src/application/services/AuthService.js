@@ -44,9 +44,17 @@ class AuthService {
     const clientToCreate = {
       ...clientData,
       email: userData.email,
+      idAddress: clientData.idAddress,
     };
 
     const newClient = await this.clientRepository.create(clientToCreate);
+
+    // Associate the address ID with the newly created client
+    if (clientData.idAddress) {
+      await this.clientRepository.update(newClient.id, { idAddress: clientData.idAddress });
+      // Update the newClient object with the address ID for the return value
+      newClient.idAddress = clientData.idAddress;
+    }
 
     const userToCreate = {
       email: userData.email,

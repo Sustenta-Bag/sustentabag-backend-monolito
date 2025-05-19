@@ -27,6 +27,97 @@ export const setupLocationRoutes = (router, { sequelize }) => {
   );
   
   const locationController = new LocationController(locationService);
+
+  // Define a rota /nearby/client primeiro (mais específica)
+  router.get(
+    '/nearby/client',
+    /*
+    #swagger.path = '/api/location/nearby/client'
+    #swagger.tags = ["Location"]
+    #swagger.summary = "Find businesses near the logged-in client's address"
+    #swagger.description = "Returns a list of nearby businesses based on the address of the authenticated client."
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['radius'] = {
+      in: 'query',
+      description: 'Search radius in kilometers',
+      required: false,
+      type: 'number',
+      default: 10
+    }
+    #swagger.parameters['limit'] = {
+      in: 'query',
+      description: 'Maximum number of results to return',
+      required: false,
+      type: 'integer',
+      default: 10
+    }
+    #swagger.responses[200] = {
+      description: 'List of nearby businesses',
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              count: { type: "integer" },
+              data: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    id: { type: "integer" },
+                    name: { type: "string" },
+                    legalName: { type: "string" },
+                    logo: { type: "string" },
+                    distance: { type: "number" },
+                    address: {
+                      type: "object",
+                      properties: {
+                        street: { type: "string" },
+                        number: { type: "string" },
+                        city: { type: "string" },
+                        state: { type: "string" },
+                        zipCode: { type: "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    #swagger.responses[400] = {
+      description: "Client has no address",
+      content: {
+        "application/json": {
+          schema: { $ref: "#/components/schemas/Error" }
+        }
+      }
+    }
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      content: {
+        "application/json": {
+          schema: { $ref: "#/components/schemas/Error" }
+        }
+      }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Access allowed only for clients",
+      content: {
+        "application/json": {
+          schema: { $ref: "#/components/schemas/Error" }
+        }
+      }
+    }
+    */
+    authenticate,
+    requireClientRole,
+    (req, res, next) => locationController.findNearbyBusinessesByClient(req, res, next)
+  );
+
+  // Em seguida, defina a rota /nearby/:addressId (menos específica)
   router.get(
     '/nearby/:addressId',
     /*
@@ -194,163 +285,6 @@ export const setupLocationRoutes = (router, { sequelize }) => {
     }
     */
     (req, res, next) => locationController.geocodeAddress(req, res, next)
-  );
-
-  /**
-   * @swagger
-   * /api/location/nearby/client:
-   *   get:
-   *     summary: Find businesses near the logged-in client's address
-   *     description: Returns a list of nearby businesses based on the address of the authenticated client.
-   *     tags: [Location]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - name: radius
-   *         in: query
-   *         description: Search radius in kilometers
-   *         required: false
-   *         schema:
-   *           type: number
-   *           default: 10
-   *       - name: limit
-   *         in: query
-   *         description: Maximum number of results to return
-   *         required: false
-   *         schema:
-   *           type: integer
-   *           default: 10
-   *     responses:
-   *       200:
-   *         description: List of nearby businesses
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 count:
-   *                   type: integer
-   *                 data:
-   *                   type: array
-   *                   items:
-   *                     type: object
-   *                     properties:
-   *                       id:
-   *                         type: integer
-   *                       name:
-   *                         type: string
-   *                       legalName:
-   *                         type: string
-   *                       logo:
-   *                         type: string
-   *                       distance:
-   *                         type: number
-   *                       address:
-   *                         type: object
-   *                         properties:
-   *                           street:
-   *                             type: string
-   *                           number:
-   *                             type: string
-   *                           city:
-   *                             type: string
-   *                           state:
-   *                             type: string
-   *                           zipCode:
-   *                             type: string
-   *       400:
-   *         description: Client has no address
-   *       401:
-   *         description: Unauthorized - Authentication required or invalid token
-   *       403:
-   *         description: Forbidden - Access allowed only for clients
-   */
-  router.get(
-    '/nearby/client',
-    /*
-    #swagger.path = '/api/location/nearby/client'
-    #swagger.tags = ["Location"]
-    #swagger.summary = "Find businesses near the logged-in client's address"
-    #swagger.description = "Returns a list of nearby businesses based on the address of the authenticated client."
-    #swagger.security = [{ "bearerAuth": [] }]
-    #swagger.parameters['radius'] = {
-      in: 'query',
-      description: 'Search radius in kilometers',
-      required: false,
-      type: 'number',
-      default: 10
-    }
-    #swagger.parameters['limit'] = {
-      in: 'query',
-      description: 'Maximum number of results to return',
-      required: false,
-      type: 'integer',
-      default: 10
-    }
-    #swagger.responses[200] = {
-      description: 'List of nearby businesses',
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            properties: {
-              count: { type: "integer" },
-              data: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    id: { type: "integer" },
-                    name: { type: "string" },
-                    legalName: { type: "string" },
-                    logo: { type: "string" },
-                    distance: { type: "number" },
-                    address: {
-                      type: "object",
-                      properties: {
-                        street: { type: "string" },
-                        number: { type: "string" },
-                        city: { type: "string" },
-                        state: { type: "string" },
-                        zipCode: { type: "string" }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    #swagger.responses[400] = {
-      description: "Client has no address",
-      content: {
-        "application/json": {
-          schema: { $ref: "#/components/schemas/Error" }
-        }
-      }
-    }
-    #swagger.responses[401] = {
-      description: "Unauthorized - Authentication required or invalid token",
-      content: {
-        "application/json": {
-          schema: { $ref: "#/components/schemas/Error" }
-        }
-      }
-    }
-    #swagger.responses[403] = {
-      description: "Forbidden - Access allowed only for clients",
-      content: {
-        "application/json": {
-          schema: { $ref: "#/components/schemas/Error" }
-        }
-      }
-    }
-    */
-    authenticate,
-    requireClientRole,
-    (req, res, next) => locationController.findNearbyBusinessesByClient(req, res, next)
   );
 
   return router;
