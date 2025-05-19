@@ -3,9 +3,9 @@ class Business {
     this.id = id;
     this.legalName = legalName;
     this.cnpj = cnpj; 
-    this.description = description;
     this.appName = appName;
     this.cellphone = cellphone;
+    this.description = description;
     this.logo = logo;
     this.delivery = delivery;
     this.deliveryTax = deliveryTax;
