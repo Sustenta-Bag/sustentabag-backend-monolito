@@ -12,14 +12,14 @@ describe('Client Entity Unit Tests', () => {
     createdAt: new Date('2023-01-01')
   };
 
-  describe('Constructor', () => {
-    test('should initialize with all properties correctly', () => {
+  describe('Constructor', () => {    test('should initialize with all properties correctly', () => {
       const client = new Client(
         clientData.id,
         clientData.name,
         clientData.email,
         clientData.cpf,
         clientData.phone,
+        null, // idAddress
         clientData.status,
         clientData.createdAt
       );
@@ -29,6 +29,7 @@ describe('Client Entity Unit Tests', () => {
       expect(client.email).toBe(clientData.email);
       expect(client.cpf).toBe(clientData.cpf);
       expect(client.phone).toBe(clientData.phone);
+      expect(client.idAddress).toBeNull();
       expect(client.status).toBe(clientData.status);
       expect(client.createdAt).toEqual(clientData.createdAt);
     });

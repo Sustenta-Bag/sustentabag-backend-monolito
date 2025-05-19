@@ -149,16 +149,19 @@ class PostgresClientRepository extends ClientRepository {
       throw error;
     }
   }
-
-  async update(id, clientData) {
+  async update(id, clientData, options = {}) {
     await this.ClientModel.update(clientData, {
       where: { id },
     });
 
-    const clientRecord = await this.ClientModel.findByPk(id);
-    if (!clientRecord) return null;
-
-    return this._mapToDomainEntity(clientRecord);
+    if (options && options.includeAddress) {
+      return this.findByIdWithAddress(id);
+    } else {
+      const clientRecord = await this.ClientModel.findByPk(id);
+      if (!clientRecord) return null;
+      
+      return this._mapToDomainEntity(clientRecord);
+    }
   }
 
   async delete(id) {

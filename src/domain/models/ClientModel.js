@@ -2,55 +2,59 @@ import { DataTypes, Model } from 'sequelize';
 
 class ClientModel extends Model {
   static init(sequelize) {
+    if (!sequelize) {
+      throw new Error('É necessário fornecer uma instância do Sequelize para inicializar o modelo ClientModel');
+    }
+
     return super.init(
       {
         id: {
           type: DataTypes.INTEGER,
           primaryKey: true,
           autoIncrement: true,
-          field: 'idCliente',
+          field: 'idCliente'
         },
         name: {
           type: DataTypes.STRING,
           allowNull: false,
-          field: 'nome',
+          field: 'nome'
         },
         email: {
           type: DataTypes.STRING,
           allowNull: false,
-          unique: true,
+          unique: true
         },
         cpf: {
           type: DataTypes.STRING,
           allowNull: false,
-          unique: true,
+          unique: true
         },
         phone: {
           type: DataTypes.STRING,
           allowNull: true,
-          field: 'telefone',
+          field: 'telefone'
         },
         idAddress: {
           type: DataTypes.INTEGER,
           allowNull: true,
           field: 'idEndereco',
           references: {
-            model: 'enderecos',
-            key: 'id'
+            model: 'Endereco',
+            key: 'idEndereco'
           }
         },
         status: {
           type: DataTypes.INTEGER,
-          allowNull: false,
+          allowNull: false
         },
         createdAt: {
           type: DataTypes.DATE,
-          field: 'dataCriacao',
+          field: 'dataCriacao'
         },
         updatedAt: {
           type: DataTypes.DATE,
-          field: 'dataAtualizacao',
-        },
+          field: 'dataAtualizacao'
+        }
       },
       {
         sequelize,
@@ -58,7 +62,7 @@ class ClientModel extends Model {
         tableName: 'clientes',
         timestamps: true,
         createdAt: 'dataCriacao',
-        updatedAt: 'dataAtualizacao',
+        updatedAt: 'dataAtualizacao'
       }
     );
   }

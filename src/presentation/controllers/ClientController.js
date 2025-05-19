@@ -14,12 +14,15 @@ class ClientController {
     } catch (error) {
       next(error);
     }
-  }
-
-  async getClient(req, res, next) {
+  }  async getClient(req, res, next) {
     try {
       const includeAddress = req.query.includeAddress === 'true';
       const client = await this.clientService.getClient(req.params.id, { includeAddress });
+      
+      if (!client) {
+        return next(new AppError('Cliente não encontrado', 'CLIENT_NOT_FOUND', 404));
+      }
+      
       return res.json(client);
     } catch (error) {
       next(error);
@@ -34,11 +37,14 @@ class ClientController {
     } catch (error) {
       next(error);
     }
-  }
-
-  async updateClient(req, res, next) {
+  }  async updateClient(req, res, next) {
     try {
       const client = await this.clientService.updateClient(req.params.id, req.body);
+      
+      if (!client) {
+        return next(new AppError('Cliente não encontrado', 'CLIENT_NOT_FOUND', 404));
+      }
+      
       return res.json(client);
     } catch (error) {
       next(error);
@@ -52,11 +58,18 @@ class ClientController {
     } catch (error) {
       next(error);
     }
-  }
-
-  async updateStatus(req, res, next) {
+  }  async updateStatus(req, res, next) {
     try {
+      if (req.body.status === undefined) {
+        return next(new AppError('Status é obrigatório', 'MISSING_STATUS', 400));
+      }
+      
       const client = await this.clientService.updateStatus(req.params.id, req.body.status);
+      
+      if (!client) {
+        return next(new AppError('Cliente não encontrado', 'CLIENT_NOT_FOUND', 404));
+      }
+      
       return res.json(client);
     } catch (error) {
       next(error);

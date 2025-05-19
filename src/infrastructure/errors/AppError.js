@@ -25,9 +25,7 @@ class AppError extends Error {
     }
 
     return errorResponse;
-  }
-
-  static notFound(entityName, id) {
+  }  static notFound(entityName, id) {
     const message = `${entityName} não encontrada com o ID: ${id}`;
     return new AppError(message, `${entityName.toUpperCase()}_NOT_FOUND`, 404);
   }
@@ -47,7 +45,6 @@ class AppError extends Error {
     
     return error;
   }
-
   static internal(message, originalError = null) {
     const error = new AppError(
       message || 'Erro interno do servidor',
@@ -63,6 +60,10 @@ class AppError extends Error {
     }
     
     return error;
+  }
+  
+  static badRequest(message, errorCode = 'BAD_REQUEST') {
+    return new AppError(message, errorCode, 400);
   }
 }
 
