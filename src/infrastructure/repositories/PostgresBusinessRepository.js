@@ -83,7 +83,6 @@ class PostgresBusinessRepository extends BusinessRepository {
     });
     return rows > 0;
   }
-
   _mapToDomainEntity(record) {
     return new Business(
       record.idBusiness,
@@ -93,13 +92,11 @@ class PostgresBusinessRepository extends BusinessRepository {
       record.cellphone,
       record.description,
       record.logo,
-      record.password,
       record.delivery,
       record.deliveryTax,
       record.idAddress,
       record.status,
-      record.createdAt,
-      record.updatedAt
+      record.createdAt
     );
   }
 }
