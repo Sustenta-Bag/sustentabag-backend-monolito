@@ -55,14 +55,14 @@ class ClientModel extends Model {
           type: DataTypes.DATE,
           field: 'dataAtualizacao'
         }
-      },
-      {
+      },      {
         sequelize,
         modelName: 'ClientModel',
         tableName: 'clientes',
         timestamps: true,
         createdAt: 'dataCriacao',
-        updatedAt: 'dataAtualizacao'
+        updatedAt: 'dataAtualizacao',
+        underscored: false // Garantir que não vai tentar usar snake_case
       }
     );
   }
