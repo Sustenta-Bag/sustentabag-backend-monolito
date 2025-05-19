@@ -110,12 +110,18 @@ class AuthService {
       console.log("Firebase business user created with ID:", firebaseUser.uid);
     } catch (firebaseError) {
       console.error("Error creating Firebase business user:", firebaseError);
-      // Continue with local user creation even if Firebase fails
     }
-
-    // Create business record (without password or firebaseId)
     const businessToCreate = {
-      ...businessData,
+      legalName: businessData.legalName,
+      cnpj: businessData.cnpj,
+      appName: businessData.appName,
+      cellphone: businessData.cellphone,
+      description: businessData.description,
+      logo: businessData.logo || null,
+      delivery: businessData.delivery,
+      deliveryTax: businessData.deliveryTax,
+      idAddress: businessData.idAddress,
+      status: businessData.status || 1,
     };
 
     const newBusiness = await this.businessRepository.create(businessToCreate);
@@ -298,7 +304,8 @@ class AuthService {
       } catch (error) {
         console.error("Erro ao atualizar token FCM no Firestore:", error);
       }
-    }    return true;
+    }
+    return true;
   }
 
   async getDeviceToken(userId) {

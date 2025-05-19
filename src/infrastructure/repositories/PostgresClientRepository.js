@@ -75,7 +75,6 @@ class PostgresClientRepository extends ClientRepository {
       record.name,
       record.email,
       record.cpf,
-      record.password,
       record.phone,
       record.status,
       record.createdAt,
