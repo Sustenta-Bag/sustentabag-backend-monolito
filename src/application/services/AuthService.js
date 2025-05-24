@@ -2,13 +2,15 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import AppError from "../../infrastructure/errors/AppError.js";
 import FirebaseService from "./FirebaseService.js";
+import AddressService from "./AddressService.js";
 
 class AuthService {
-  constructor(userRepository, clientRepository, businessRepository) {
+  constructor(userRepository, clientRepository, businessRepository, addressRepository, locationService = null) {
     this.userRepository = userRepository;
     this.clientRepository = clientRepository;
     this.businessRepository = businessRepository;
     this.firebaseService = new FirebaseService();
+    this.addressService = new AddressService(addressRepository, locationService);
   }
 
   async registerClient(clientData, userData) {
@@ -39,22 +41,20 @@ class AuthService {
       console.log("Firebase user created with ID:", firebaseUser.uid);
     } catch (firebaseError) {
       console.error("Error creating Firebase user:", firebaseError);
+    }    const address = {
+      ...clientData.idAddress,
     }
 
+    const addressCreated = await this.addressService.createAddress(address);
+    if (!addressCreated) {
+      throw new AppError("Endereço inválido", "INVALID_ADDRESS");
+    }
+    
     const clientToCreate = {
       ...clientData,
       email: userData.email,
-      idAddress: clientData.idAddress,
-    };
-
-    const newClient = await this.clientRepository.create(clientToCreate);
-
-    // Associate the address ID with the newly created client
-    if (clientData.idAddress) {
-      await this.clientRepository.update(newClient.id, { idAddress: clientData.idAddress });
-      // Update the newClient object with the address ID for the return value
-      newClient.idAddress = clientData.idAddress;
-    }
+      idAddress: addressCreated.id, 
+    };    const newClient = await this.clientRepository.create(clientToCreate);
 
     const userToCreate = {
       email: userData.email,
@@ -114,10 +114,18 @@ class AuthService {
       console.log("Firebase business user created with ID:", firebaseUser.uid);
     } catch (firebaseError) {
       console.error("Error creating Firebase business user:", firebaseError);
+    }    const address = {
+      ...businessData.idAddress,
+    }
+
+    const addressCreated = await this.addressService.createAddress(address);
+    if (!addressCreated) {
+      throw new AppError("Endereço inválido", "INVALID_ADDRESS");
     }
 
     const businessToCreate = {
       ...businessData,
+      idAddress: addressCreated.id
     };
 
     const newBusiness = await this.businessRepository.create(businessToCreate);
