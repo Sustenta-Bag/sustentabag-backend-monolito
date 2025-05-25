@@ -27,20 +27,6 @@ export const setupClientRoutes = (router, options = {}) => {
   const clientService = new ClientService(clientRepository, authService);
   const clientController = new ClientController(clientService);
   
-  router.post(`/auth/login`,
-    /*
-    #swagger.path = '/api/clients/auth/login'
-    #swagger.tags = ["Client"]
-    #swagger.requestBody = {
-      required: true,
-      schema: { $ref: '#components/schemas/LoginInput' },
-    }
-    #swagger.responses[200]
-    #swagger.deprecated = true
-    */
-    validateLogin, 
-    clientController.login.bind(clientController)
-  );
 
   router.post(`/`,
     /*
