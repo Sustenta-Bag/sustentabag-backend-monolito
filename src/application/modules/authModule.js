@@ -18,9 +18,15 @@ export const setupAuthModule = (options = {}) => {
   
   const clientRepository = options.clientRepository;
   const businessRepository = options.businessRepository;
+  const addressRepository = options.addressRepository;
+  const locationService = options.locationService;
   
   if (!clientRepository || !businessRepository) {
     console.warn('Auth module requires client and business repositories');
+  }
+  
+  if (!addressRepository) {
+    console.warn('Auth module requires address repository for address creation');
   }
   
   UserModel.init(sequelize);
@@ -30,7 +36,9 @@ export const setupAuthModule = (options = {}) => {
   const authService = new AuthService(
     userRepository, 
     clientRepository, 
-    businessRepository
+    businessRepository,
+    addressRepository,
+    locationService
   );
   
   const authController = new AuthController(authService);

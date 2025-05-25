@@ -36,19 +36,29 @@ export default (authController) => (router) => {
                 required: ["email", "password"]
               },
               entityData: {
-                oneOf: [
-                  {
+                oneOf: [                  {
                     type: "object",
                     title: "Cliente",
                     properties: {
                       name: { type: "string", example: "Maria Silva Oliveira" },
                       cpf: { type: "string", example: "12345678909" },
                       phone: { type: "string", example: "11987654321" },
+                      idAddress: {
+                        type: "object",
+                        properties: {
+                          zipCode: { type: "string", example: "85937000" },
+                          state: { type: "string", example: "PR" },
+                          city: { type: "string", example: "Assis Chateaubriand" },
+                          street: { type: "string", example: "Avenida Paraná" },
+                          number: { type: "string", example: "72" },
+                          complement: { type: "string", example: "None" }
+                        },
+                        required: ["zipCode", "state", "city", "street", "number"]
+                      },
                       status: { type: "integer", example: 1 }
                     },
-                    required: ["name", "cpf"]
-                  },
-                  {
+                    required: ["name", "cpf", "idAddress"]
+                  },                  {
                     type: "object",
                     title: "Empresa",
                     properties: {
@@ -59,18 +69,28 @@ export default (authController) => (router) => {
                       description: { type: "string", example: "Empresa especializada em sacolas sustentáveis" },
                       delivery: { type: "boolean", example: true },
                       deliveryTax: { type: "number", example: 5.99 },
-                      idAddress: { type: "integer", example: 1 },
+                      idAddress: {
+                        type: "object",
+                        properties: {
+                          zipCode: { type: "string", example: "85937000" },
+                          state: { type: "string", example: "PR" },
+                          city: { type: "string", example: "Assis Chateaubriand" },
+                          street: { type: "string", example: "Avenida Paraná" },
+                          number: { type: "string", example: "72" },
+                          complement: { type: "string", example: "None" }
+                        },
+                        required: ["zipCode", "state", "city", "street", "number"]
+                      },
                       status: { type: "integer", example: 1 }
                     },
-                    required: ["legalName", "cnpj", "appName", "cellphone"]
+                    required: ["legalName", "cnpj", "appName", "cellphone", "idAddress"]
                   }
                 ]
               }
             },
             required: ["entityType", "userData", "entityData"]
           },
-          examples: {
-            "Cliente": {
+          examples: {            "Cliente": {
               value: {
                 "entityType": "client",
                 "userData": {
@@ -81,11 +101,18 @@ export default (authController) => (router) => {
                   "name": "Maria Silva Oliveira",
                   "cpf": "12345678909",
                   "phone": "11987654321",
+                  "idAddress": {
+                    "zipCode": "85937000",
+                    "state": "PR",
+                    "city": "Assis Chateaubriand",
+                    "street": "Avenida Paraná",
+                    "number": "72",
+                    "complement": "None"
+                  },
                   "status": 1
                 }
               }
-            },
-            "Empresa": {
+            },            "Empresa": {
               value: {
                 "entityType": "business",
                 "userData": {
@@ -100,7 +127,14 @@ export default (authController) => (router) => {
                   "description": "Empresa especializada em sacolas sustentáveis",
                   "delivery": true,
                   "deliveryTax": 5.99,
-                  "idAddress": 1,
+                  "idAddress": {
+                    "zipCode": "85937000",
+                    "state": "PR",
+                    "city": "Assis Chateaubriand",
+                    "street": "Avenida Paraná",
+                    "number": "72",
+                    "complement": "None"
+                  },
                   "status": 1
                 }
               }

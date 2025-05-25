@@ -467,11 +467,43 @@
                             "type": "string",
                             "example": "11987654321"
                           },
-                          "status": {
-                            "type": "integer",
-                            "example": 1
-                          },
                           "idAddress": {
+                            "type": "object",
+                            "properties": {
+                              "zipCode": {
+                                "type": "string",
+                                "example": "85937000"
+                              },
+                              "state": {
+                                "type": "string",
+                                "example": "PR"
+                              },
+                              "city": {
+                                "type": "string",
+                                "example": "Assis Chateaubriand"
+                              },
+                              "street": {
+                                "type": "string",
+                                "example": "Avenida Paraná"
+                              },
+                              "number": {
+                                "type": "string",
+                                "example": "72"
+                              },
+                              "complement": {
+                                "type": "string",
+                                "example": "None"
+                              }
+                            },
+                            "required": [
+                              "zipCode",
+                              "state",
+                              "city",
+                              "street",
+                              "number"
+                            ]
+                          },
+                          "status": {
                             "type": "integer",
                             "example": 1
                           }
@@ -515,8 +547,40 @@
                             "example": 5.99
                           },
                           "idAddress": {
-                            "type": "integer",
-                            "example": 1
+                            "type": "object",
+                            "properties": {
+                              "zipCode": {
+                                "type": "string",
+                                "example": "85937000"
+                              },
+                              "state": {
+                                "type": "string",
+                                "example": "PR"
+                              },
+                              "city": {
+                                "type": "string",
+                                "example": "Assis Chateaubriand"
+                              },
+                              "street": {
+                                "type": "string",
+                                "example": "Avenida Paraná"
+                              },
+                              "number": {
+                                "type": "string",
+                                "example": "72"
+                              },
+                              "complement": {
+                                "type": "string",
+                                "example": "None"
+                              }
+                            },
+                            "required": [
+                              "zipCode",
+                              "state",
+                              "city",
+                              "street",
+                              "number"
+                            ]
                           },
                           "status": {
                             "type": "integer",
@@ -527,7 +591,8 @@
                           "legalName",
                           "cnpj",
                           "appName",
-                          "cellphone"
+                          "cellphone",
+                          "idAddress"
                         ]
                       }
                     ]
@@ -551,8 +616,15 @@
                       "name": "Maria Silva Oliveira",
                       "cpf": "12345678909",
                       "phone": "11987654321",
-                      "status": 1,
-                      "idAddress": 1
+                      "idAddress": {
+                        "zipCode": "85937000",
+                        "state": "PR",
+                        "city": "Assis Chateaubriand",
+                        "street": "Avenida Paraná",
+                        "number": "72",
+                        "complement": "None"
+                      },
+                      "status": 1
                     }
                   }
                 },
@@ -571,7 +643,14 @@
                       "description": "Empresa especializada em sacolas sustentáveis",
                       "delivery": true,
                       "deliveryTax": 5.99,
-                      "idAddress": 1,
+                      "idAddress": {
+                        "zipCode": "85937000",
+                        "state": "PR",
+                        "city": "Assis Chateaubriand",
+                        "street": "Avenida Paraná",
+                        "number": "72",
+                        "complement": "None"
+                      },
                       "status": 1
                     }
                   }
@@ -2227,6 +2306,152 @@
         }
       }
     },
+    "/": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/location/nearby/client": {
+      "get": {
+        "tags": [
+          "Location"
+        ],
+        "summary": "Find businesses near the logged-in client's address",
+        "description": "Returns a list of nearby businesses based on the address of the authenticated client.",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "radius",
+            "in": "query",
+            "description": "Search radius in kilometers",
+            "required": false,
+            "default": 10,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results to return",
+            "required": false,
+            "default": 10,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of nearby businesses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "legalName": {
+                            "type": "string"
+                          },
+                          "logo": {
+                            "type": "string"
+                          },
+                          "distance": {
+                            "type": "number"
+                          },
+                          "address": {
+                            "type": "object",
+                            "properties": {
+                              "street": {
+                                "type": "string"
+                              },
+                              "number": {
+                                "type": "string"
+                              },
+                              "city": {
+                                "type": "string"
+                              },
+                              "state": {
+                                "type": "string"
+                              },
+                              "zipCode": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Client has no address",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Access allowed only for clients",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/location/nearby/{addressId}": {
       "get": {
         "tags": [
@@ -2457,139 +2682,6 @@
             }
           }
         }
-      }
-    },
-    "/api/location/nearby/client": {
-      "get": {
-        "tags": [
-          "Location"
-        ],
-        "summary": "Find businesses near the logged-in client's address",
-        "description": "Returns a list of nearby businesses based on the address of the authenticated client.",
-        "parameters": [
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "radius",
-            "in": "query",
-            "description": "Search radius in kilometers",
-            "required": false,
-            "default": 10,
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Maximum number of results to return",
-            "required": false,
-            "default": 10,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of nearby businesses",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "count": {
-                      "type": "integer"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "integer"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "legalName": {
-                            "type": "string"
-                          },
-                          "logo": {
-                            "type": "string"
-                          },
-                          "distance": {
-                            "type": "number"
-                          },
-                          "address": {
-                            "type": "object",
-                            "properties": {
-                              "street": {
-                                "type": "string"
-                              },
-                              "number": {
-                                "type": "string"
-                              },
-                              "city": {
-                                "type": "string"
-                              },
-                              "state": {
-                                "type": "string"
-                              },
-                              "zipCode": {
-                                "type": "string"
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Client has no address",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Authentication required or invalid token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden - Access allowed only for clients",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
       }
     }
   },
