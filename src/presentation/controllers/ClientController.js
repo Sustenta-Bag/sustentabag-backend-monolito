@@ -86,41 +86,6 @@ class ClientController {
     }
   }
 
-  async login(req, res, next) {
-    try {
-      const { email, password } = req.body;
-
-      const client = await this.clientService.findByEmail(email);
-      if (!client) {
-        throw new AppError("Email ou senha inválidos", "INVALID_CREDENTIALS");
-      }
-
-      const isValid = await bcrypt.compare(password, client.password);
-      if (!isValid) {
-        throw new AppError("Email ou senha inválidos", "INVALID_CREDENTIALS");
-      }
-
-      const token = jwt.sign(
-        { id: client.id, role: "client" },
-        process.env.JWT_SECRET,
-        { expiresIn: "1d" }
-      );
-
-      return res.json({
-        token,
-        client: {
-          id: client.id,
-          name: client.name,
-          email: client.email,
-          cpf: client.cpf,
-          phone: client.phone,
-          status: client.status
-        }
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
 }
 
 export default ClientController;
