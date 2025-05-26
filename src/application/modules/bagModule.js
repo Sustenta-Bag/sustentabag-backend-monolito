@@ -3,18 +3,10 @@ import express from 'express';
 import { setupBagRoutes } from '../../presentation/routes/bagRoutes.js';
 import { errorHandler } from '../../presentation/middleware/errorHandler.js';
 import BagModel from '../../domain/models/BagModel.js';
+import PostgresBagRepository from '../../infrastructure/repositories/PostgresBagRepository.js';
+import BagService from '../../application/services/BagService.js';
 
 dotenv.config();
-
-export const setupBagModule = (options = {}) => {
-  const router = express.Router();
-  
-  setupBagRoutes(router, options);
-  
-  router.use(errorHandler);
-  
-  return router;
-};
 
 export const initializeModels = (sequelizeInstance) => {
   if (!sequelizeInstance) {
@@ -35,4 +27,33 @@ export const bagModuleConfig = {
   dependencies: [
     'sequelize'
   ]
+};
+
+export const setupBagModule = (options = {}) => {
+  const router = express.Router();
+  
+  if (!options.sequelizeInstance) {
+    throw new Error('Sequelize instance is required to set up bag module');
+  }
+  
+  const bagRepository = new PostgresBagRepository(
+    options.BagModel || BagModel
+  );
+  
+  const bagService = new BagService(bagRepository);
+  
+  setupBagRoutes(router, {
+    bagRepository
+  });
+  
+  return router;
+};
+
+export const getBagService = (sequelizeInstance) => {
+  if (!sequelizeInstance) {
+    throw new Error('Sequelize instance is required to get bag service');
+  }
+  
+  const bagRepository = new PostgresBagRepository(BagModel);
+  return new BagService(bagRepository);
 };
