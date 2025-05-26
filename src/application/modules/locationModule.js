@@ -4,15 +4,18 @@ import LocationService from '../../application/services/LocationService.js';
 import PostgresAddressRepository from '../../infrastructure/repositories/PostgresAddressRepository.js';
 import PostgresBusinessRepository from '../../infrastructure/repositories/PostgresBusinessRepository.js';
 import PostgresClientRepository from '../../infrastructure/repositories/PostgresClientRepository.js';
+import PostgresBagRepository from '../../infrastructure/repositories/PostgresBagRepository.js';
 import AddressModel from '../../domain/models/AddressModel.js';
 import BusinessModel from '../../domain/models/BusinessModel.js';
 import ClientModel from '../../domain/models/ClientModel.js';
+import BagModel from '../../domain/models/BagModel.js';
 import { authenticate, requireClientRole } from '../../presentation/middleware/authMiddleware.js';
 
 export const setupLocationRoutes = (router, { sequelize }) => {
   const addressRepository = new PostgresAddressRepository(AddressModel);
   const businessRepository = new PostgresBusinessRepository(BusinessModel, AddressModel);
   const clientRepository = new PostgresClientRepository(ClientModel, AddressModel);
+  const bagRepository = new PostgresBagRepository(BagModel);
   
   const mapboxToken = process.env.MAPBOX_ACCESS_TOKEN;
   if (!mapboxToken) {
@@ -28,7 +31,6 @@ export const setupLocationRoutes = (router, { sequelize }) => {
   
   const locationController = new LocationController(locationService);
 
-  // Define a rota /nearby/client primeiro (mais específica)
   router.get(
     '/nearby/client',
     /*
@@ -117,7 +119,6 @@ export const setupLocationRoutes = (router, { sequelize }) => {
     (req, res, next) => locationController.findNearbyBusinessesByClient(req, res, next)
   );
 
-  // Em seguida, defina a rota /nearby/:addressId (menos específica)
   router.get(
     '/nearby/:addressId',
     /*
@@ -285,6 +286,107 @@ export const setupLocationRoutes = (router, { sequelize }) => {
     }
     */
     (req, res, next) => locationController.geocodeAddress(req, res, next)
+  );
+
+  router.get(
+    '/nearby/client/bags',
+    /*
+    #swagger.path = '/api/location/nearby/client/bags'
+    #swagger.tags = ["Location"]
+    #swagger.summary = "Find available bags from businesses near the logged-in client's address"
+    #swagger.description = "Returns a list of available bags from nearby businesses based on the address of the authenticated client."
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['radius'] = {
+      in: 'query',
+      description: 'Search radius in kilometers',
+      required: false,
+      type: 'number',
+      default: 10
+    }
+    #swagger.parameters['limit'] = {
+      in: 'query',
+      description: 'Maximum number of bags to return',
+      required: false,
+      type: 'integer',
+      default: 50
+    }
+    #swagger.responses[200] = {
+      description: 'List of available bags from nearby businesses',
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              count: { type: "integer" },
+              data: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    id: { type: "integer" },
+                    type: { type: "string" },
+                    price: { type: "number" },
+                    description: { type: "string" },
+                    createdAt: { type: "string", format: "date-time" },
+                    business: {
+                      type: "object",
+                      properties: {
+                        id: { type: "integer" },
+                        name: { type: "string" },
+                        legalName: { type: "string" },
+                        logo: { type: "string" },
+                        distance: { type: "number" },
+                        address: {
+                          type: "object",
+                          properties: {
+                            street: { type: "string" },
+                            number: { type: "string" },
+                            city: { type: "string" },
+                            state: { type: "string" },
+                            zipCode: { type: "string" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    #swagger.responses[400] = {
+      description: "Client has no address",
+      content: {
+        "application/json": {
+          schema: { $ref: "#/components/schemas/Error" }
+        }
+      }
+    }
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      content: {
+        "application/json": {
+          schema: { $ref: "#/components/schemas/Error" }
+        }
+      }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Access allowed only for clients",
+      content: {
+        "application/json": {
+          schema: { $ref: "#/components/schemas/Error" }
+        }
+      }
+    }
+    */
+    authenticate,
+    requireClientRole,
+    (req, res, next) => {
+      req.bagRepository = bagRepository;
+      locationController.findNearbyAvailableBagsByClient(req, res, next);
+    }
   );
 
   return router;

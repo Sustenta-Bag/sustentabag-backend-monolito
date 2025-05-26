@@ -101,6 +101,60 @@ class LocationController {
       next(error);
     }
   }
+
+  async findNearbyAvailableBagsByClient(req, res, next) {
+    console.log('Entrou em findNearbyAvailableBagsByClient no LocationController');
+    try {
+      const { radius, limit } = req.query;
+      const clientId = req.user.entityId;
+
+      if (!clientId) {
+        throw new AppError('ID do cliente não encontrado no token', 'CLIENT_ID_NOT_FOUND', 401);
+      }
+
+      if (req.user.role !== 'client') {
+        throw new AppError('Acesso permitido apenas para clientes', 'ACCESS_DENIED', 403);
+      }
+
+      const options = {
+        radius: radius ? parseFloat(radius) : 10,
+        limit: limit ? parseInt(limit) : 50
+      };
+
+      const bags = await this.locationService.findNearbyAvailableBagsByClient(
+        clientId,
+        req.bagRepository,
+        options
+      );
+
+      return res.json({
+        count: bags.length,
+        data: bags.map(bag => ({
+          id: bag.id,
+          type: bag.type,
+          price: bag.price,
+          description: bag.description,
+          createdAt: bag.createdAt,
+          business: {
+            id: bag.business.id,
+            name: bag.business.name,
+            legalName: bag.business.legalName,
+            logo: bag.business.logo,
+            distance: parseFloat(bag.business.distance.toFixed(2)),
+            address: bag.business.address ? {
+              street: bag.business.address.street,
+              number: bag.business.address.number,
+              city: bag.business.address.city,
+              state: bag.business.address.state,
+              zipCode: bag.business.address.zipCode
+            } : null
+          }
+        }))
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default LocationController;
