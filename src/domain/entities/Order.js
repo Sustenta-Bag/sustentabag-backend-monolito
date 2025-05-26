@@ -1,5 +1,4 @@
-class Order {
-  constructor(id, userId, businessId, status = 'pending', totalAmount = 0, createdAt = new Date()) {
+class Order {  constructor(id, userId, businessId, status = 'pendente', totalAmount = 0, createdAt = new Date()) {
     this.id = id;
     this.userId = userId;
     this.businessId = businessId;
@@ -25,9 +24,8 @@ class Order {
     this.totalAmount = this.items.reduce((total, item) => total + (item.price * item.quantity), 0);
     return this;
   }
-
   updateStatus(newStatus) {
-    const validStatuses = ['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'];
+    const validStatuses = ['pendente', 'confirmado', 'preparando', 'pronto', 'entregue', 'cancelado'];
     if (!validStatuses.includes(newStatus)) {
       throw new Error('Status inválido');
     }
@@ -36,34 +34,33 @@ class Order {
   }
 
   confirm() {
-    return this.updateStatus('confirmed');
+    return this.updateStatus('confirmado');
   }
 
   prepare() {
-    return this.updateStatus('preparing');
+    return this.updateStatus('preparando');
   }
 
   markAsReady() {
-    return this.updateStatus('ready');
+    return this.updateStatus('pronto');
   }
 
   deliver() {
-    return this.updateStatus('delivered');
+    return this.updateStatus('entregue');
   }
 
   cancel() {
-    return this.updateStatus('cancelled');
-  }
-  canBeConfirmed() {
+    return this.updateStatus('cancelado');
+  }  canBeConfirmed() {
     // O microsserviço de pagamento será responsável por confirmar se o pagamento foi realizado
     // Esta lógica deve ser removida do monolito e delegada ao payment-service
-    return this.status === 'pending';
+    return this.status === 'pendente';
   }
 
   canBeCancelled() {
     // Removida a dependência do status de pagamento
     // O payment-service será responsável pelo gerenciamento do status de pagamentos
-    return this.status !== 'delivered';
+    return this.status !== 'entregue';
   }
 }
 

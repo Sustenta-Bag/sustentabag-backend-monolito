@@ -27,12 +27,10 @@ class PaymentWebhookController {
       }
 
       // Log da notificação recebida
-      console.log(`Webhook do payment-service recebido: Pedido ${orderId}, status ${status}`);
-
-      // Atualizar o status do pedido com base na notificação
+      console.log(`Webhook do payment-service recebido: Pedido ${orderId}, status ${status}`);      // Atualizar o status do pedido com base na notificação
       if (status === 'completed') {
         // Se o pagamento foi concluído, confirmar o pedido
-        await this.orderService.updateOrderStatus(orderId, 'confirmed');
+        await this.orderService.updateOrderStatus(orderId, 'confirmado');
       } else if (status === 'failed' || status === 'cancelled') {
         // Se o pagamento falhou ou foi cancelado, cancelar o pedido
         await this.orderService.cancelOrder(orderId);

@@ -30,16 +30,15 @@ class OrderModel extends Model {
           model: 'empresas',
           key: 'idEmpresa'
         }
-      },
-      status: {
+      },      status: {
         type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: 'pending',
+        defaultValue: 'pendente',
         field: 'status',
         validate: {
-          isIn: [['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled']]
+          isIn: [['pendente', 'confirmado', 'preparando', 'pronto', 'entregue', 'cancelado']]
         }
-      },      totalAmount: {
+      },totalAmount: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         defaultValue: 0,

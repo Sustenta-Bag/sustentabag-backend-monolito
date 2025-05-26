@@ -80,7 +80,7 @@ class OrderService {
       throw AppError.notFound('Pedido', id);
     }
     
-    const validStatuses = ['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'];
+    const validStatuses = ['pendente', 'confirmado', 'preparando', 'pronto', 'entregue', 'cancelado'];
     if (!validStatuses.includes(status)) {
       throw new AppError('Status inválido', 'INVALID_STATUS');
     }
@@ -89,7 +89,7 @@ class OrderService {
     const updatedOrder = await this.orderRepository.updateStatus(id, status);
 
     // Se o pedido foi finalizado (entregue), inativar as sacolas
-    if (status === 'delivered') {
+    if (status === 'entregue') {
       await this.inactivateBagsFromOrder(order);
     }
 
@@ -101,8 +101,7 @@ class OrderService {
     if (!order) {
       throw AppError.notFound('Pedido', orderId);
     }
-    
-    if (order.status !== 'pending') {
+      if (order.status !== 'pendente') {
       throw new AppError('Não é possível adicionar itens a um pedido que não está pendente', 'INVALID_ORDER_STATUS');
     }
     
@@ -132,8 +131,7 @@ class OrderService {
     if (!order) {
       throw AppError.notFound('Pedido', orderId);
     }
-    
-    if (order.status !== 'pending') {
+      if (order.status !== 'pendente') {
       throw new AppError('Não é possível remover itens de um pedido que não está pendente', 'INVALID_ORDER_STATUS');
     }
     
@@ -155,8 +153,7 @@ class OrderService {
     if (!order) {
       throw AppError.notFound('Pedido', orderId);
     }
-    
-    if (order.status !== 'pending') {
+      if (order.status !== 'pendente') {
       throw new AppError('Não é possível atualizar itens de um pedido que não está pendente', 'INVALID_ORDER_STATUS');
     }
     
@@ -184,12 +181,10 @@ class OrderService {
     
     if (!order.canBeCancelled()) {
       throw new AppError('Não é possível cancelar este pedido', 'INVALID_ORDER_STATUS');
-    }
-
-    // Removida a lógica de cancelamento/reembolso de pagamento
+    }    // Removida a lógica de cancelamento/reembolso de pagamento
     // O payment-service deve ser informado sobre o cancelamento do pedido
     // através de um mecanismo de comunicação assíncrona (eventos, webhooks, etc.)
-      return await this.orderRepository.updateStatus(id, 'cancelled');
+      return await this.orderRepository.updateStatus(id, 'cancelado');
   }
 
   /**
