@@ -30,6 +30,7 @@
   "dependencies": {
     "@mapbox/mapbox-sdk": "^0.16.1",
     "amqplib": "~0.10.7",
+    "axios": "^1.6.7",
     "bcrypt": "^5.1.1",
     "colors": "~1.4.0",
     "compression": "1.8.0",
