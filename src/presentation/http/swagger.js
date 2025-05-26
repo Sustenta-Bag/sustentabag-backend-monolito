@@ -23,6 +23,10 @@ const doc = {
     },
   ],  tags: [
     {
+      name: "Base",
+      description: "General API routes"
+    },
+    {
       name: "Location",
       description: "Operações relacionadas a localização geográfica"
     }
