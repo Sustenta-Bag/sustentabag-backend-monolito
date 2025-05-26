@@ -87,7 +87,7 @@ class LocationService {
       
       try {
         const response = await Promise.race([geocodePromise, timeoutPromise]);
-        clearTimeout(timeoutId); // Clear the timeout when request completes successfully
+        clearTimeout(timeoutId); 
 
         if (
           !response.body ||
@@ -109,7 +109,7 @@ class LocationService {
         
         return { latitude: lat, longitude: lng };
       } catch (error) {
-        clearTimeout(timeoutId); // Also clear timeout if there's an error
+        clearTimeout(timeoutId); 
         throw error;
       }
     } catch (error) {
@@ -337,7 +337,6 @@ class LocationService {
       console.log(`Buscando cliente com ID: ${clientId}`);
       const client = await this.clientRepository.findByIdWithAddress(clientId);
 
-      // Add log here to inspect the client object
       console.log(`Resultado de findByIdWithAddress para cliente ${clientId}:`, JSON.stringify(client, null, 2));
 
       if (!client) {
@@ -365,6 +364,82 @@ class LocationService {
       if (error instanceof AppError) throw error;
       throw new AppError(
         `Erro ao buscar estabelecimentos próximos ao cliente: ${error.message}`,
+        'LOCATION_SERVICE_ERROR',
+        500
+      );
+    }
+  }
+
+  /**
+   * Busca todas as bags disponíveis das empresas próximas ao endereço de um cliente
+   * @param {number} clientId - ID do cliente
+   * @param {Object} bagRepository - Repositório de bags
+   * @param {Object} options - Opções de busca como raio e limite
+   * @returns {Promise<Array>} - Lista de bags disponíveis das empresas próximas
+   */
+  async findNearbyAvailableBagsByClient(clientId, bagRepository, { radius = 10, limit = 50 } = {}) {
+    try {
+      if (!clientId || isNaN(parseInt(clientId))) {
+        throw new AppError('ID do cliente inválido', 'INVALID_CLIENT_ID', 400);
+      }
+
+      console.log(`Buscando bags disponíveis próximas para cliente com ID: ${clientId}`);
+      
+      const nearbyBusinesses = await this.findNearbyBusinessesByClient(clientId, { radius, limit: 100 });
+      
+      console.log(`Encontradas ${nearbyBusinesses.length} empresas próximas`);
+      
+      if (!nearbyBusinesses || nearbyBusinesses.length === 0) {
+        console.log('Nenhuma empresa próxima encontrada');
+        return [];
+      }
+
+      const allBags = [];
+      
+      for (const business of nearbyBusinesses) {
+        try {
+          const activeBags = await bagRepository.findActiveByBusinessId(business.id);
+          
+          for (const bag of activeBags) {
+            allBags.push({
+              id: bag.id,
+              type: bag.type,
+              price: bag.price,
+              description: bag.description,
+              idBusiness: bag.idBusiness,
+              status: bag.status,
+              createdAt: bag.createdAt,
+              business: {
+                id: business.id,
+                name: business.appName,
+                legalName: business.legalName,
+                logo: business.logo,
+                distance: business.distance,
+                address: business.address
+              }
+            });
+          }
+          
+          console.log(`Empresa ${business.id} (${business.appName}) tem ${activeBags.length} bags ativas`);
+        } catch (error) {
+          console.error(`Erro ao buscar bags da empresa ${business.id}:`, error);
+        }
+      }
+
+      allBags.sort((a, b) => {
+        const distA = typeof a.business.distance === 'number' ? a.business.distance : Infinity;
+        const distB = typeof b.business.distance === 'number' ? b.business.distance : Infinity;
+        return distA - distB;
+      });
+
+      console.log(`Retornando ${allBags.length} bags disponíveis das empresas próximas`);
+      return allBags;
+      
+    } catch (error) {
+      console.error('Erro ao buscar bags disponíveis próximas ao cliente:', error);
+      if (error instanceof AppError) throw error;
+      throw new AppError(
+        `Erro ao buscar bags disponíveis próximas ao cliente: ${error.message}`,
         'LOCATION_SERVICE_ERROR',
         500
       );

@@ -166,7 +166,6 @@ class PostgresBusinessRepository extends BusinessRepository {
       record.cellphone,
       record.description,
       record.logo,
-      record.password,
       record.delivery,
       record.deliveryTax,
       record.idAddress,
