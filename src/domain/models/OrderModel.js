@@ -39,30 +39,11 @@ class OrderModel extends Model {
         validate: {
           isIn: [['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled']]
         }
-      },
-      totalAmount: {
+      },      totalAmount: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         defaultValue: 0,
         field: 'valorTotal'
-      },
-      paymentId: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        field: 'idPagamento'
-      },
-      paymentStatus: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        field: 'statusPagamento',
-        validate: {
-          isIn: [['pending', 'processing', 'completed', 'failed', 'cancelled', 'refunded']]
-        }
-      },
-      paymentMethod: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        field: 'metodoPagamento'
       },
       createdAt: {
         type: DataTypes.DATE,

@@ -74,8 +74,7 @@ class OrderService {
 
   async getOrdersByBusiness(businessId) {
     return await this.orderRepository.findByBusinessId(businessId);
-  }
-  async updateOrderStatus(id, status) {
+  }  async updateOrderStatus(id, status) {
     const order = await this.orderRepository.findById(id);
     if (!order) {
       throw AppError.notFound('Pedido', id);
@@ -86,11 +85,15 @@ class OrderService {
       throw new AppError('Status inválido', 'INVALID_STATUS');
     }
 
-    // Removida a verificação de status de pagamento
-    // A confirmação de pagamento será responsabilidade do payment-service
-    // que notificará o monolito através de webhooks ou outro mecanismo
-    
-    return await this.orderRepository.updateStatus(id, status);
+    // Atualizar o status do pedido
+    const updatedOrder = await this.orderRepository.updateStatus(id, status);
+
+    // Se o pedido foi finalizado (entregue), inativar as sacolas
+    if (status === 'delivered') {
+      await this.inactivateBagsFromOrder(order);
+    }
+
+    return updatedOrder;
   }
 
   async addItemToOrder(orderId, itemData) {
@@ -186,8 +189,33 @@ class OrderService {
     // Removida a lógica de cancelamento/reembolso de pagamento
     // O payment-service deve ser informado sobre o cancelamento do pedido
     // através de um mecanismo de comunicação assíncrona (eventos, webhooks, etc.)
-    
-    return await this.orderRepository.updateStatus(id, 'cancelled');
+      return await this.orderRepository.updateStatus(id, 'cancelled');
+  }
+
+  /**
+   * Inativa as sacolas de um pedido quando ele é finalizado (entregue)
+   * Isso previne que as mesmas unidades sejam comercializadas novamente
+   */
+  async inactivateBagsFromOrder(order) {
+    try {
+      console.log(`Inativando sacolas do pedido ${order.id} - Status: entregue`);
+      
+      for (const item of order.items) {
+        try {
+          await this.bagService.changeBagStatus(item.bagId, 0); // 0 = inativo
+          console.log(`✅ Sacola ${item.bagId} inativada com sucesso (quantidade: ${item.quantity})`);
+        } catch (error) {
+          console.error(`❌ Erro ao inativar sacola ${item.bagId}:`, error.message);
+          // Continua o processo mesmo se uma sacola falhar
+          // para não bloquear a finalização do pedido
+        }
+      }
+      
+      console.log(`Processo de inativação concluído para o pedido ${order.id}`);
+    } catch (error) {
+      console.error(`Erro geral ao inativar sacolas do pedido ${order.id}:`, error);
+      // Log do erro mas não propaga para não bloquear a atualização do status do pedido
+    }
   }
 }
 

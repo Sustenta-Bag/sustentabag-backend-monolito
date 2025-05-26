@@ -63,10 +63,7 @@ export const setupModuleRouters = (options = {}) => {
 
   const businessRouter = businessModule.setupBusinessModule({
     sequelizeInstance: options.sequelizeInstance
-  });  const authRouter = authModule.setupAuthModule({
-  });
-
-  const authRouter = authModule.setupAuthModule({
+  }); const authRouter = authModule.setupAuthModule({
     sequelizeInstance: options.sequelizeInstance,
     clientRepository: clientRepository,
     businessRepository: businessRepository,
