@@ -34,7 +34,7 @@ export const setupLocationRoutes = (router, { sequelize }) => {
   router.get(
     '/nearby/client',
     /*
-    #swagger.path = '/api/location/nearby/client'
+    #swagger.path = '/api/locations/nearby/client'
     #swagger.tags = ["Location"]
     #swagger.summary = "Find businesses near the logged-in client's address"
     #swagger.description = "Returns a list of nearby businesses based on the address of the authenticated client."
@@ -122,7 +122,7 @@ export const setupLocationRoutes = (router, { sequelize }) => {
   router.get(
     '/nearby/:addressId',
     /*
-    #swagger.path = '/api/location/nearby/{addressId}'
+    #swagger.path = '/api/locations/nearby/{addressId}'
     #swagger.tags = ["Location"]
     #swagger.summary = "Find businesses near an address"
     #swagger.description = "Returns a list of nearby businesses based on an address ID"
@@ -223,7 +223,7 @@ export const setupLocationRoutes = (router, { sequelize }) => {
   router.post(
     '/geocode',
     /*
-    #swagger.path = '/api/location/geocode'
+    #swagger.path = '/api/locations/geocode'
     #swagger.tags = ["Location"]
     #swagger.summary = "Geocode an address"
     #swagger.description = "Convert an address to geographic coordinates"
@@ -291,7 +291,7 @@ export const setupLocationRoutes = (router, { sequelize }) => {
   router.get(
     '/nearby/client/bags',
     /*
-    #swagger.path = '/api/location/nearby/client/bags'
+    #swagger.path = '/api/locations/nearby/client/bags'
     #swagger.tags = ["Location"]
     #swagger.summary = "Find available bags from businesses near the logged-in client's address"
     #swagger.description = "Returns a list of available bags from nearby businesses based on the address of the authenticated client."

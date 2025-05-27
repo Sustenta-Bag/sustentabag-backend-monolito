@@ -31,6 +31,42 @@
     }
   ],
   "paths": {
+    "/api/payments/webhook": {
+      "post": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "orderId": {
+                    "example": "any"
+                  },
+                  "status": {
+                    "example": "any"
+                  },
+                  "paymentId": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/addresses": {
       "post": {
         "tags": [
@@ -514,7 +550,8 @@
                         },
                         "required": [
                           "name",
-                          "cpf"
+                          "cpf",
+                          "idAddress"
                         ]
                       },
                       {
@@ -3158,7 +3195,7 @@
         ]
       }
     },
-    "/api/location/nearby/client": {
+    "/api/locations/nearby/client": {
       "get": {
         "tags": [
           "Location"
@@ -3291,7 +3328,7 @@
         ]
       }
     },
-    "/api/location/nearby/{addressId}": {
+    "/api/locations/nearby/{addressId}": {
       "get": {
         "tags": [
           "Location"
@@ -3422,7 +3459,7 @@
         ]
       }
     },
-    "/api/location/geocode": {
+    "/api/locations/geocode": {
       "post": {
         "tags": [
           "Location"
@@ -3523,7 +3560,7 @@
         }
       }
     },
-    "/api/location/nearby/client/bags": {
+    "/api/locations/nearby/client/bags": {
       "get": {
         "tags": [
           "Location"
