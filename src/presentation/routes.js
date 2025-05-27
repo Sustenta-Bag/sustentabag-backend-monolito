@@ -16,7 +16,8 @@ const {
     businessRouter,
     authRouter,
     locationRouter,
-    orderRouter
+    orderRouter,
+    favoriteRouter
 } = setupModuleRouters({
     sequelizeInstance: sequelize
 });
@@ -28,6 +29,7 @@ router.use('/api/bags', bagRouter);
 router.use('/api/auth', authRouter);
 router.use('/api/locations', locationRouter);
 router.use('/api/orders', orderRouter);
+router.use('/api/favorites', favoriteRouter);
 
 // Configurar webhook para receber notificações do payment-service
 const bagRepository = new BagRepository(sequelize);

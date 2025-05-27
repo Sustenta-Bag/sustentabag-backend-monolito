@@ -3,12 +3,17 @@ import { sequelize } from '../../infrastructure/database/connection.js';
 
 const router = express.Router();
 
+// Rota para verificar se as conexões estabelecidas pelo .env estão funcionando corretamente
+
 /**
  * @route GET /api/health
  * @description Verificação do estado da API e suas conexões
  * @access Public
  */
 router.get('/', async (req, res) => {
+  /*
+  #swagger.ignore = true
+  */
   try {
     // Testar a conexão com o banco de dados
     await sequelize.authenticate();
