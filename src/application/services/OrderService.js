@@ -212,6 +212,88 @@ class OrderService {
       // Log do erro mas não propaga para não bloquear a atualização do status do pedido
     }
   }
+
+  async getOrderHistoryByUser(userId, options = {}) {
+    return await this.orderRepository.getOrderHistoryByUser(userId, options);
+  }
+
+  async getOrderHistoryByBusiness(businessId, options = {}) {
+    return await this.orderRepository.getOrderHistoryByBusiness(businessId, options);
+  }
+
+  async getOrdersByStatus(status, options = {}) {
+    const validStatuses = ['pendente', 'confirmado', 'preparando', 'pronto', 'entregue', 'cancelado'];
+    if (!validStatuses.includes(status)) {
+      throw new AppError('Status inválido', 'INVALID_STATUS');
+    }
+    return await this.orderRepository.getOrdersByStatus(status, options);
+  }
+
+  async getOrdersByDateRange(startDate, endDate, options = {}) {
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      throw new AppError('Data inicial não pode ser maior que a data final', 'INVALID_DATE_RANGE');
+    }
+    return await this.orderRepository.getOrdersByDateRange(startDate, endDate, options);
+  }
+
+  // Método para obter estatísticas rápidas do histórico
+  async getOrderStatsForUser(userId) {
+    const allOrders = await this.orderRepository.findByUserId(userId);
+    
+    const stats = {
+      total: allOrders.length,
+      byStatus: {
+        pendente: 0,
+        confirmado: 0,
+        preparando: 0,
+        pronto: 0,
+        entregue: 0,
+        cancelado: 0
+      },
+      totalAmount: 0,
+      lastOrderDate: null
+    };
+
+    allOrders.forEach(order => {
+      stats.byStatus[order.status]++;
+      stats.totalAmount += parseFloat(order.totalAmount || 0);
+      
+      if (!stats.lastOrderDate || order.createdAt > stats.lastOrderDate) {
+        stats.lastOrderDate = order.createdAt;
+      }
+    });
+
+    return stats;
+  }
+
+  async getOrderStatsForBusiness(businessId) {
+    const allOrders = await this.orderRepository.findByBusinessId(businessId);
+    
+    const stats = {
+      total: allOrders.length,
+      byStatus: {
+        pendente: 0,
+        confirmado: 0,
+        preparando: 0,
+        pronto: 0,
+        entregue: 0,
+        cancelado: 0
+      },
+      totalRevenue: 0,
+      lastOrderDate: null
+    };
+
+    allOrders.forEach(order => {
+      stats.byStatus[order.status]++;
+      stats.totalRevenue += parseFloat(order.totalAmount || 0);
+      
+      if (!stats.lastOrderDate || order.createdAt > stats.lastOrderDate) {
+        stats.lastOrderDate = order.createdAt;
+      }
+    });
+
+    return stats;
+  }
 }
 
-export default OrderService; 
+export default OrderService;

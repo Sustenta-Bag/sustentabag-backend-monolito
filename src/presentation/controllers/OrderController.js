@@ -105,6 +105,110 @@ class OrderController {
       next(error);
     }
   }
+
+  async getOrderHistoryByUser(req, res, next) {
+    try {
+      const { userId } = req.params;
+      const { status, startDate, endDate, limit, offset, orderBy, orderDirection } = req.query;
+      
+      const options = {
+        status,
+        startDate: startDate ? new Date(startDate) : null,
+        endDate: endDate ? new Date(endDate) : null,
+        limit: limit || 10,
+        offset: offset || 0,
+        orderBy: orderBy || 'createdAt',
+        orderDirection: orderDirection || 'DESC'
+      };
+
+      const history = await this.orderService.getOrderHistoryByUser(userId, options);
+      return res.json(history);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getOrderHistoryByBusiness(req, res, next) {
+    try {
+      const { businessId } = req.params;
+      const { status, startDate, endDate, limit, offset, orderBy, orderDirection } = req.query;
+      
+      const options = {
+        status,
+        startDate: startDate ? new Date(startDate) : null,
+        endDate: endDate ? new Date(endDate) : null,
+        limit: limit || 10,
+        offset: offset || 0,
+        orderBy: orderBy || 'createdAt',
+        orderDirection: orderDirection || 'DESC'
+      };
+
+      const history = await this.orderService.getOrderHistoryByBusiness(businessId, options);
+      return res.json(history);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getOrderStatsForUser(req, res, next) {
+    try {
+      const stats = await this.orderService.getOrderStatsForUser(req.params.userId);
+      return res.json(stats);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getOrderStatsForBusiness(req, res, next) {
+    try {
+      const stats = await this.orderService.getOrderStatsForBusiness(req.params.businessId);
+      return res.json(stats);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getOrdersByStatus(req, res, next) {
+    try {
+      const { status } = req.params;
+      const { limit, offset, orderBy, orderDirection } = req.query;
+      
+      const options = {
+        limit: limit || 10,
+        offset: offset || 0,
+        orderBy: orderBy || 'createdAt',
+        orderDirection: orderDirection || 'DESC'
+      };
+
+      const orders = await this.orderService.getOrdersByStatus(status, options);
+      return res.json(orders);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getOrdersByDateRange(req, res, next) {
+    try {
+      const { startDate, endDate } = req.query;
+      const { limit, offset, orderBy, orderDirection } = req.query;
+      
+      const options = {
+        limit: limit || 10,
+        offset: offset || 0,
+        orderBy: orderBy || 'createdAt',
+        orderDirection: orderDirection || 'DESC'
+      };
+
+      const orders = await this.orderService.getOrdersByDateRange(
+        startDate ? new Date(startDate) : null,
+        endDate ? new Date(endDate) : null,
+        options
+      );
+      return res.json(orders);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
-export default OrderController; 
+export default OrderController;

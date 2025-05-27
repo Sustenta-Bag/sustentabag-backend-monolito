@@ -449,11 +449,11 @@ describe('PostgresBusinessRepository', () => {
       expect(result.cellphone).toBe(modelData.cellphone);
       expect(result.description).toBe(modelData.description);
       expect(result.logo).toBe(modelData.logo);
-      expect(result.delivery).toBe(modelData.password);
-      expect(result.deliveryTax).toBe(modelData.delivery);
-      expect(result.idAddress).toBe(modelData.deliveryTax);
-      expect(result.status).toBe(modelData.idAddress);
-      expect(result.createdAt).toBe(modelData.status);
+      expect(result.delivery).toBe(modelData.delivery);
+      expect(result.deliveryTax).toBe(modelData.deliveryTax);
+      expect(result.idAddress).toBe(modelData.idAddress);
+      expect(result.status).toBe(modelData.status);
+      expect(result.createdAt).toBe(modelData.createdAt);
     });
   });
 });

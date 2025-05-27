@@ -3,6 +3,7 @@ import Order from '../../domain/entities/Order.js';
 import OrderItem from '../../domain/entities/OrderItem.js';
 import OrderModel from '../../domain/models/OrderModel.js';
 import OrderItemModel from '../../domain/models/OrderItemModel.js';
+import { Op } from 'sequelize';
 
 class PostgresOrderRepository extends OrderRepository {
   constructor(orderModel = OrderModel, orderItemModel = OrderItemModel) {
@@ -186,6 +187,162 @@ class PostgresOrderRepository extends OrderRepository {
     return this._mapToDomainItem(itemRecord);
   }
 
+  async getOrderHistoryByUser(userId, options = {}) {
+    const { status, startDate, endDate, limit = 10, offset = 0, orderBy = 'createdAt', orderDirection = 'DESC' } = options;
+
+    const whereClause = { userId };
+    
+    if (status) {
+      whereClause.status = status;
+    }
+    
+    if (startDate && endDate) {
+      whereClause.createdAt = {
+        [Op.between]: [startDate, endDate]
+      };
+    } else if (startDate) {
+      whereClause.createdAt = {
+        [Op.gte]: startDate
+      };
+    } else if (endDate) {
+      whereClause.createdAt = {
+        [Op.lte]: endDate
+      };
+    }
+
+    const orderRecords = await this.OrderModel.findAndCountAll({
+      where: whereClause,
+      include: [{
+        model: this.OrderItemModel,
+        as: 'items'
+      }],
+      order: [[orderBy, orderDirection]],
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    });
+
+    return {
+      orders: orderRecords.rows.map(record => {
+        const order = this._mapToDomainEntity(record);
+        order.items = record.items.map(item => this._mapToDomainItem(item));
+        return order;
+      }),
+      total: orderRecords.count,
+      hasMore: (parseInt(offset) + parseInt(limit)) < orderRecords.count
+    };
+  }
+
+  async getOrderHistoryByBusiness(businessId, options = {}) {
+    const { status, startDate, endDate, limit = 10, offset = 0, orderBy = 'createdAt', orderDirection = 'DESC' } = options;
+
+    const whereClause = { businessId };
+    
+    if (status) {
+      whereClause.status = status;
+    }
+    
+    if (startDate && endDate) {
+      whereClause.createdAt = {
+        [Op.between]: [startDate, endDate]
+      };
+    } else if (startDate) {
+      whereClause.createdAt = {
+        [Op.gte]: startDate
+      };
+    } else if (endDate) {
+      whereClause.createdAt = {
+        [Op.lte]: endDate
+      };
+    }
+
+    const orderRecords = await this.OrderModel.findAndCountAll({
+      where: whereClause,
+      include: [{
+        model: this.OrderItemModel,
+        as: 'items'
+      }],
+      order: [[orderBy, orderDirection]],
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    });
+
+    return {
+      orders: orderRecords.rows.map(record => {
+        const order = this._mapToDomainEntity(record);
+        order.items = record.items.map(item => this._mapToDomainItem(item));
+        return order;
+      }),
+      total: orderRecords.count,
+      hasMore: (parseInt(offset) + parseInt(limit)) < orderRecords.count
+    };
+  }
+
+  async getOrdersByStatus(status, options = {}) {
+    const { limit = 10, offset = 0, orderBy = 'createdAt', orderDirection = 'DESC' } = options;
+
+    const orderRecords = await this.OrderModel.findAndCountAll({
+      where: { status },
+      include: [{
+        model: this.OrderItemModel,
+        as: 'items'
+      }],
+      order: [[orderBy, orderDirection]],
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    });
+
+    return {
+      orders: orderRecords.rows.map(record => {
+        const order = this._mapToDomainEntity(record);
+        order.items = record.items.map(item => this._mapToDomainItem(item));
+        return order;
+      }),
+      total: orderRecords.count,
+      hasMore: (parseInt(offset) + parseInt(limit)) < orderRecords.count
+    };
+  }
+
+  async getOrdersByDateRange(startDate, endDate, options = {}) {
+    const { limit = 10, offset = 0, orderBy = 'createdAt', orderDirection = 'DESC' } = options;
+
+    const whereClause = {};
+    
+    if (startDate && endDate) {
+      whereClause.createdAt = {
+        [Op.between]: [startDate, endDate]
+      };
+    } else if (startDate) {
+      whereClause.createdAt = {
+        [Op.gte]: startDate
+      };
+    } else if (endDate) {
+      whereClause.createdAt = {
+        [Op.lte]: endDate
+      };
+    }
+
+    const orderRecords = await this.OrderModel.findAndCountAll({
+      where: whereClause,
+      include: [{
+        model: this.OrderItemModel,
+        as: 'items'
+      }],
+      order: [[orderBy, orderDirection]],
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    });
+
+    return {
+      orders: orderRecords.rows.map(record => {
+        const order = this._mapToDomainEntity(record);
+        order.items = record.items.map(item => this._mapToDomainItem(item));
+        return order;
+      }),
+      total: orderRecords.count,
+      hasMore: (parseInt(offset) + parseInt(limit)) < orderRecords.count
+    };
+  }
+
   _mapToDomainEntity(record) {
     return new Order(
       record.id,
@@ -209,4 +366,4 @@ class PostgresOrderRepository extends OrderRepository {
   }
 }
 
-export default PostgresOrderRepository; 
+export default PostgresOrderRepository;
