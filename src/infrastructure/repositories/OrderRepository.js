@@ -42,6 +42,22 @@ class OrderRepository {
   async updateItemQuantity(orderId, itemId, quantity) {
     throw new Error('Método não implementado');
   }
+
+  async getOrderHistoryByUser(userId, options = {}) {
+    throw new Error('Método não implementado');
+  }
+
+  async getOrderHistoryByBusiness(businessId, options = {}) {
+    throw new Error('Método não implementado');
+  }
+
+  async getOrdersByStatus(status, options = {}) {
+    throw new Error('Método não implementado');
+  }
+
+  async getOrdersByDateRange(startDate, endDate, options = {}) {
+    throw new Error('Método não implementado');
+  }
 }
 
-export default OrderRepository; 
+export default OrderRepository;

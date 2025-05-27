@@ -286,9 +286,182 @@ export const setupOrderRoutes = (router, options = {}) => {
       description: "Not Found - Order not found",
       schema: { $ref: "#/components/schemas/Error" }
     }
-    */
-    authenticate,
+    */    authenticate,
     requireAnyRole,
     validateOrderId,
     orderController.cancelOrder.bind(orderController));
-}; 
+
+  // Get order history by user (with filters and pagination)
+  router.get('/history/user/:userId',
+    /*
+    #swagger.path = '/api/orders/history/user/{userId}'
+    #swagger.tags = ["Order History"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['userId'] = {
+      in: 'path',
+      description: 'User ID',
+      required: true,
+      type: 'integer'
+    }
+    #swagger.parameters['status'] = {
+      in: 'query',
+      description: 'Filter by order status',
+      required: false,
+      type: 'string',
+      enum: ['pendente', 'confirmado', 'preparando', 'pronto', 'entregue', 'cancelado']
+    }
+    #swagger.parameters['startDate'] = {
+      in: 'query',
+      description: 'Filter from date (YYYY-MM-DD)',
+      required: false,
+      type: 'string'
+    }
+    #swagger.parameters['endDate'] = {
+      in: 'query',
+      description: 'Filter to date (YYYY-MM-DD)',
+      required: false,
+      type: 'string'
+    }
+    #swagger.parameters['limit'] = {
+      in: 'query',
+      description: 'Number of orders per page',
+      required: false,
+      type: 'integer',
+      default: 10
+    }
+    #swagger.parameters['offset'] = {
+      in: 'query',
+      description: 'Number of orders to skip',
+      required: false,
+      type: 'integer',
+      default: 0
+    }
+    #swagger.responses[200] = {
+      description: "User order history retrieved successfully",
+      schema: {
+        type: "object",
+        properties: {
+          orders: { type: "array", items: { $ref: "#/components/schemas/Order" } },
+          total: { type: "integer" },
+          hasMore: { type: "boolean" }
+        }
+      }
+    }
+    */
+    authenticate,
+    requireAnyRole,
+    orderController.getOrderHistoryByUser.bind(orderController));
+
+  // Get order history by business (with filters and pagination)
+  router.get('/history/business/:businessId',
+    /*
+    #swagger.path = '/api/orders/history/business/{businessId}'
+    #swagger.tags = ["Order History"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['businessId'] = {
+      in: 'path',
+      description: 'Business ID',
+      required: true,
+      type: 'integer'
+    }
+    #swagger.responses[200] = {
+      description: "Business order history retrieved successfully"
+    }
+    */
+    authenticate,
+    requireBusinessRole,
+    orderController.getOrderHistoryByBusiness.bind(orderController));
+
+  // Get order statistics for user
+  router.get('/stats/user/:userId',
+    /*
+    #swagger.path = '/api/orders/stats/user/{userId}'
+    #swagger.tags = ["Order Statistics"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = {
+      description: "User order statistics retrieved successfully",
+      schema: {
+        type: "object",
+        properties: {
+          total: { type: "integer" },
+          byStatus: { type: "object" },
+          totalAmount: { type: "number" },
+          lastOrderDate: { type: "string" }
+        }
+      }
+    }
+    */
+    authenticate,
+    requireAnyRole,
+    orderController.getOrderStatsForUser.bind(orderController));
+
+  // Get order statistics for business
+  router.get('/stats/business/:businessId',
+    /*
+    #swagger.path = '/api/orders/stats/business/{businessId}'
+    #swagger.tags = ["Order Statistics"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = {
+      description: "Business order statistics retrieved successfully",
+      schema: {
+        type: "object",
+        properties: {
+          total: { type: "integer" },
+          byStatus: { type: "object" },
+          totalRevenue: { type: "number" },
+          lastOrderDate: { type: "string" }
+        }
+      }
+    }
+    */
+    authenticate,
+    requireBusinessRole,
+    orderController.getOrderStatsForBusiness.bind(orderController));
+
+  // Get orders by status
+  router.get('/status/:status',
+    /*
+    #swagger.path = '/api/orders/status/{status}'
+    #swagger.tags = ["Order"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['status'] = {
+      in: 'path',
+      description: 'Order status',
+      required: true,
+      type: 'string',
+      enum: ['pendente', 'confirmado', 'preparando', 'pronto', 'entregue', 'cancelado']
+    }
+    #swagger.responses[200] = {
+      description: "Orders filtered by status retrieved successfully"
+    }
+    */
+    authenticate,
+    requireBusinessRole,
+    orderController.getOrdersByStatus.bind(orderController));
+
+  // Get orders by date range
+  router.get('/date-range',
+    /*
+    #swagger.path = '/api/orders/date-range'
+    #swagger.tags = ["Order"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['startDate'] = {
+      in: 'query',
+      description: 'Start date (YYYY-MM-DD)',
+      required: false,
+      type: 'string'
+    }
+    #swagger.parameters['endDate'] = {
+      in: 'query',
+      description: 'End date (YYYY-MM-DD)',
+      required: false,
+      type: 'string'
+    }
+    #swagger.responses[200] = {
+      description: "Orders filtered by date range retrieved successfully"
+    }
+    */
+    authenticate,
+    requireBusinessRole,
+    orderController.getOrdersByDateRange.bind(orderController));
+};
