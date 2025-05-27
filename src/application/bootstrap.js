@@ -7,6 +7,7 @@ import * as authModule from './modules/authModule.js';
 import * as locationModule from './modules/locationModule.js';
 import LocationService from './services/LocationService.js';
 import * as orderModule from './modules/orderModule.js';
+import * as favoriteModule from './modules/favoriteModule.js';
 import setupAssociations from '../infrastructure/database/associations.js';
 
 export const initializeModules = (sequelize) => {
@@ -16,6 +17,7 @@ export const initializeModules = (sequelize) => {
   const businessModels = businessModule.initializeModels(sequelize);
   const authModels = authModule.initializeModels(sequelize);
   const orderModels = orderModule.initializeModels(sequelize);
+  const favoriteModels = favoriteModule.initializeModels(sequelize);
   
   const allModels = {
     ...bagModels,
@@ -23,7 +25,8 @@ export const initializeModules = (sequelize) => {
     ...addressModels,
     ...businessModels,
     ...authModels,
-    ...orderModels
+    ...orderModels,
+    ...favoriteModels
   };
   
   setupAssociations(allModels);
@@ -61,6 +64,12 @@ export const setupModuleRouters = (options = {}) => {
     sequelizeInstance: options.sequelizeInstance
   });
 
+  const favoriteRouter = favoriteModule.setupFavoriteModule({
+    sequelizeInstance: options.sequelizeInstance,
+    clientRepository: clientRepository,
+    businessRepository: businessRepository
+  });
+
   const businessRouter = businessModule.setupBusinessModule({
     sequelizeInstance: options.sequelizeInstance
   }); const authRouter = authModule.setupAuthModule({
@@ -91,6 +100,7 @@ export const setupModuleRouters = (options = {}) => {
     businessRouter,
     authRouter,
     locationRouter,
-    orderRouter
+    orderRouter,
+    favoriteRouter
   };
 };

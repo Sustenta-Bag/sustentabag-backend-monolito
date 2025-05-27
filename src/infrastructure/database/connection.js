@@ -70,6 +70,11 @@ export const syncDatabase = async (force = false) => {
       console.log("Sincronizando modelo de Sacolas...");
       await sequelize.models.BagModel.sync({ force });
     }
+
+    if (sequelize.models.FavoriteModel) {
+      console.log("Sincronizando modelo de Favoritos...");
+      await sequelize.models.FavoriteModel.sync({ force });
+    }
     
     await sequelize.query('SET CONSTRAINTS ALL IMMEDIATE');
     

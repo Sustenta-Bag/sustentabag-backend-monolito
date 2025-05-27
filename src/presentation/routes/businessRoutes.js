@@ -14,9 +14,7 @@ import {
 } from '../middleware/businessValidation.js';
 import { 
   authenticate, 
-  requireBusinessRole, 
-  requireClientRole, 
-  requireAnyRole 
+  requireBusinessRole,
 } from '../middleware/authMiddleware.js';
 
 const upload = multer(multerConfig);
