@@ -65,8 +65,7 @@ export const syncDatabase = async (force = false) => {
       console.log("Sincronizando modelo de Clientes...");
       await sequelize.models.ClientModel.sync({ force });
     }
-    
-    if (sequelize.models.BagModel) {
+      if (sequelize.models.BagModel) {
       console.log("Sincronizando modelo de Sacolas...");
       await sequelize.models.BagModel.sync({ force });
     }
@@ -74,6 +73,16 @@ export const syncDatabase = async (force = false) => {
     if (sequelize.models.FavoriteModel) {
       console.log("Sincronizando modelo de Favoritos...");
       await sequelize.models.FavoriteModel.sync({ force });
+    }
+    
+    if (sequelize.models.OrderModel) {
+      console.log("Sincronizando modelo de Pedidos...");
+      await sequelize.models.OrderModel.sync({ force });
+    }
+    
+    if (sequelize.models.OrderItemModel) {
+      console.log("Sincronizando modelo de Itens do Pedido...");
+      await sequelize.models.OrderItemModel.sync({ force });
     }
     
     await sequelize.query('SET CONSTRAINTS ALL IMMEDIATE');
