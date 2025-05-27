@@ -22,12 +22,12 @@ export const validateCreateOrder = [
     .isInt({ min: 1 })
     .withMessage('Quantidade deve ser um número inteiro positivo'),
 
-  body('paymentMethod')
-    .isString()
-    .notEmpty()
-    .withMessage('Método de pagamento é obrigatório')
-    .isIn(['credit_card', 'debit_card', 'pix', 'bank_transfer'])
-    .withMessage('Método de pagamento inválido'),
+  // body('paymentMethod')
+  //   .isString()
+  //   .notEmpty()
+  //   .withMessage('Método de pagamento é obrigatório')
+  //   .isIn(['credit_card', 'debit_card', 'pix', 'bank_transfer'])
+  //   .withMessage('Método de pagamento inválido'),
 
   handleValidationErrors
 ];
