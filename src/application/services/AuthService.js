@@ -283,7 +283,6 @@ class AuthService {
 
     return true;
   }
-
   async updateDeviceToken(userId, deviceToken) {
     const user = await this.userRepository.findById(userId);
 
@@ -305,6 +304,16 @@ class AuthService {
     }
 
     return true;
+  }
+
+  async getUserFcmToken(userId) {
+    const user = await this.userRepository.findById(userId);
+
+    if (!user) {
+      throw new AppError("Usuário não encontrado", "USER_NOT_FOUND", 404);
+    }
+
+    return user.fcmToken;
   }
 }
 

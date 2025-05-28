@@ -236,9 +236,6 @@ export default (authController) => (router) => {
     authController.login.bind(authController)
   );
 
-
-
-
   router.post(
     "/change-password",
     /*
@@ -319,6 +316,51 @@ export default (authController) => (router) => {
     authenticate,
     validateDeviceTokenInput,
     authController.updateDeviceToken.bind(authController)
+  );
+
+  router.get(
+    "/user/:userId/fcm-token",
+    /*
+    #swagger.path = '/api/auth/user/{userId}/fcm-token'
+    #swagger.tags = ['Authentication']
+    #swagger.summary = 'Recuperar token FCM do usuário'
+    #swagger.description = 'Recupera o token FCM associado a um usuário específico'
+    #swagger.parameters[0] = {
+      name: 'userId',
+      in: 'path',
+      description: 'ID do usuário',
+      required: true,
+      schema: {
+        type: 'string'
+      }
+    }
+    #swagger.responses[200] = {
+      description: 'Token FCM recuperado com sucesso',
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              token: { 
+                type: "string", 
+                example: "fcm-token-example",
+                description: "Token FCM do usuário ou null se não encontrado"
+              }
+            }
+          }
+        }
+      }
+    }
+    #swagger.responses[404] = {
+      description: 'Usuário não encontrado',
+      schema: { $ref: "#/components/schemas/Error" }
+    }
+    #swagger.responses[400] = {
+      description: 'ID do usuário inválido',
+      schema: { $ref: "#/components/schemas/ValidationError" }
+    }
+    */
+    authController.getUserFcmToken.bind(authController)
   );
 
   return router;
