@@ -3,7 +3,7 @@ import Order from '../../domain/entities/Order.js';
 import OrderItem from '../../domain/entities/OrderItem.js';
 import OrderModel from '../../domain/models/OrderModel.js';
 import OrderItemModel from '../../domain/models/OrderItemModel.js';
-import { Op } from 'sequelize';
+import { Op, or } from 'sequelize';
 
 class PostgresOrderRepository extends OrderRepository {
   constructor(orderModel = OrderModel, orderItemModel = OrderItemModel) {
@@ -31,10 +31,10 @@ class PostgresOrderRepository extends OrderRepository {
       
       order.items = itemsRecords.map(item => this._mapToDomainItem(item));
     }
+    order.calculateTotal();
     
     return order;
   }
-
   async findById(id) {
     const orderRecord = await this.OrderModel.findByPk(id, {
       include: [{
@@ -47,10 +47,10 @@ class PostgresOrderRepository extends OrderRepository {
     
     const order = this._mapToDomainEntity(orderRecord);
     order.items = orderRecord.items.map(item => this._mapToDomainItem(item));
+    order.calculateTotal();
     
     return order;
   }
-
   async findAll() {
     const orderRecords = await this.OrderModel.findAll({
       include: [{
@@ -62,10 +62,10 @@ class PostgresOrderRepository extends OrderRepository {
     return orderRecords.map(record => {
       const order = this._mapToDomainEntity(record);
       order.items = record.items.map(item => this._mapToDomainItem(item));
+      order.calculateTotal();
       return order;
     });
   }
-
   async update(id, orderData) {
     const { items, ...orderFields } = orderData;
     
@@ -84,6 +84,7 @@ class PostgresOrderRepository extends OrderRepository {
     
     const order = this._mapToDomainEntity(orderRecord);
     order.items = orderRecord.items.map(item => this._mapToDomainItem(item));
+    order.calculateTotal();
     
     return order;
   }
@@ -94,7 +95,6 @@ class PostgresOrderRepository extends OrderRepository {
     });
     return deleted > 0;
   }
-
   async findByUserId(userId) {
     const orderRecords = await this.OrderModel.findAll({
       where: { userId },
@@ -107,10 +107,10 @@ class PostgresOrderRepository extends OrderRepository {
     return orderRecords.map(record => {
       const order = this._mapToDomainEntity(record);
       order.items = record.items.map(item => this._mapToDomainItem(item));
+      order.calculateTotal();
       return order;
     });
   }
-
   async findByBusinessId(businessId) {
     const orderRecords = await this.OrderModel.findAll({
       where: { businessId },
@@ -123,10 +123,10 @@ class PostgresOrderRepository extends OrderRepository {
     return orderRecords.map(record => {
       const order = this._mapToDomainEntity(record);
       order.items = record.items.map(item => this._mapToDomainItem(item));
+      order.calculateTotal();
       return order;
     });
   }
-
   async updateStatus(id, status) {
     await this.OrderModel.update({ status }, {
       where: { id }
@@ -143,6 +143,7 @@ class PostgresOrderRepository extends OrderRepository {
     
     const order = this._mapToDomainEntity(orderRecord);
     order.items = orderRecord.items.map(item => this._mapToDomainItem(item));
+    order.calculateTotal();
     
     return order;
   }
@@ -186,7 +187,6 @@ class PostgresOrderRepository extends OrderRepository {
     
     return this._mapToDomainItem(itemRecord);
   }
-
   async getOrderHistoryByUser(userId, options = {}) {
     const { status, startDate, endDate, limit = 10, offset = 0, orderBy = 'createdAt', orderDirection = 'DESC' } = options;
 
@@ -225,13 +225,13 @@ class PostgresOrderRepository extends OrderRepository {
       orders: orderRecords.rows.map(record => {
         const order = this._mapToDomainEntity(record);
         order.items = record.items.map(item => this._mapToDomainItem(item));
+        order.calculateTotal();
         return order;
       }),
       total: orderRecords.count,
       hasMore: (parseInt(offset) + parseInt(limit)) < orderRecords.count
     };
   }
-
   async getOrderHistoryByBusiness(businessId, options = {}) {
     const { status, startDate, endDate, limit = 10, offset = 0, orderBy = 'createdAt', orderDirection = 'DESC' } = options;
 
@@ -270,13 +270,13 @@ class PostgresOrderRepository extends OrderRepository {
       orders: orderRecords.rows.map(record => {
         const order = this._mapToDomainEntity(record);
         order.items = record.items.map(item => this._mapToDomainItem(item));
+        order.calculateTotal();
         return order;
       }),
       total: orderRecords.count,
       hasMore: (parseInt(offset) + parseInt(limit)) < orderRecords.count
     };
   }
-
   async getOrdersByStatus(status, options = {}) {
     const { limit = 10, offset = 0, orderBy = 'createdAt', orderDirection = 'DESC' } = options;
 
@@ -295,13 +295,13 @@ class PostgresOrderRepository extends OrderRepository {
       orders: orderRecords.rows.map(record => {
         const order = this._mapToDomainEntity(record);
         order.items = record.items.map(item => this._mapToDomainItem(item));
+        order.calculateTotal();
         return order;
       }),
       total: orderRecords.count,
       hasMore: (parseInt(offset) + parseInt(limit)) < orderRecords.count
     };
   }
-
   async getOrdersByDateRange(startDate, endDate, options = {}) {
     const { limit = 10, offset = 0, orderBy = 'createdAt', orderDirection = 'DESC' } = options;
 
@@ -336,6 +336,7 @@ class PostgresOrderRepository extends OrderRepository {
       orders: orderRecords.rows.map(record => {
         const order = this._mapToDomainEntity(record);
         order.items = record.items.map(item => this._mapToDomainItem(item));
+        order.calculateTotal();
         return order;
       }),
       total: orderRecords.count,
