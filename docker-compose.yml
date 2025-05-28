@@ -86,7 +86,7 @@ services:
 
   notification-service:
     build:
-      context: ../../notification-service
+      context: ../notification-service
       dockerfile: Dockerfile
     container_name: notification-service
     restart: unless-stopped
@@ -114,7 +114,7 @@ services:
   # Serviço de pagamento
   payment-service:
     build:
-      context: ../../payment-service
+      context: ../payment-service
       dockerfile: Dockerfile
     container_name: payment-service
     restart: unless-stopped
