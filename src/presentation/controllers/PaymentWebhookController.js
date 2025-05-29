@@ -7,39 +7,61 @@ class PaymentWebhookController {
   constructor(orderService) {
     this.orderService = orderService;
   }
-
   async handlePaymentUpdate(req, res, next) {
     try {
       const { orderId, status, paymentId } = req.body;
-      
+
       if (!orderId || !status) {
         return res.status(400).json({
-          message: 'Dados incompletos. orderId e status são obrigatórios'
+          message: "Dados incompletos. orderId e status são obrigatórios",
         });
       }
 
-      // Buscar o pedido e verificar se ele existe
-      const order = await this.orderService.getOrder(orderId);
+      let orderIdInt;
+      try {
+        orderIdInt = parseInt(orderId);
+        if (isNaN(orderIdInt)) {
+          throw new Error("OrderId inválido");
+        }
+      } catch (error) {
+        console.log(
+          `❌ OrderId inválido recebido: ${orderId} (tipo: ${typeof orderId})`
+        );
+        return res.status(400).json({
+          message: `OrderId inválido: ${orderId}. Esperado um número inteiro.`,
+        });
+      }
+
+      console.log(
+        `🔄 Convertendo orderId: "${orderId}" (${typeof orderId}) → ${orderIdInt} (${typeof orderIdInt})`
+      );
+      const order = await this.orderService.getOrder(orderIdInt);
       if (!order) {
         return res.status(404).json({
-          message: `Pedido com ID ${orderId} não encontrado`
+          message: `Pedido com ID ${orderIdInt} não encontrado`,
         });
       }
+      console.log(
+        `Webhook do payment-service recebido: Pedido ${orderIdInt}, status ${status}, paymentId: ${paymentId}`
+      );
 
-      // Log da notificação recebida
-      console.log(`Webhook do payment-service recebido: Pedido ${orderId}, status ${status}`);      // Atualizar o status do pedido com base na notificação
-      if (status === 'completed') {
-        // Se o pagamento foi concluído, confirmar o pedido
-        await this.orderService.updateOrderStatus(orderId, 'confirmado');
-      } else if (status === 'failed' || status === 'cancelled') {
-        // Se o pagamento falhou ou foi cancelado, cancelar o pedido
-        await this.orderService.cancelOrder(orderId);
+      if (status === "approved" || status === "completed") {
+        console.log(`Processando pagamento aprovado para pedido ${orderIdInt}`);
+
+        await this.orderService.updateOrderStatus(orderIdInt, "entregue");
+
+        console.log(
+          `✅ Pedido ${orderIdInt} finalizado e sacolas inativadas após pagamento aprovado`
+        );
+      } else if (status === "failed" || status === "cancelled") {
+        console.log(
+          `Cancelando pedido ${orderIdInt} devido ao pagamento ${status}`
+        );
+        await this.orderService.cancelOrder(orderIdInt);
       }
-      // Outros status podem ser tratados conforme necessário
 
-      // Responder com sucesso
       return res.status(200).json({
-        message: 'Notificação processada com sucesso'
+        message: "Notificação processada com sucesso",
       });
     } catch (error) {
       next(error);
