@@ -189,18 +189,35 @@ jobs:
           MESSAGE="${{ steps.generate-tag.outputs.message }}"
           BRANCH="${{ steps.generate-tag.outputs.branch }}"
           
-          # Garantir que estamos na branch correta
+          # Garantir que estamos na branch correta e atualizada
           git checkout $BRANCH
           git pull origin $BRANCH
           
-          # Criar a tag
-          git tag -a "$TAG" -m "$MESSAGE"
-          git push origin "$TAG"
+          # Buscar todas as tags do remote
+          git fetch --tags --force
           
-          echo "### ✅ Tag criada com sucesso" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Tag: $TAG" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Mensagem: $MESSAGE" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Branch: $BRANCH" >> "$GITHUB_STEP_SUMMARY"
+          # Verificar se a tag já existe (local ou remote)
+          if git tag | grep -q "^$TAG$"; then
+            echo "### ℹ️ Tag já existe" >> "$GITHUB_STEP_SUMMARY"
+            echo "A tag $TAG já existe no repositório. Continuando com o workflow..." >> "$GITHUB_STEP_SUMMARY"
+            # Garantir que a tag local está sincronizada com o remote
+            git fetch origin "refs/tags/$TAG:refs/tags/$TAG" --force
+          else
+            # Criar a tag apenas se não existir
+            git tag -a "$TAG" -m "$MESSAGE"
+            # Tentar push da tag, mas não falhar se já existir
+            if ! git push origin "$TAG" 2>/dev/null; then
+              echo "### ℹ️ Tag já existe no remote" >> "$GITHUB_STEP_SUMMARY"
+              echo "A tag $TAG já existe no repositório remoto. Continuando com o workflow..." >> "$GITHUB_STEP_SUMMARY"
+              # Garantir que a tag local está sincronizada com o remote
+              git fetch origin "refs/tags/$TAG:refs/tags/$TAG" --force
+            else
+              echo "### ✅ Tag criada com sucesso" >> "$GITHUB_STEP_SUMMARY"
+              echo "- Tag: $TAG" >> "$GITHUB_STEP_SUMMARY"
+              echo "- Mensagem: $MESSAGE" >> "$GITHUB_STEP_SUMMARY"
+              echo "- Branch: $BRANCH" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
       
       - name: Gerar changelog
         run: |
