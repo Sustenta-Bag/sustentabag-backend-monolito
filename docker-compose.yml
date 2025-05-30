@@ -45,7 +45,8 @@ services:
       - FIREBASE_AUTH_DOMAIN=${FIREBASE_AUTH_DOMAIN}
       - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
       - FIREBASE_STORAGE_BUCKET=${FIREBASE_STORAGE_BUCKET}
-      - FIREBASE_MESSAGING_SENDER_ID=${FIREBASE_MESSAGING_SENDER_ID}      - FIREBASE_APP_ID=${FIREBASE_APP_ID}
+      - FIREBASE_MESSAGING_SENDER_ID=${FIREBASE_MESSAGING_SENDER_ID}      
+      - FIREBASE_APP_ID=${FIREBASE_APP_ID}
       - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
       # Private key needs special handling for newlines
       - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
@@ -90,14 +91,30 @@ services:
       dockerfile: Dockerfile
     container_name: notification-service
     restart: unless-stopped
+    ports:
+      - "4409:4409"
+    env_file:
+      - ../notification-service/.env
     environment:
-      - NODE_ENV=production
-      - RABBITMQ=amqp://admin:admin@rabbitmq:5672
-      - MAX_RETRIES=5
+      - NODE_ENV=${NODE_ENV}
+      - RABBITMQ=${RABBITMQ}
+      - MAX_RETRIES=${MAX_RETRIES}
+      - HEALTH_PORT=${HEALTH_PORT}
+      - PORT=${PORT}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - FIREBASE_API_KEY=${FIREBASE_API_KEY}
+      - FIREBASE_AUTH_DOMAIN=${FIREBASE_AUTH_DOMAIN}
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+      - FIREBASE_STORAGE_BUCKET=${FIREBASE_STORAGE_BUCKET}
+      - FIREBASE_MESSAGING_SENDER_ID=${FIREBASE_MESSAGING_SENDER_ID}
+      - FIREBASE_APP_ID=${FIREBASE_APP_ID}
+      - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+      - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
     depends_on:
       - rabbitmq
     networks:
       - sustentabag-network
+
   mongodb:
     image: mongo:6.0
     container_name: payment-mongodb
@@ -125,8 +142,9 @@ services:
       - PORT=3001
       - MONGODB_URI=mongodb://mongodb:27017/payment-service
       - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
-      - MERCADOPAGO_ACCESS_TOKEN=
-      - MERCADOPAGO_WEBHOOK_URL=https://seu-dominio.com/api/payments/webhook
+      - PAYMENT_SIMULATION_CALLBACK_URL=http://sustentabag-api:4041/api/payment-simulation
+      - PAYMENT_SIMULATION_NOTIFICATION_URL=http://sustentabag-api:4041/api/payments/webhook
+      - MONOLITH_BASE_URL=http://sustentabag-api:4041
     depends_on:
       - rabbitmq
       - mongodb
