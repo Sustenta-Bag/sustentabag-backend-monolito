@@ -8,7 +8,11 @@ class BagController {
 
   async createBag(req, res, next) {
     try {
-      const bag = await this.bagService.createBag(req.body);
+      const bagData = {
+        ...req.body,
+        idBusiness: req.user.entityId
+      };
+      const bag = await this.bagService.createBag(bagData);
 
       if (res.status(201)) {
         const data = {
@@ -54,7 +58,11 @@ class BagController {
 
   async updateBag(req, res, next) {
     try {
-      const bag = await this.bagService.updateBag(req.params.id, req.body);
+      const bagData = {
+        ...req.body,
+        idBusiness: req.user.entityId
+      };
+      const bag = await this.bagService.updateBag(req.params.id, bagData);
       return res.json(bag);
     } catch (error) {
       next(error);
@@ -103,6 +111,30 @@ class BagController {
         req.body.status
       );
       return res.json(bag);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getAllowedTags(req, res, next) {
+    try {
+      const ALLOWED_TAGS = [
+        'PODE_CONTER_GLUTEN',
+        'PODE_CONTER_LACTOSE',
+        'PODE_CONTER_LEITE',
+        'PODE_CONTER_OVOS',
+        'PODE_CONTER_AMENDOIM',
+        'PODE_CONTER_CASTANHAS',
+        'PODE_CONTER_NOZES',
+        'PODE_CONTER_SOJA',
+        'PODE_CONTER_PEIXE',
+        'PODE_CONTER_FRUTOS_DO_MAR',
+        'PODE_CONTER_CRUSTACEOS',
+        'PODE_CONTER_GERGELIM',
+        'PODE_CONTER_SULFITOS',
+        'PODE_CONTER_CARNE'
+      ];
+      return res.json(ALLOWED_TAGS);
     } catch (error) {
       next(error);
     }

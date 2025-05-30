@@ -70,6 +70,7 @@ class PostgresBagRepository extends BagRepository {
       record.description,
       record.idBusiness,
       record.status,
+      record.tags,
       record.createdAt
     );
   }
