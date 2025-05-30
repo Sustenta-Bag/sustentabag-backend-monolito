@@ -4827,6 +4827,29 @@
             "type": "number",
             "example": 1
           },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "PODE_CONTER_GLUTEN",
+                "PODE_CONTER_LACTOSE",
+                "PODE_CONTER_LEITE",
+                "PODE_CONTER_OVOS",
+                "PODE_CONTER_AMENDOIM",
+                "PODE_CONTER_CASTANHAS",
+                "PODE_CONTER_NOZES",
+                "PODE_CONTER_SOJA",
+                "PODE_CONTER_PEIXE",
+                "PODE_CONTER_FRUTOS_DO_MAR",
+                "PODE_CONTER_CRUSTACEOS",
+                "PODE_CONTER_GERGELIM",
+                "PODE_CONTER_SULFITOS",
+                "PODE_CONTER_CARNE"
+              ]
+            },
+            "description": "Lista de possíveis alérgenos na sacola"
+          },
           "createdAt": {
             "type": "string",
             "example": "2023-01-01T00:00:00Z"
@@ -4841,28 +4864,48 @@
         "properties": {
           "type": {
             "type": "string",
-            "example": "Doce"
+            "enum": ["Doce", "Salgada", "Mista"],
+            "description": "Tipo da sacola"
           },
           "price": {
             "type": "number",
-            "example": 10.99
+            "minimum": 0,
+            "description": "Preço da sacola"
           },
           "description": {
             "type": "string",
-            "example": "Sacola com diversos doces e sobremesas"
-          },
-          "idBusiness": {
-            "type": "number",
-            "example": 1
+            "description": "Descrição da sacola"
           },
           "status": {
-            "type": "number",
-            "example": 1
+            "type": "integer",
+            "enum": [0, 1],
+            "description": "Status da sacola (0 = inativo, 1 = ativo)"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "PODE_CONTER_GLUTEN",
+                "PODE_CONTER_LACTOSE",
+                "PODE_CONTER_LEITE",
+                "PODE_CONTER_OVOS",
+                "PODE_CONTER_AMENDOIM",
+                "PODE_CONTER_CASTANHAS",
+                "PODE_CONTER_NOZES",
+                "PODE_CONTER_SOJA",
+                "PODE_CONTER_PEIXE",
+                "PODE_CONTER_FRUTOS_DO_MAR",
+                "PODE_CONTER_CRUSTACEOS",
+                "PODE_CONTER_GERGELIM",
+                "PODE_CONTER_SULFITOS",
+                "PODE_CONTER_CARNE"
+              ]
+            },
+            "description": "Lista de possíveis alérgenos na sacola"
           }
         },
-        "xml": {
-          "name": "BagInput"
-        }
+        "required": ["type", "price"]
       },
       "StatusUpdate": {
         "type": "object",

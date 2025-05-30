@@ -200,4 +200,25 @@ export const setupBagRoutes = (router, options = {}) => {
     requireBusinessRole,
     validateStatusUpdate, 
     bagController.changeBagStatus.bind(bagController));
+
+  router.get('/tags',
+    /*
+    #swagger.path = '/api/bags/tags'
+    #swagger.tags = ["Bag"]
+    #swagger.description = "Retorna a lista de tags permitidas para sacolas"
+    #swagger.responses[200] = {
+      description: "Lista de tags permitidas",
+      schema: {
+        type: "array",
+        items: {
+          type: "string"
+        },
+        example: ["PODE_CONTER_GLUTEN", "PODE_CONTER_LACTOSE"]
+      }
+    }
+    */
+    bagController.getAllowedTags.bind(bagController)
+  );
+
+  return router;
 };
