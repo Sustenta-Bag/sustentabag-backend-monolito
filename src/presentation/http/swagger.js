@@ -175,6 +175,18 @@ const doc = {
         cpf: "12345678901",
         password: "senha123"
       },
+
+      Favorite: {
+        idBusiness: 1,
+        idClient: 1
+      },
+
+      Review: {
+        idOrder: 1,
+        idClient: 1,
+        rating: 5,
+        comment: "Excelente sacola, muito bem feita!",
+      },
       
       AuthResponse: {
         user: { 
@@ -228,7 +240,6 @@ const endpointsFiles = [
   "../routes.js",
   "../routes/*.js",
   "../docs/*.js",
-  "../../application/modules/*.js"
 ];
 
 swaggerAutogen({ openapi: "3.0.0" })(outputFile, endpointsFiles, doc)

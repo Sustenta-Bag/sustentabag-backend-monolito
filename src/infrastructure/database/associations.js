@@ -152,6 +152,38 @@ const setupAssociations = (models) => {
   } else {
     console.warn('Não foi possível configurar associação entre Favorite e Client. Modelos não disponíveis.');
   }
+
+  if (models.ReviewModel && models.OrderModel) {
+    console.log('Configurando associação entre Review e Order');
+    
+    models.ReviewModel.belongsTo(models.OrderModel, {
+      foreignKey: 'idOrder',
+      as: 'order'
+    });
+    
+    models.OrderModel.hasOne(models.ReviewModel, {
+      foreignKey: 'idOrder',
+      as: 'review'
+    });
+  } else {
+    console.warn('Não foi possível configurar associação entre Review e Business. Modelos não disponíveis.');
+  }
+
+  if (models.ReviewModel && models.ClientModel) {
+    console.log('Configurando associação entre Review e Client');
+    
+    models.ReviewModel.belongsTo(models.ClientModel, {
+      foreignKey: 'idClient',
+      as: 'client'
+    });
+    
+    models.ClientModel.hasMany(models.ReviewModel, {
+      foreignKey: 'idClient',
+      as: 'reviews'
+    });
+  } else {
+    console.warn('Não foi possível configurar associação entre Review e Client. Modelos não disponíveis.');
+  }
 };
 
 export default setupAssociations;

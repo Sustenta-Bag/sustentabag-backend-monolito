@@ -17,6 +17,12 @@ export const setupFavoriteRoutes = (router, options = {}) => {
         #swagger.tags = ["Favorites"]
         #swagger.consumes = ['application/json']
         #swagger.security = [{ "bearerAuth": [] }]
+        #swagger.parameters['idClient'] = {
+            in: 'query',
+            description: 'ID of the client to filter favorites',
+            required: false,
+            type: 'integer'
+        }
         #swagger.responses[201]
         */
         "/",
@@ -33,17 +39,7 @@ export const setupFavoriteRoutes = (router, options = {}) => {
         #swagger.security = [{ "bearerAuth": [] }]
         #swagger.requestBody = {
             required: true,
-            content: {
-                "application/json": {
-                    schema: {
-                        type: "object",
-                        properties: {
-                            idBusiness: { type: "integer", example: 1 }
-                        },
-                        required: ["idBusiness"]
-                    }
-                }
-            }
+            schema: { $ref: '#/components/schemas/Favorite' },
         }
         #swagger.responses[201]
         */

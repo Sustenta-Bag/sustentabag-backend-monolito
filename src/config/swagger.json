@@ -2412,6 +2412,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "idClient",
+            "in": "query",
+            "description": "ID of the client to filter favorites",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -2457,16 +2466,12 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "idBusiness": {
-                    "type": "integer",
-                    "example": 1
-                  }
-                },
-                "required": [
-                  "idBusiness"
-                ]
+                "$ref": "#/components/schemas/Favorite"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/Favorite"
               }
             }
           }
@@ -4103,13 +4108,12 @@
         ]
       }
     },
-    "/api/locations/nearby/client": {
+    "/api/reviews": {
       "get": {
         "tags": [
-          "Location"
+          "Reviews"
         ],
-        "summary": "Find businesses near the logged-in client's address",
-        "description": "Returns a list of nearby businesses based on the address of the authenticated client.",
+        "description": "",
         "parameters": [
           {
             "name": "authorization",
@@ -4119,156 +4123,33 @@
             }
           },
           {
-            "name": "radius",
+            "name": "page",
             "in": "query",
-            "description": "Search radius in kilometers",
-            "required": false,
-            "default": 10,
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Maximum number of results to return",
-            "required": false,
-            "default": 10,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of nearby businesses",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "count": {
-                      "type": "integer"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "integer"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "legalName": {
-                            "type": "string"
-                          },
-                          "logo": {
-                            "type": "string"
-                          },
-                          "distance": {
-                            "type": "number"
-                          },
-                          "address": {
-                            "type": "object",
-                            "properties": {
-                              "street": {
-                                "type": "string"
-                              },
-                              "number": {
-                                "type": "string"
-                              },
-                              "city": {
-                                "type": "string"
-                              },
-                              "state": {
-                                "type": "string"
-                              },
-                              "zipCode": {
-                                "type": "string"
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Client has no address",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Authentication required or invalid token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden - Access allowed only for clients",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/locations/nearby/{addressId}": {
-      "get": {
-        "tags": [
-          "Location"
-        ],
-        "summary": "Find businesses near an address",
-        "description": "Returns a list of nearby businesses based on an address ID",
-        "parameters": [
-          {
-            "name": "addressId",
-            "in": "path",
-            "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "ID of the reference address"
-          },
-          {
-            "name": "radius",
-            "in": "query",
-            "description": "Search radius in kilometers",
-            "required": false,
-            "default": 10,
-            "schema": {
-              "type": "number"
             }
           },
           {
             "name": "limit",
             "in": "query",
-            "description": "Maximum number of results to return",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "idClient",
+            "in": "query",
+            "description": "ID of the client to filter reviews",
             "required": false,
-            "default": 10,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "idBusiness",
+            "in": "query",
+            "description": "ID of the business to filter reviews",
+            "required": false,
             "schema": {
               "type": "integer"
             }
@@ -4276,88 +4157,7 @@
         ],
         "responses": {
           "200": {
-            "description": "List of nearby businesses",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "count": {
-                      "type": "integer",
-                      "description": "Total number of businesses found"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "integer",
-                            "description": "Business ID"
-                          },
-                          "name": {
-                            "type": "string",
-                            "description": "Business name"
-                          },
-                          "legalName": {
-                            "type": "string",
-                            "description": "Business legal name"
-                          },
-                          "logo": {
-                            "type": "string",
-                            "description": "URL to business logo"
-                          },
-                          "distance": {
-                            "type": "number",
-                            "description": "Distance in kilometers"
-                          },
-                          "address": {
-                            "type": "object",
-                            "properties": {
-                              "street": {
-                                "type": "string"
-                              },
-                              "number": {
-                                "type": "string"
-                              },
-                              "city": {
-                                "type": "string"
-                              },
-                              "state": {
-                                "type": "string"
-                              },
-                              "zipCode": {
-                                "type": "string"
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Authentication required",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Address not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
+            "description": "OK"
           }
         },
         "security": [
@@ -4365,66 +4165,24 @@
             "bearerAuth": []
           }
         ]
-      }
-    },
-    "/api/locations/geocode": {
+      },
       "post": {
         "tags": [
-          "Location"
+          "Reviews"
         ],
-        "summary": "Geocode an address",
-        "description": "Convert an address to geographic coordinates",
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
-          "200": {
-            "description": "Successfully geocoded address",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "latitude": {
-                      "type": "number"
-                    },
-                    "longitude": {
-                      "type": "number"
-                    },
-                    "fullAddress": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid address data",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Authentication required",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Server error or geocoding error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
+          "201": {
+            "description": "Created"
           }
         },
         "security": [
@@ -4437,182 +4195,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "street": {
-                    "type": "string"
-                  },
-                  "number": {
-                    "type": "string"
-                  },
-                  "city": {
-                    "type": "string"
-                  },
-                  "state": {
-                    "type": "string"
-                  },
-                  "zipCode": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "street",
-                  "number",
-                  "city",
-                  "state",
-                  "zipCode"
-                ]
+                "$ref": "#/components/schemas/Review"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/Review"
               }
             }
           }
         }
       }
     },
-    "/api/locations/nearby/client/bags": {
-      "get": {
+    "/api/reviews/{id}": {
+      "delete": {
         "tags": [
-          "Location"
+          "Reviews"
         ],
-        "summary": "Find available bags from businesses near the logged-in client's address",
-        "description": "Returns a list of available bags from nearby businesses based on the address of the authenticated client.",
+        "description": "",
         "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the review to delete"
+          },
           {
             "name": "authorization",
             "in": "header",
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "radius",
-            "in": "query",
-            "description": "Search radius in kilometers",
-            "required": false,
-            "default": 10,
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Maximum number of bags to return",
-            "required": false,
-            "default": 50,
-            "schema": {
-              "type": "integer"
-            }
           }
         ],
         "responses": {
-          "200": {
-            "description": "List of available bags from nearby businesses",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "count": {
-                      "type": "integer"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "integer"
-                          },
-                          "type": {
-                            "type": "string"
-                          },
-                          "price": {
-                            "type": "number"
-                          },
-                          "description": {
-                            "type": "string"
-                          },
-                          "createdAt": {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          "business": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "integer"
-                              },
-                              "name": {
-                                "type": "string"
-                              },
-                              "legalName": {
-                                "type": "string"
-                              },
-                              "logo": {
-                                "type": "string"
-                              },
-                              "distance": {
-                                "type": "number"
-                              },
-                              "address": {
-                                "type": "object",
-                                "properties": {
-                                  "street": {
-                                    "type": "string"
-                                  },
-                                  "number": {
-                                    "type": "string"
-                                  },
-                                  "city": {
-                                    "type": "string"
-                                  },
-                                  "state": {
-                                    "type": "string"
-                                  },
-                                  "zipCode": {
-                                    "type": "string"
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Client has no address",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Authentication required or invalid token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden - Access allowed only for clients",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
+          "204": {
+            "description": "No Content"
           }
         },
         "security": [
@@ -5126,6 +4747,46 @@
         },
         "xml": {
           "name": "ClientLoginRequest"
+        }
+      },
+      "Favorite": {
+        "type": "object",
+        "properties": {
+          "idBusiness": {
+            "type": "number",
+            "example": 1
+          },
+          "idClient": {
+            "type": "number",
+            "example": 1
+          }
+        },
+        "xml": {
+          "name": "Favorite"
+        }
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "idOrder": {
+            "type": "number",
+            "example": 1
+          },
+          "idClient": {
+            "type": "number",
+            "example": 1
+          },
+          "rating": {
+            "type": "number",
+            "example": 5
+          },
+          "comment": {
+            "type": "string",
+            "example": "Excelente sacola, muito bem feita!"
+          }
+        },
+        "xml": {
+          "name": "Review"
         }
       },
       "AuthResponse": {

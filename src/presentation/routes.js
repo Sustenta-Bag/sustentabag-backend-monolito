@@ -17,6 +17,7 @@ const {
   locationRouter,
   orderRouter,
   favoriteRouter,
+  reviewRouter
 } = setupModuleRouters({
   sequelizeInstance: sequelize,
 });
@@ -29,6 +30,7 @@ router.use("/api/auth", authRouter);
 router.use("/api/locations", locationRouter);
 router.use("/api/orders", orderRouter);
 router.use("/api/favorites", favoriteRouter);
+router.use("/api/reviews", reviewRouter);
 
 // Configurar webhook para receber notificações do payment-service
 const bagService = getBagService(sequelize);

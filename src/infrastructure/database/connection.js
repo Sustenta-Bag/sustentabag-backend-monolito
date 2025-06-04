@@ -84,6 +84,11 @@ export const syncDatabase = async (force = false) => {
       console.log("Sincronizando modelo de Itens do Pedido...");
       await sequelize.models.OrderItemModel.sync({ force });
     }
+
+    if(sequelize.models.ReviewModel) {
+      console.log("Sincronizando modelo de Avaliações...");
+      await sequelize.models.ReviewModel.sync({ force });
+    }
     
     await sequelize.query('SET CONSTRAINTS ALL IMMEDIATE');
     
