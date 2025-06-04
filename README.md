@@ -20,7 +20,7 @@ Este sistema gerencia sacolas ecológicas para o projeto SustentaBag, permitindo
 - Swagger (Documentação da API)
 - JWT (Autenticação)
 - Yup e Express-validator (Validação)
-- Docker e Docker Compose (Containerização)
+- Docker e Docker Compose (Containerização) 
 
 ## Estrutura do Projeto
 
