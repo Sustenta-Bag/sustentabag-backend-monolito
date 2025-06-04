@@ -1,9 +1,9 @@
-class FavoriteRepository {
-    async create(favorite) {
+class Favorite {
+    async create(review) {
         throw new Error('Método não implementado');
     }
 
-    async findAll(options, idClient) {
+    async findAll(options, idClient, idBusiness) {
         throw new Error('Método não implementado');
     }
 
@@ -16,4 +16,4 @@ class FavoriteRepository {
     }
 }
 
-export default FavoriteRepository;
+export default Favorite;
