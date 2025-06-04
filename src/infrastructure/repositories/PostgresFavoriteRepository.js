@@ -9,7 +9,6 @@ class PostgresFavoriteRepository extends favoriteRepository {
     }
 
     async create(favoriteData) {
-        console.log(favoriteData)
         const favoriteRecord = await this.FavoriteModel.create(favoriteData);
         return this._mapToDomainEntity(favoriteRecord);
     }
@@ -21,16 +20,18 @@ class PostgresFavoriteRepository extends favoriteRepository {
         return rows > 0;
     }
 
-    async findAll(options = {}) {
+    async findAll(options = {}, idCliente) {
+        if( idCliente ) {
+            options.where = { idClient: idCliente };
+        }
         const records = await this.FavoriteModel.findAll(options);
         return records.map(r => this._mapToDomainEntity(r));
     }
 
     _mapToDomainEntity(record) {
         return new Favorite(
-            record.id,
             record.idBusiness,
-            record.idUser
+            record.idClient,
         );
     }
 }

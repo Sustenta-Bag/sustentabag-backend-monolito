@@ -6,7 +6,7 @@ class FavoriteService {
     }
 
     async createFavorite(data) {
-        const favorite = new Favorite(undefined, data.idBusiness, data.idClient);
+        const favorite = new Favorite(data.idBusiness, data.idClient);
         return await this.favoriteRepository.create(favorite);
     }
 
@@ -14,11 +14,7 @@ class FavoriteService {
         const offset = (page - 1) * limit;
         const options = { offset, limit };
 
-        if (idClient) {
-            options.where = { idClient };
-        }
-
-        return await this.favoriteRepository.findAll(options);
+        return await this.favoriteRepository.findAll(options, idClient);
     }
 
     async deleteFavorite(id) {

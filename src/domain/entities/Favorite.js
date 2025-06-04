@@ -1,12 +1,10 @@
 class Favorite {
-    constructor(id, idBusiness, idClient) {
-        this.id = id;
+    constructor(idBusiness, idClient) {
         this.idBusiness = idBusiness;
         this.idClient = idClient;
     }
 
     delete() {
-        this.id = null;
         this.idBusiness = null;
         this.idClient = null;
         return this;

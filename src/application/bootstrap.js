@@ -8,6 +8,7 @@ import * as locationModule from './modules/locationModule.js';
 import LocationService from './services/LocationService.js';
 import * as orderModule from './modules/orderModule.js';
 import * as favoriteModule from './modules/favoriteModule.js';
+import * as reviewModule from './modules/reviewModule.js';
 import setupAssociations from '../infrastructure/database/associations.js';
 
 export const initializeModules = (sequelize) => {
@@ -18,6 +19,7 @@ export const initializeModules = (sequelize) => {
   const authModels = authModule.initializeModels(sequelize);
   const orderModels = orderModule.initializeModels(sequelize);
   const favoriteModels = favoriteModule.initializeModels(sequelize);
+  const reviewModels = reviewModule.initializeModels(sequelize);
   
   const allModels = {
     ...bagModels,
@@ -26,7 +28,8 @@ export const initializeModules = (sequelize) => {
     ...businessModels,
     ...authModels,
     ...orderModels,
-    ...favoriteModels
+    ...favoriteModels,
+    ...reviewModels,
   };
   
   setupAssociations(allModels);
@@ -43,7 +46,8 @@ export const setupModuleRouters = (options = {}) => {
   const clientRepository = clientModule.getClientRepository(options.sequelizeInstance);
   const businessRepository = businessModule.getBusinessRepository(options.sequelizeInstance);
   const addressRepository = addressModule.getAddressRepository(options.sequelizeInstance);
-  
+  const orderRepository = orderModule.getOrderRepository(options.sequelizeInstance);
+
   const mapboxToken = process.env.MAPBOX_ACCESS_TOKEN;
   const locationService = new LocationService(
     businessRepository,
@@ -68,6 +72,12 @@ export const setupModuleRouters = (options = {}) => {
     sequelizeInstance: options.sequelizeInstance,
     clientRepository: clientRepository,
     businessRepository: businessRepository
+  });
+
+  const reviewRouter = reviewModule.setupReviewModule({
+    sequelizeInstance: options.sequelizeInstance,
+    OrderRepository: orderRepository,
+    clientRepository: clientRepository
   });
 
   const businessRouter = businessModule.setupBusinessModule({
@@ -101,6 +111,7 @@ export const setupModuleRouters = (options = {}) => {
     authRouter,
     locationRouter,
     orderRouter,
-    favoriteRouter
+    favoriteRouter,
+    reviewRouter
   };
 };
