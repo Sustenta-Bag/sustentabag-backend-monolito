@@ -49,6 +49,12 @@ class BagModel extends Model {
           isIn: [[0, 1]]
         }
       },
+      tags: {
+        type: DataTypes.JSON,
+        allowNull: true,
+        field: 'tags',
+        comment: 'Array de tags de alérgenos possíveis na sacola'
+      },
       createdAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
