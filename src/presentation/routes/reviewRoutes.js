@@ -1,5 +1,5 @@
 import ReviewController from '../controllers/reviewController.js';
-import ReviewService from '../../application/services/reviewService.js';
+import ReviewService from '../../application/services/ReviewService.js';
 import PostgresReviewRepository from '../../infrastructure/repositories/PostgresReviewRepository.js';
 import PostgresOrderRepository from '../../infrastructure/repositories/PostgresOrderRepository.js';
 import {
