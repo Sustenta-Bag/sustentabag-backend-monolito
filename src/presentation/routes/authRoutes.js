@@ -19,156 +19,63 @@ export default (authController) => (router) => {
       required: true,
       content: {
         "application/json": {
-          schema: {
-            type: "object",
-            properties: {
-              entityType: { 
-                type: "string", 
-                enum: ["client", "business"],
-                example: "client" 
-              },
-              userData: {
-                type: "object",
-                properties: {
-                  email: { type: "string", example: "usuario@example.com" },
-                  password: { type: "string", example: "senha123" }
+          examples: {
+            Cliente: {
+              value: {
+                entityType: "client",
+                userData: {
+                  email: "usuario@example.com",
+                  password: "senha123",
                 },
-                required: ["email", "password"]
+                entityData: {
+                  name: "Maria Silva Oliveira",
+                  cpf: "12345678909",
+                  phone: "11987654321",
+                  idAddress: {
+                    zipCode: "85937000",
+                    state: "PR",
+                    city: "Assis Chateaubriand",
+                    street: "Avenida Paraná",
+                    number: "72",
+                    complement: "None",
+                  },
+                  status: 1,
+                },
               },
-              entityData: {
-                oneOf: [                  {
-                    type: "object",
-                    title: "Cliente",
-                    properties: {
-                      name: { type: "string", example: "Maria Silva Oliveira" },
-                      cpf: { type: "string", example: "12345678909" },
-                      phone: { type: "string", example: "11987654321" },
-                      idAddress: {
-                        type: "object",
-                        properties: {
-                          zipCode: { type: "string", example: "85937000" },
-                          state: { type: "string", example: "PR" },
-                          city: { type: "string", example: "Assis Chateaubriand" },
-                          street: { type: "string", example: "Avenida Paraná" },
-                          number: { type: "string", example: "72" },
-                          complement: { type: "string", example: "None" }
-                        },
-                        required: ["zipCode", "state", "city", "street", "number"]
-                      },
-                      status: { type: "integer", example: 1 }
-                    },
-                    required: ["name", "cpf", "idAddress"]
-                  },                  {
-                    type: "object",
-                    title: "Empresa",
-                    properties: {
-                      legalName: { type: "string", example: "Sustenta Bag LTDA" },
-                      cnpj: { type: "string", example: "12345678000195" },
-                      appName: { type: "string", example: "Sustenta Bag - Centro" },
-                      cellphone: { type: "string", example: "11987654321" },
-                      description: { type: "string", example: "Empresa especializada em sacolas sustentáveis" },
-                      delivery: { type: "boolean", example: true },
-                      deliveryTax: { type: "number", example: 5.99 },
-                      idAddress: {
-                        type: "object",
-                        properties: {
-                          zipCode: { type: "string", example: "85937000" },
-                          state: { type: "string", example: "PR" },
-                          city: { type: "string", example: "Assis Chateaubriand" },
-                          street: { type: "string", example: "Avenida Paraná" },
-                          number: { type: "string", example: "72" },
-                          complement: { type: "string", example: "None" }
-                        },
-                        required: ["zipCode", "state", "city", "street", "number"]
-                      },
-                      status: { type: "integer", example: 1 }
-                    },
-                    required: ["legalName", "cnpj", "appName", "cellphone", "idAddress"]
-                  }
-                ]
-              }
             },
-            required: ["entityType", "userData", "entityData"]
-          },
-          examples: {            "Cliente": {
+            Empresa: {
               value: {
-                "entityType": "client",
-                "userData": {
-                  "email": "usuario@example.com",
-                  "password": "senha123"
+                entityType: "business",
+                userData: {
+                  email: "empresa@example.com",
+                  password: "senha123",
                 },
-                "entityData": {
-                  "name": "Maria Silva Oliveira",
-                  "cpf": "12345678909",
-                  "phone": "11987654321",
-                  "idAddress": {
-                    "zipCode": "85937000",
-                    "state": "PR",
-                    "city": "Assis Chateaubriand",
-                    "street": "Avenida Paraná",
-                    "number": "72",
-                    "complement": "None"
+                entityData: {
+                  legalName: "Sustenta Bag LTDA",
+                  cnpj: "12345678000195",
+                  appName: "Sustenta Bag - Centro",
+                  cellphone: "11987654321",
+                  description: "Empresa especializada em sacolas sustentáveis",
+                  delivery: true,
+                  deliveryTax: 5.99,
+                  idAddress: {
+                    zipCode: "85937000",
+                    state: "PR",
+                    city: "Assis Chateaubriand",
+                    street: "Avenida Paraná",
+                    number: "72",
+                    complement: "None",
                   },
-                  "status": 1
-                }
-              }
-            },            "Empresa": {
-              value: {
-                "entityType": "business",
-                "userData": {
-                  "email": "empresa@example.com",
-                  "password": "senha123"
+                  status: 1,
                 },
-                "entityData": {
-                  "legalName": "Sustenta Bag LTDA",
-                  "cnpj": "12345678000195",
-                  "appName": "Sustenta Bag - Centro",
-                  "cellphone": "11987654321",
-                  "description": "Empresa especializada em sacolas sustentáveis",
-                  "delivery": true,
-                  "deliveryTax": 5.99,
-                  "idAddress": {
-                    "zipCode": "85937000",
-                    "state": "PR",
-                    "city": "Assis Chateaubriand",
-                    "street": "Avenida Paraná",
-                    "number": "72",
-                    "complement": "None"
-                  },
-                  "status": 1
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    #swagger.responses[201] = {
-      description: 'Usuário registrado com sucesso',
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            properties: {
-              user: { 
-                type: "object",
-                properties: {
-                  id: { type: "integer" },
-                  email: { type: "string" },
-                  role: { type: "string" },
-                  firebaseId: { type: "string" }
-                }
               },
-              entity: { 
-                type: "object",
-                description: "Dados da entidade criada (cliente ou empresa)"
-              }
-            }
-          }
-        }
+            },
+          },
+        },
       }
     }
-    #swagger.responses[400] = {
+    #swagger.responses[201]
+    #swagger.responses[402] = {
       description: 'Dados inválidos',
       schema: { $ref: "#/components/schemas/ValidationError" }
     }
@@ -186,44 +93,13 @@ export default (authController) => (router) => {
     #swagger.description = 'Realiza login de um usuário com email e senha'
     #swagger.requestBody = {
       required: true,
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            properties: {
-              email: { type: "string", example: "usuario@example.com" },
-              password: { type: "string", example: "senha123" }
-            },
-            required: ["email", "password"]
-          }
-        }
-      }
+      schema: { $ref: "#/components/schemas/AuthLoginRequest" }
     }
     #swagger.responses[200] = {
       description: 'Login realizado com sucesso',
       content: {
         "application/json": {
-          schema: {
-            type: "object",
-            properties: {
-              user: { 
-                type: "object",
-                properties: {
-                  id: { type: "integer" },
-                  email: { type: "string" },
-                  role: { type: "string" }
-                }
-              },
-              entity: { 
-                type: "object",
-                description: "Dados da entidade (cliente ou empresa)"
-              },
-              token: { 
-                type: "string", 
-                description: "JWT para autenticação em rotas protegidas" 
-              }
-            }
-          }
+          schema: { $ref: "#/components/schemas/AuthLoginOk" },
         }
       }
     }
@@ -246,18 +122,7 @@ export default (authController) => (router) => {
     #swagger.security = [{ "bearerAuth": [] }]
     #swagger.requestBody = {
       required: true,
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            properties: {
-              currentPassword: { type: "string", example: "senha123" },
-              newPassword: { type: "string", example: "novaSenha456" }
-            },
-            required: ["currentPassword", "newPassword"]
-          }
-        }
-      }
+      schema: { $ref: "#/components/schemas/AuthChangePasswordRequest" }
     }
     #swagger.responses[204] = {
       description: 'Senha alterada com sucesso'
@@ -279,40 +144,27 @@ export default (authController) => (router) => {
   router.post(
     "/device-token",
     /*
-  #swagger.path = '/api/auth/device-token'
-  #swagger.tags = ['Authentication']
-  #swagger.summary = 'Registrar token do dispositivo'
-  #swagger.description = 'Registra o token FCM do dispositivo para receber notificações'
-  #swagger.security = [{ "bearerAuth": [] }]
-  #swagger.requestBody = {
-    required: true,
-    content: {
-      "application/json": {
-        schema: {
-          type: "object",
-          properties: {
-            deviceToken: { 
-              type: "string", 
-              example: "cSM76L5hQJKZZhXs-DsmFA:APA91bHgT1uQ..." 
-            }
-          },
-          required: ["deviceToken"]
-        }
-      }
+    #swagger.path = '/api/auth/device-token'
+    #swagger.tags = ['Authentication']
+    #swagger.summary = 'Registrar token do dispositivo'
+    #swagger.description = 'Registra o token FCM do dispositivo para receber notificações'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.requestBody = {
+      required: true,
+      schema: { $ref: "#/components/schemas/DeviceToken" }
     }
-  }
-  #swagger.responses[204] = {
-    description: 'Token registrado com sucesso'
-  }
-  #swagger.responses[401] = {
-    description: 'Não autenticado',
-    schema: { $ref: "#/components/schemas/Error" }
-  }
-  #swagger.responses[400] = {
-    description: 'Dados inválidos',
-    schema: { $ref: "#/components/schemas/ValidationError" }
-  }
-  */
+    #swagger.responses[204] = {
+      description: 'Token registrado com sucesso'
+    }
+    #swagger.responses[401] = {
+      description: 'Não autenticado',
+      schema: { $ref: "#/components/schemas/Error" }
+    }
+    #swagger.responses[400] = {
+      description: 'Dados inválidos',
+      schema: { $ref: "#/components/schemas/ValidationError" }
+    }
+    */
     authenticate,
     validateDeviceTokenInput,
     authController.updateDeviceToken.bind(authController)
