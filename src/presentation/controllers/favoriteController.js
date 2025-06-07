@@ -5,8 +5,12 @@ class FavoriteController {
 
     async createFavorite(req, res, next) {
         try {
-            const favorite = await this.favoriteService.createFavorite(req.body);
-            return res.status(201).json(favorite);
+            const data = {
+                ...req.body,
+                idClient: req.user.entityId
+            }
+            await this.favoriteService.createFavorite(data);
+            return res.created();
         } catch (error) {
             next(error);
         }
@@ -20,7 +24,7 @@ class FavoriteController {
                 limit: limit ? parseInt(limit) : 10,
                 idClient: idClient ? parseInt(idClient) : null
             });
-            return res.json(favorites);
+            return res.ok(favorites);
         } catch(error) {
             next(error);
         }
@@ -29,7 +33,18 @@ class FavoriteController {
     async deleteFavorite(req, res, next) {
         try {
             await this.favoriteService.deleteFavorite(req.params.id);
-            return res.status(204).send();
+            return res.no_content();
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async deleteFavoriteByBusiness(req, res, next) {
+        try {
+            const idBusiness = parseInt(req.params.idBusiness, 10);
+            const idClient = req.user.entityId;
+            await this.favoriteService.deleteFavoriteByBusiness(idBusiness, idClient);
+            return res.no_content();
         } catch (error) {
             next(error);
         }

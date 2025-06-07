@@ -11,10 +11,14 @@ import { fileURLToPath } from "url";
 
 import swaggerFile from "./config/swagger.json" with { type: "json" };
 
+import hateoas from './presentation/middleware/hateoas.js';
+import handlers from './presentation/middleware/handlers.js';
+
 import { connectDatabase, syncDatabase, sequelize } from './infrastructure/database/connection.js';
 import { errorHandler } from './presentation/middleware/errorHandler.js';
 import { initializeModules } from './application/bootstrap.js';
 import routes from "./presentation/routes.js";
+// import routes2 from "./presentation/routes2.js";
 
 dotenv.config();
 
@@ -34,6 +38,8 @@ app.use(compression())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
+app.use(handlers);
+app.use(hateoas);
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 app.use(routes);
 app.use(errorHandler);

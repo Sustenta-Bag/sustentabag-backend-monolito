@@ -27,6 +27,10 @@ class OrderRepository {
     throw new Error('Método não implementado');
   }
 
+  async findAllBusinessWithOrders() {
+    throw new Error('Método não implementado');
+  }
+
   async updateStatus(id, status) {
     throw new Error('Método não implementado');
   }

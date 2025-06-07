@@ -6,15 +6,26 @@ class ReviewService {
     }
 
     async createReview(data) {
-        const review = new Review(data.idOrder, data.idClient, data.rating, data.comment);
+        const existing = await this.reviewRepository.findAll({
+            where: {
+                idOrder: data.idOrder,
+                idClient: data.idClient,
+            }
+        });
+
+        if(existing && existing.length > 0) {
+            throw new Error('Order already reviewed')
+        }
+
+        const review = new Review(data.idClient, data.idOrder, data.rating, data.comment);
         return await this.reviewRepository.create(review);
     }
 
-    async listReviews({ page = 1, limit = 10, idClient, idBusiness }) {
+    async listReviews({ page, limit, idClient, idBusiness, rating }) {
         const offset = (page - 1) * limit;
         const options = { offset, limit };
         
-        return await this.reviewRepository.findAll(options, idClient, idBusiness);
+        return await this.reviewRepository.findAll(options, idClient, idBusiness, rating);
     }
 
     async deleteReview(id) {

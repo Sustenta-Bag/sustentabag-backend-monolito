@@ -38,7 +38,14 @@ export const validateCreateBusiness = [
   body('logo')
     .optional()
     .isString()
-    .withMessage('Logo deve ser uma string (URL ou caminho)'),  
+    .withMessage('Logo deve ser uma string (URL ou caminho)'),
+
+  body('openingHours')
+    .exists()
+    .withMessage('OpeningHours é obrigatório')
+    .bail()
+    .isString()
+    .withMessage('OpeningHours deve ser uma string'),
 
   body('password')
     .exists()
@@ -56,6 +63,11 @@ export const validateCreateBusiness = [
     .optional()
     .isFloat({ min: 0 })
     .withMessage('DeliveryTax deve ser um número positivo'),
+
+  body('develiveryTime')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('DeveliveryTime deve ser um número inteiro não negativo'),
 
   body('idAddress')
     .exists()

@@ -43,9 +43,11 @@ export const setupBusinessRoutes = (router, options = {}) => {
             appName: { type: "string", example: "Sustenta Bag - Centro" },
             cellphone: { type: "string", example: "11987654321" },
             description: { type: "string", example: "Empresa especializada em sacolas" },
+            openingHours: { type: "string", example: "08:00-18:00" },
             password: { type: "string", example: "senha123" },
             delivery: { type: "boolean", example: true },
             deliveryTax: { type: "number", example: 5.99 },
+            develiveryTime: { type: "integer", example: 30 },
             idAddress: { type: "integer", example: 1 },
             logo: { type: "string", format: "binary" }
           },

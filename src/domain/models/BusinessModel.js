@@ -61,6 +61,16 @@ class BusinessModel extends Model {
         allowNull: true,
         field: 'taxaEntrega'
       },
+      deliveryTime: {
+        type: DataTypes.STRING(50),
+        allowNull: true,
+        field: 'tempoEntrega'
+      },
+      openingHours: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+        field: 'horarioFuncionamento'
+      },
       idAddress: {
         type: DataTypes.INTEGER,
         allowNull: false,

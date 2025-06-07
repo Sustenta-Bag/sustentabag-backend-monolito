@@ -1,5 +1,5 @@
 class Business {
-  constructor(id, legalName, cnpj, appName, cellphone, description, logo, delivery, deliveryTax, idAddress, status = 1, createdAt = new Date()) {
+  constructor(id, legalName, cnpj, appName, cellphone, description, logo, delivery, deliveryTax, deliveryTime, idAddress, openingHours, status = 1, createdAt = new Date()) {
     this.id = id;
     this.legalName = legalName;
     this.cnpj = cnpj; 
@@ -9,7 +9,9 @@ class Business {
     this.logo = logo;
     this.delivery = delivery;
     this.deliveryTax = deliveryTax;
+    this.deliveryTime = deliveryTime;
     this.idAddress = idAddress;
+    this.openingHours = openingHours;
     this.status = status;
     this.createdAt = createdAt;
   }
