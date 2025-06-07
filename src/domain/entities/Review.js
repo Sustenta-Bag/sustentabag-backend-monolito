@@ -1,5 +1,6 @@
 class Review {
-    constructor(idClient, idOrder, rating, comment = '', createdAt = new Date(), updatedAt = new Date()) {
+    constructor(idOrder, idClient, rating, comment = '', createdAt = new Date(), updatedAt = new Date(), idReview) {
+        this.idReview = idReview;
         this.idClient = idClient;
         this.idOrder = idOrder;
         this.rating = rating;

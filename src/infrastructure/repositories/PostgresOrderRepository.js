@@ -127,6 +127,17 @@ class PostgresOrderRepository extends OrderRepository {
       return order;
     });
   }
+
+  async findAllBusinessWithOrders() {
+    const orderRecords = await this.OrderModel.findAll({
+        attributes: [
+            [this.OrderModel.sequelize.col('idEmpresa'), 'businessId']
+        ],
+        group: ['idEmpresa'],
+        raw: true
+    });
+    return orderRecords;
+}
   async updateStatus(id, status) {
     await this.OrderModel.update({ status }, {
       where: { id }

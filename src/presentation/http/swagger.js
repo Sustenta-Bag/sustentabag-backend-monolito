@@ -198,12 +198,10 @@ const doc = {
 
       Favorite: {
         idBusiness: 1,
-        idClient: 1
       },
 
       Review: {
         idOrder: 1,
-        idClient: 1,
         rating: 5,
         comment: "Excelente sacola, muito bem feita!",
       },

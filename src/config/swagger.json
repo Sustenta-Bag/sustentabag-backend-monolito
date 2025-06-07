@@ -564,6 +564,8 @@
                       "description": "Empresa especializada em sacolas sustentáveis",
                       "delivery": true,
                       "deliveryTax": 5.99,
+                      "deliveryTime": 30,
+                      "openingHours": "08:00-18:00",
                       "idAddress": {
                         "zipCode": "85937000",
                         "state": "PR",
@@ -2348,9 +2350,6 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
           "201": {
             "description": "Created"
           }
@@ -2417,6 +2416,42 @@
               "type": "string"
             },
             "description": "ID of the favorite to delete"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/favorites/business/{idBusiness}": {
+      "delete": {
+        "tags": [
+          "Favorites"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "idBusiness",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the business to delete"
           },
           {
             "name": "authorization",
@@ -4061,6 +4096,13 @@
             }
           },
           {
+            "name": "rating",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "idClient",
             "in": "query",
             "description": "ID of the client to filter reviews",
@@ -4769,10 +4811,6 @@
           "idBusiness": {
             "type": "number",
             "example": 1
-          },
-          "idClient": {
-            "type": "number",
-            "example": 1
           }
         },
         "xml": {
@@ -4783,10 +4821,6 @@
         "type": "object",
         "properties": {
           "idOrder": {
-            "type": "number",
-            "example": 1
-          },
-          "idClient": {
             "type": "number",
             "example": 1
           },

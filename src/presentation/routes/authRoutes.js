@@ -58,6 +58,8 @@ export default (authController) => (router) => {
                   description: "Empresa especializada em sacolas sustentáveis",
                   delivery: true,
                   deliveryTax: 5.99,
+                  deliveryTime: 30,
+                  openingHours: "08:00-18:00",
                   idAddress: {
                     zipCode: "85937000",
                     state: "PR",

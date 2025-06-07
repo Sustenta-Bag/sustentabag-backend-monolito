@@ -68,4 +68,23 @@ export const setupFavoriteRoutes = (router, options = {}) => {
         requireClientRole,
         favoriteController.deleteFavorite.bind(favoriteController)
     );
+
+    router.delete(
+        /*
+        #swagger.path = '/api/favorites/business/{idBusiness}'
+        #swagger.tags = ["Favorites"]
+        #swagger.security = [{ "bearerAuth": [] }]
+        #swagger.parameters['idBusiness'] = {
+            in: 'path',
+            description: 'ID of the business to delete',
+            required: true,
+            type: 'integer'
+        }
+        #swagger.responses[204]
+        */
+        "/business/:idBusiness",
+        authenticate,
+        requireClientRole,
+        favoriteController.deleteFavoriteByBusiness.bind(favoriteController)
+    )
 };
