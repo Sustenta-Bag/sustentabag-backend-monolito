@@ -5,8 +5,12 @@ class reviewController {
 
   async createReview(req, res, next) {
     try {
-      const review = await this.reviewService.createReview(req.body);
-      return res.status(201).json(review);
+      const data = {
+        ...req.body,
+        idClient: req.user.entityId
+      }
+      await this.reviewService.createReview(data);
+      return res.created();
     } catch(error) {
       next(error);
     }
@@ -14,14 +18,15 @@ class reviewController {
 
   async listReviews(req, res, next) {
     try {
-      const { page, limit, idClient, idBusiness } = req.query;
+      const { page, limit, idClient, idBusiness, rating } = req.query;
       const reviews = await this.reviewService.listReviews({
         page: page ? parseInt(page) : 1,
         limit: limit ? parseInt(limit) : 10,
         idClient: idClient ? parseInt(idClient) : null,
-        idBusiness: idBusiness ? parseInt(idBusiness) : null
+        idBusiness: idBusiness ? parseInt(idBusiness) : null,
+        rating: rating ? parseInt(rating) : null
       });
-      return res.json(reviews);
+      return res.ok(reviews);
     } catch(error) {
       next(error);
     } 
@@ -30,7 +35,7 @@ class reviewController {
   async deleteReview(req, res, next) {
     try {
       await this.reviewService.deleteReview(req.params.id);
-      return res.status(204).send();
+      return res.no_content();
     } catch (error) {
       next(error) 
     }

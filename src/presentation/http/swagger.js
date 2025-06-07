@@ -51,19 +51,6 @@ const doc = {
         }]
       },
       
-      AuthRegisterRequest: {
-        entityType: "client",
-        userData: {
-          email: "usuario@example.com",
-          password: "senha123"
-        },
-        entityData: {
-          name: "Maria Silva Oliveira",
-          cpf: "12345678909",
-          phone: "11987654321"
-        }
-      },
-      
       AuthLoginRequest: {
         email: "usuario@example.com",
         password: "senha123"
@@ -72,6 +59,33 @@ const doc = {
       AuthChangePasswordRequest: {
         currentPassword: "senha123",
         newPassword: "novaSenha456"
+      },
+
+      AuthLoginOk: {
+        type: "object",
+        properties: {
+          user: {
+            type: "object",
+            properties: {
+              id: { type: "integer", example: 1 },
+              email: { type: "string", example: "usuario@example.com" },
+              role: { type: "string", example: "client" }
+            }
+          },
+          entity: {
+            type: "object",
+            description: "Dados da entidade (cliente ou empresa)"
+          },
+          token: {
+            type: "string",
+            description: "JWT para autenticação em rotas protegidas",
+            example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        }
+      },
+
+      DeviceToken: {
+        deviceToken: "cSM76L5hQJKZZhXs-DsmFA:APA91bHgT1uQ..."  
       },
       
       User: {
@@ -129,6 +143,8 @@ const doc = {
         description: "Empresa especializada em sacolas",
         delivery: true,
         deliveryTax: 5.99,
+        develiveryTime: 30,
+        openingHours: "08:00-18:00",
         idAddress: 1,
         logo: "file_binary_data"
       },
@@ -152,6 +168,10 @@ const doc = {
         street: "Rua das Flores",
         number: "123",
         complement: "Apto 45"
+      },
+
+      UpdateStatus: {
+        status: true
       },
       
       Client: {
@@ -178,12 +198,10 @@ const doc = {
 
       Favorite: {
         idBusiness: 1,
-        idClient: 1
       },
 
       Review: {
         idOrder: 1,
-        idClient: 1,
         rating: 5,
         comment: "Excelente sacola, muito bem feita!",
       },
@@ -237,7 +255,7 @@ const doc = {
 
 const outputFile = "../../config/swagger.json";
 const endpointsFiles = [
-  "../routes.js",
+  // "../routes2.js",
   "../routes/*.js",
   "../docs/*.js",
 ];

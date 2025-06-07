@@ -146,4 +146,33 @@ export const setupAddressRoutes = (router, options = {}) => {
     validateAddressId,
     addressController.deleteAddress.bind(addressController)
   );
+
+  router.patch(
+    /*
+    #swagger.path = '/api/addresses/{id}/status'
+    #swagger.tags = ["Address"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.requestBody = {
+      required: true,
+      schema: { $ref: '#components/schemas/UpdateStatus' },
+    }
+    #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/Error" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/Error" }
+    }
+    #swagger.responses[404] = {
+      description: "Not Found - Address not found",
+      schema: { $ref: "#/components/schemas/Error" }
+    }
+    */
+    `/:id/status`,
+    authenticate,
+    requireAnyRole,
+    addressController.updateAddressStatus.bind(addressController)
+  )
 };

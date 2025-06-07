@@ -55,6 +55,16 @@ class PostgresAddressRepository extends AddressRepository {
     });
     return rows > 0;
   }
+
+  async updateStatus(id, status) {
+    const record = await this.AddressModel.findByPk(id);
+    if (!record) return null;
+
+    record.status = status;
+    await record.save();
+    return this._mapToDomainEntity(record);
+  }
+
   _mapToDomainEntity(record) {
     return new Address(
       record.id,

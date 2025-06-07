@@ -37,7 +37,12 @@ class AddressService {
     return address;
   }
 
-  async listAddresses({ page = 1, limit = 10, city, state, zipCode } = {}) {
+  async listAddresses({ page, limit, filters = {} } = {}) {
+    if (!page || page < 1) page = 1;
+    if (!limit) limit = 10;
+    const city = filters.city || '';
+    const state = filters.state || '';
+    const zipCode = filters.zipCode || '';
     const where = {};
     if (city)  where.City = city;
     if (state) where.State = state;
@@ -88,6 +93,18 @@ class AddressService {
       throw AppError.notFound("Endereço", id);
     }
     return deleted;
+  }
+
+  async updateAddressStatus(id, status) {
+    const address = await this.addressRepository.findById(id);
+    if (!address) {
+      throw AppError.notFound("Endereço", id);
+    }
+    if (![0, 1].includes(status)) {
+      throw new AppError("Status inválido. Deve ser 0 (inativo) ou 1 (ativo).", "INVALID_STATUS");
+    }
+    address.status = status;
+    return this.addressRepository.update(id, address);
   }
 }
 

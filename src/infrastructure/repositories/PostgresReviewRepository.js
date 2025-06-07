@@ -1,7 +1,6 @@
 import reviewRepository from '../repositories/ReviewRepository.js';
 import Review from '../../domain/entities/Review.js';
 import ReviewModel from '../../domain/models/ReviewModel.js';
-import OrderRepository from '../repositories/OrderRepository.js';
 
 class PostgresReviewRepository extends reviewRepository {
     constructor(reviewModel = ReviewModel, orderRepository) {
@@ -22,12 +21,15 @@ class PostgresReviewRepository extends reviewRepository {
         return rows > 0;
     }
 
-    async findAll(options = {}, idClient, idBusiness) {
+    async findAll(options = {}, idClient, idBusiness, rating) {
         if (idClient) {
             options.where = { idClient };
         }
         if(idBusiness) {
             return await this._findAllByBusiness(idBusiness);
+        }
+        if(rating) {
+            return this._findBusinessesByRating(rating);
         }
         const records = await this.ReviewModel.findAll(options);
         return records.map(r => this._mapToDomainEntity(r));
@@ -48,11 +50,33 @@ class PostgresReviewRepository extends reviewRepository {
             return { reviews: [], total: 0, message: 'Empresa sem nenhuma avaliação' };
         }
 
+        const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+
         return {
             reviews: reviews.map(r => this._mapToDomainEntity(r)),
-            total: reviews.length
+            total: reviews.length,
+            avgRating: avgRating.toFixed(2),
         };
     }
+
+    async _findBusinessesByRating(rating) {
+        const businesses = await this.orderRepository.findAllBusinessWithOrders();
+        const businessIds = businesses.map(order => order.businessId);
+
+        const result = [];
+
+        for (const business of businesses) {
+            const { avgRating } = await this._findAllByBusiness(business.businessId);
+            if (avgRating !== null && avgRating >= rating) {
+                result.push({
+                    businessId: business.businessId,
+                    avgRating
+                });
+            }
+        }
+
+        return result;
+}
 
     _mapToDomainEntity(record) {
         return new Review(
@@ -61,7 +85,8 @@ class PostgresReviewRepository extends reviewRepository {
             record.rating,
             record.comment,
             record.createdAt,
-            record.updatedAt
+            record.updatedAt,
+            record.idReview,
         );
     }
 }

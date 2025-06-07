@@ -10,6 +10,7 @@ class PostgresFavoriteRepository extends favoriteRepository {
 
     async create(favoriteData) {
         const favoriteRecord = await this.FavoriteModel.create(favoriteData);
+        console.log(favoriteData);
         return this._mapToDomainEntity(favoriteRecord);
     }
 
@@ -30,8 +31,9 @@ class PostgresFavoriteRepository extends favoriteRepository {
 
     _mapToDomainEntity(record) {
         return new Favorite(
-            record.idBusiness,
             record.idClient,
+            record.idBusiness,
+            record.idFavorite,
         );
     }
 }
