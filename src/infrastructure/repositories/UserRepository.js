@@ -40,6 +40,20 @@ class UserRepository {
     return this._mapToEntity(updated);
   }
 
+  async findByCliendIds(clientIds) {
+    if (!clientIds || clientIds.length === 0) {
+      return [];
+    }
+    
+    const users = await this.userModel.findAll({
+      where: {
+        entityId: clientIds
+      }
+    });
+    
+    return users.map(user => this._mapToEntity(user));
+  }
+
   async findByFirebaseId(firebaseId) {
     const user = await this.userModel.findOne({ where: { firebaseId } });
     if (!user) return null;

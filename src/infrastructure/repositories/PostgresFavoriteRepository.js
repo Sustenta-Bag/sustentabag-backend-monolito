@@ -29,6 +29,13 @@ class PostgresFavoriteRepository extends favoriteRepository {
         return records.map(r => this._mapToDomainEntity(r));
     }
 
+    async findByBusinessId(idBusiness) {
+        const records = await this.FavoriteModel.findAll({
+            where: { idBusiness }
+        });
+        return records.map(r => this._mapToDomainEntity(r));
+    }
+
     _mapToDomainEntity(record) {
         return new Favorite(
             record.idClient,

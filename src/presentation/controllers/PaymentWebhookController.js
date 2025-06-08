@@ -53,11 +53,18 @@ class PaymentWebhookController {
         console.log(
           `✅ Pedido ${orderIdInt} finalizado e sacolas inativadas após pagamento aprovado`
         );
-      } else if (status === "failed" || status === "cancelled") {
+      } else if (status === "failed" || status === "cancelled" || status === "rejected") {
         console.log(
           `Cancelando pedido ${orderIdInt} devido ao pagamento ${status}`
         );
         await this.orderService.cancelOrder(orderIdInt);
+      } else {
+        console.log(
+          `Status de pagamento desconhecido: ${status} para pedido ${orderIdInt}`
+        );
+        return res.status(400).json({
+          message: `Status de pagamento desconhecido: ${status}`,
+        });
       }
 
       return res.status(200).json({

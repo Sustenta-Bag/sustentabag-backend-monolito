@@ -39,21 +39,30 @@ export const setupBagModule = (options = {}) => {
   const bagRepository = new PostgresBagRepository(
     options.BagModel || BagModel
   );
-  
-  const bagService = new BagService(bagRepository);
+  const favoriteRepository = options.favoriteRepository;
+  const authRepository = options.authRepository;
+    const bagService = new BagService(
+    bagRepository,
+    favoriteRepository,
+    authRepository
+  );
   
   setupBagRoutes(router, {
-    bagRepository
+    bagService,
+    bagRepository,
+    favoriteRepository,
+    authRepository
   });
   
   return router;
 };
 
-export const getBagService = (sequelizeInstance) => {
+export const getBagService = (sequelizeInstance, favoriteRepository, authRepository) => {
   if (!sequelizeInstance) {
     throw new Error('Sequelize instance is required to get bag service');
   }
   
   const bagRepository = new PostgresBagRepository(BagModel);
-  return new BagService(bagRepository);
+
+  return new BagService(bagRepository, favoriteRepository, authRepository);
 };
