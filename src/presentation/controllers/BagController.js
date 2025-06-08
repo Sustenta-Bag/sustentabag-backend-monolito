@@ -5,31 +5,56 @@ class BagController {
   constructor(bagService) {
     this.bagService = bagService;
   }
-
   async createBag(req, res, next) {
     try {
       const bagData = {
         ...req.body,
-        idBusiness: req.user.entityId
+        idBusiness: req.user.entityId,
       };
       const bag = await this.bagService.createBag(bagData);
+      try {
+        const usersFavorites =
+          await this.bagService.getUsersFavoritesByBusinessId(
+            req.user.entityId
+          );
 
-      if (res.status(201)) {
-        const data = {
-          to: "GG7YEvoNUYh1qohZUmTSJRHu9fa2",
-          notification: {
-            title: "Novo produto criado",
-            body: `Uma nova bolsa do tipo ${bag.type} foi criada.`,
-          },
-          data: {
-            type: "BAG_CREATED",
-            payload: {
-              type: bag.type,
-            },
-          },
-        };
+        if (usersFavorites && usersFavorites.length > 0) {
 
-        await RabbitMQPublisher(data);
+          const fcmTokens = usersFavorites
+            .map((user) => user.fcmToken)
+            .filter((token) => token);
+          if (fcmTokens.length > 0) {
+            const notificationData = {
+              to: fcmTokens,
+              notification: {
+                title: "Novo produto criado",
+                body: `Uma nova bolsa do tipo ${bag.type} foi criada por uma empresa que você favorita.`,
+              },
+              type: "BAG_CREATED",
+              payload: {
+                bagType: bag.type,
+              },
+            };
+
+            await RabbitMQPublisher(notificationData);
+          } else {
+            console.log(
+              "Nenhum usuário tem FCM token válido para receber notificações"
+            );
+          }
+        } else {
+          console.log("Nenhum usuário favoritou esta empresa");
+        }
+      } catch (notificationError) {
+        console.error("Erro ao enviar notificações:", notificationError);
+        if (
+          notificationError.message &&
+          notificationError.message.includes("Favoritos")
+        ) {
+          console.log(
+            "Esta empresa ainda não possui usuários que a favoritaram"
+          );
+        }
       }
 
       return res.status(201).json(bag);
@@ -60,7 +85,7 @@ class BagController {
     try {
       const bagData = {
         ...req.body,
-        idBusiness: req.user.entityId
+        idBusiness: req.user.entityId,
       };
       const bag = await this.bagService.updateBag(req.params.id, bagData);
       return res.json(bag);
@@ -119,20 +144,20 @@ class BagController {
   async getAllowedTags(req, res, next) {
     try {
       const ALLOWED_TAGS = [
-        'PODE_CONTER_GLUTEN',
-        'PODE_CONTER_LACTOSE',
-        'PODE_CONTER_LEITE',
-        'PODE_CONTER_OVOS',
-        'PODE_CONTER_AMENDOIM',
-        'PODE_CONTER_CASTANHAS',
-        'PODE_CONTER_NOZES',
-        'PODE_CONTER_SOJA',
-        'PODE_CONTER_PEIXE',
-        'PODE_CONTER_FRUTOS_DO_MAR',
-        'PODE_CONTER_CRUSTACEOS',
-        'PODE_CONTER_GERGELIM',
-        'PODE_CONTER_SULFITOS',
-        'PODE_CONTER_CARNE'
+        "PODE_CONTER_GLUTEN",
+        "PODE_CONTER_LACTOSE",
+        "PODE_CONTER_LEITE",
+        "PODE_CONTER_OVOS",
+        "PODE_CONTER_AMENDOIM",
+        "PODE_CONTER_CASTANHAS",
+        "PODE_CONTER_NOZES",
+        "PODE_CONTER_SOJA",
+        "PODE_CONTER_PEIXE",
+        "PODE_CONTER_FRUTOS_DO_MAR",
+        "PODE_CONTER_CRUSTACEOS",
+        "PODE_CONTER_GERGELIM",
+        "PODE_CONTER_SULFITOS",
+        "PODE_CONTER_CARNE",
       ];
       return res.json(ALLOWED_TAGS);
     } catch (error) {

@@ -3,6 +3,7 @@ import express from 'express';
 import { setupFavoriteRoutes } from '../../presentation/routes/favoriteRoutes.js';
 import { errorHandler } from '../../presentation/middleware/errorHandler.js';
 import FavoriteModel from '../../domain/models/FavoriteModel.js';
+import PostgresFavoriteRepository from '../../infrastructure/repositories/PostgresFavoriteRepository.js';
 
 dotenv.config();
 
@@ -26,6 +27,14 @@ export const initializeModels = (sequelizeInstance) => {
     return {
         FavoriteModel
     };
+};
+
+export const getFavoriteRepository = (sequelizeInstance) => {
+  if (!sequelizeInstance) {
+    throw new Error('Sequelize instance is required to get favorite repository');
+  }
+  
+  return new PostgresFavoriteRepository(FavoriteModel);
 };
 
 export const favoriteModuleConfig = {
