@@ -11,6 +11,10 @@ class FavoriteRepository {
         throw new Error('Método não implementado');
     }
 
+    async findByBusinessId(idBusiness) {
+        throw new Error('Método não implementado');
+    }
+
     async delete(id) {
         throw new Error('Método não implementado');
     }

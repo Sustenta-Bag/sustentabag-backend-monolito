@@ -24,13 +24,13 @@ export default async (data) => {
     const timestamp = new Date();
     
     const message = {
-      to: "token FCM ",
+      to: data.to,
       notification: {
         title: data.notification.title,
         body: data.notification.body,
       },
       data: {
-        type: "single",
+        type: "bulk",
         payload: {
           ...data.payload,
           timestamp: timestamp,

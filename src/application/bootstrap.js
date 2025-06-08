@@ -47,6 +47,8 @@ export const setupModuleRouters = (options = {}) => {
   const businessRepository = businessModule.getBusinessRepository(options.sequelizeInstance);
   const addressRepository = addressModule.getAddressRepository(options.sequelizeInstance);
   const orderRepository = orderModule.getOrderRepository(options.sequelizeInstance);
+  const favoriteRepository = favoriteModule.getFavoriteRepository(options.sequelizeInstance);
+  const userRepository = authModule.getUserRepository(options.sequelizeInstance);
 
   const mapboxToken = process.env.MAPBOX_ACCESS_TOKEN;
   const locationService = new LocationService(
@@ -57,7 +59,9 @@ export const setupModuleRouters = (options = {}) => {
   );
   
   const bagRouter = bagModule.setupBagModule({
-    sequelizeInstance: options.sequelizeInstance
+    sequelizeInstance: options.sequelizeInstance,
+    favoriteRepository: favoriteRepository,
+    authRepository: userRepository
   });
   
   const clientRouter = clientModule.setupClientModule({

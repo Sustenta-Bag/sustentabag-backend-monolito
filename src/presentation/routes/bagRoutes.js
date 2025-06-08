@@ -17,7 +17,10 @@ import {
 
 export const setupBagRoutes = (router, options = {}) => {
   const bagRepository = options.bagRepository || new PostgresBagRepository();
-  const bagService = new BagService(bagRepository);
+  const favoriteRepository = options.favoriteRepository;
+  const authRepository = options.authRepository;
+  
+  const bagService = options.bagService || new BagService(bagRepository, favoriteRepository, authRepository);
   const bagController = new BagController(bagService);
   
   router.post(`/`,

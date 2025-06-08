@@ -48,3 +48,12 @@ export const setupAuthModule = (options = {}) => {
   
   return router;
 };
+
+export const getUserRepository = (sequelizeInstance) => {
+  if (!sequelizeInstance) {
+    throw new Error('Sequelize instance is required to get user repository');
+  }
+  
+  UserModel.init(sequelizeInstance);
+  return new UserRepository(UserModel);
+};
