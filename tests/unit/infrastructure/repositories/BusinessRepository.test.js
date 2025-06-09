@@ -1,10 +1,16 @@
 import BusinessRepository from '../../../../src/infrastructure/repositories/BusinessRepository.js';
 
+class TestBusinessRepository extends BusinessRepository {
+  async findActiveBusiness() {
+    throw new Error('Método não implementado');
+  }
+}
+
 describe('BusinessRepository Unit Tests', () => {
   let businessRepository;
 
   beforeEach(() => {
-    businessRepository = new BusinessRepository();
+    businessRepository = new TestBusinessRepository();
   });
 
   test('create method should throw "Método não implementado"', async () => {
