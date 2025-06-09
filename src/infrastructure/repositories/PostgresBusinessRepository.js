@@ -80,7 +80,9 @@ class PostgresBusinessRepository extends BusinessRepository {
           targetKey: 'id',
           as: 'address'
         });
-      }      const records = await this.BusinessModel.findAll({
+      }
+      
+      const records = await this.BusinessModel.findAll({
         include: [{ 
           model: this.AddressModel, 
           as: 'address',
@@ -115,6 +117,7 @@ class PostgresBusinessRepository extends BusinessRepository {
         return business;
       });
     } catch (error) {
+      console.error('Erro ao buscar empresas com endereços:', error);
       throw error;
     }
   }

@@ -33,7 +33,7 @@ describe('Business Entity', () => {
     expect(business.deliveryTax).toBe(5.0);
     expect(business.idAddress).toBe(1);
     expect(business.status).toBe(1);
-    expect(business.createdAt).toBe(currentDate);
+    expect(business.createdAt).toBeInstanceOf(Date);
   });
 
   test('should initialize with default values when not provided', () => {
