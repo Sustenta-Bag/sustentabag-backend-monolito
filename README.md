@@ -1,251 +1,172 @@
-# SustentaBag Backend Monolito
+# 🌱 SustentaBag - Backend Monolítico
 
-[![CI](https://github.com/Sustenta-Bag/sustentabag-backend-monolito/actions/workflows/ci.yml/badge.svg)](https://github.com/Sustenta-Bag/sustentabag-backend-monolito/actions/workflows/ci.yml)
-[![Análise de Segurança](https://github.com/Sustenta-Bag/sustentabag-backend-monolito/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/Sustenta-Bag/sustentabag-backend-monolito/actions/workflows/codeql-analysis.yml)
-[![Node.js](https://img.shields.io/badge/Node.js-v14+-green.svg)](https://nodejs.org)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14-blue.svg)](https://www.postgresql.org)
-[![Docker](https://img.shields.io/badge/Docker-20.10+-blue.svg)](https://www.docker.com)
-[![Licença](https://img.shields.io/badge/Licença-ISC-blue.svg)](LICENSE)
+> **Sistema de gerenciamento de sacolas ecológicas para redução do desperdício alimentar**
 
-📊 **Estatísticas do Projeto:**
-- 🧪 **Testes**: 100+ casos de teste unitários
-- 📦 **Entidades**: 9 modelos de domínio  
-- 🔥 **Endpoints**: APIs REST documentadas
-- 🐳 **Containerizado**: Docker Compose
+Um backend robusto desenvolvido em Node.js que conecta estabelecimentos comerciais a consumidores conscientes, promovendo a sustentabilidade através da venda de sacolas com produtos próximos ao vencimento por preços acessíveis.
 
 ## 📋 Índice
 
-- [⚡ Quick Start](#-quick-start)
-- [🌟 Descrição](#-descrição)
-- [🏗 Arquitetura](#-arquitetura)
-- [🛠 Tecnologias](#-tecnologias)
-- [📋 Pré-requisitos](#-pré-requisitos)
-- [🚀 Instalação](#-instalação)
-- [⚙️ Configuração](#-configuração)
-- [💻 Uso](#-uso)
-- [🔧 Solução de Problemas](#-solução-de-problemas)
-- [👨‍💻 Desenvolvimento](#-desenvolvimento)
-- [🧪 Testes](#-testes)
-- [📚 Documentação](#-documentação)
-- [🤝 Contribuição](#-contribuição)
-- [💬 Suporte](#-suporte)
-- [📄 Licença](#-licença)
+- [Sobre o Projeto](#-sobre-o-projeto)
+- [Tecnologias](#-tecnologias)
+- [Arquitetura](#-arquitetura)
+- [Pré-requisitos](#-pré-requisitos)
+- [Instalação](#-instalação)
+- [Configuração](#️-configuração)
+- [Uso](#-uso)
+- [API Documentation](#-api-documentation)
+- [Testes](#-testes)
+- [Deploy](#-deploy)
+- [Contribuição](#-contribuição)
+- [FAQ](#-faq)
+- [Licença](#-licença)
 
-## ⚡ Quick Start
+## 🎯 Sobre o Projeto
 
-Quer testar rapidamente? Execute estes comandos:
+O SustentaBag é uma plataforma inovadora que combate o desperdício alimentar conectando:
 
-```bash
-# Clone e configure
-git clone https://github.com/Sustenta-Bag/sustentabag-backend-monolito.git
-cd sustentabag-backend-monolito
-cp .env.example .env
+- **🏪 Estabelecimentos**: Cadastram sacolas com produtos próximos ao vencimento
+- **👥 Consumidores**: Adquirem produtos de qualidade por preços reduzidos
+- **🌍 Sustentabilidade**: Reduz o desperdício e promove consumo consciente
 
-# Inicie com Docker (todos os serviços)
-docker-compose up -d
+### Funcionalidades Principais
 
-# Aguarde ~30s e acesse:
-# 📖 Documentação: http://localhost:4041/api-docs
-# 🔍 Health Check: http://localhost:4041/health
-# 🗄️ PgAdmin: http://localhost:5050
-```
-
-**Primeira vez?** Vá para [Instalação Completa](#-instalação) para configuração detalhada.
-
----
-
-## 🌟 Descrição
-
-O SustentaBag é um sistema inovador para gerenciamento de sacolas ecológicas, desenvolvido com foco em sustentabilidade e eficiência. O backend monolítico implementa uma arquitetura baseada em DDD (Domain-Driven Design) e integra-se com diversos serviços para fornecer uma solução completa de gestão.
-
-### 🎯 Objetivos
-
-- 🌱 Facilitar o gerenciamento de sacolas ecológicas
-- ♻️ Promover práticas sustentáveis
-- 🚀 Fornecer uma API robusta e escalável
-- 💳 Integrar serviços de pagamento e notificação
-- 🔒 Garantir rastreabilidade e segurança
-
-### ✨ Funcionalidades Principais
-
-#### Core Business
-- 📦 Cadastro e gerenciamento de sacolas
-- 👥 Gestão de usuários e autenticação
-- 📊 Controle de estoque e pedidos
-- 🚚 Rastreamento de entregas
-- 📈 Relatórios e analytics
-
-#### Serviços Integrados
-- 🔔 Sistema de notificações em tempo real
-- 💳 Processamento de pagamentos
-- 📱 Autenticação via Firebase
-- 📍 Geolocalização de entregas
-- 📊 Monitoramento e métricas
-
-## 🏗 Arquitetura
-
-### Visão Geral do Sistema
-```
-┌─────────────────┐     ┌─────────────────┐
-│   API Principal │     │  Frontend Web   │
-│   (Monolito)    │◄───►│    (React)      │
-└─────────────────┘     └─────────────────┘
-        ▲                        ▲
-        │                        │
-        ▼                        ▼
-┌─────────────────┐     ┌─────────────────┐
-│   PostgreSQL    │     │    Firebase     │
-└─────────────────┘     └─────────────────┘
-```
-
-### Componentes do Sistema
-
-#### 1. 🎯 API Principal (Monolito)
-- **Porta**: 4041
-- **Responsabilidades**:
-  - Implementa DDD para gerenciamento do core business
-  - Gerencia sacolas, usuários e pedidos
-  - Fornece endpoints REST documentados
-  - Integra com Firebase para autenticação
-  - Utiliza Mapbox para geolocalização
-  - Autenticação via Firebase
-  - Dashboard administrativo
-  - Gestão de usuários
-
-### Fluxo de Dados
-
-1. **Autenticação e Autorização**
-   ```
-   Cliente → Frontend → Firebase Auth → API Principal
-   ```
-
-2. **Processamento de Pedidos**
-   ```
-   Cliente → API Principal → PostgreSQL
-   ```
-
-3. **Geolocalização**
-   ```
-   Cliente → API Principal → Mapbox API → Resposta com Coordenadas
-   ```
-
-### Persistência de Dados
-
-- **PostgreSQL**: Dados principais e relacionamentos
-- **Firebase**: Autenticação
+- ✅ **Gestão de Estabelecimentos**: Cadastro, autenticação e gerenciamento de negócios
+- ✅ **Sistema de Sacolas**: Criação e gestão de sacolas ecológicas (Doce, Salgada, Mista)
+- ✅ **Geolocalização**: Busca de estabelecimentos próximos usando Mapbox
+- ✅ **Sistema de Pedidos**: Fluxo completo de compra e entrega
+- ✅ **Autenticação**: Integração com Firebase Authentication
+- ✅ **Favoritos**: Sistema de estabelecimentos favoritos
+- ✅ **Notificações**: Notificações push para novos produtos
+- ✅ **API RESTful**: Documentação completa com Swagger
 
 ## 🛠 Tecnologias
 
 ### Backend Principal
 | Tecnologia | Versão | Descrição |
 |------------|--------|-----------|
-| Node.js | v14+ | Runtime JavaScript |
-| Express | ^5.1.0 | Framework Web |
-| Sequelize | ^6.37.7 | ORM para PostgreSQL |
-| Jest | ^29.7.0 | Framework de Testes |
-| Swagger | ^5.0.1 | Documentação da API |
-| JWT | ^9.0.2 | Autenticação |
-| Express-validator | ^7.2.1 | Validação de Requisições |
+| **Node.js** | 18+ | Runtime JavaScript |
+| **Express** | ^5.1.0 | Framework Web |
+| **Sequelize** | ^6.37.7 | ORM para PostgreSQL |
+| **PostgreSQL** | 14 | Banco de Dados Principal |
+| **Jest** | ^29.7.0 | Framework de Testes |
 
 ### Serviços e Integrações
 | Serviço | Versão | Descrição |
 |---------|--------|-----------|
-| PostgreSQL | 14 | Banco de Dados Principal |
-| Firebase | ^11.6.0 | Autenticação |
-| Mapbox | ^1.0.0 | Geolocalização |
+| **Firebase** | ^11.6.0 | Autenticação e Notificações |
+| **Mapbox** | ^1.0.0 | Geolocalização e Mapas |
+| **Swagger** | ^5.0.1 | Documentação da API |
+| **JWT** | ^9.0.2 | Tokens de Autenticação |
+| **Docker** | - | Containerização |
 
-### Ferramentas de Desenvolvimento
-| Ferramenta | Versão | Descrição |
-|------------|--------|-----------|
-| Docker | 20.10+ | Containerização |
-| Docker Compose | 2.0+ | Orquestração |
-| PgAdmin | Latest | Admin PostgreSQL |
+### Segurança e Middleware
+- **Helmet**: Proteção de headers HTTP
+- **CORS**: Controle de origem cruzada
+- **bcrypt**: Hash de senhas
+- **Express Validator**: Validação de dados
 
-### Dependências de Desenvolvimento
-| Pacote | Versão | Descrição |
-|--------|--------|-----------|
-| Nodemon | ^3.1.9 | Hot Reload |
-| Supertest | ^7.1.0 | Testes de API |
-| Sinon | ^20.0.0 | Mocks e Stubs |
-| SQLite3 | ^5.1.7 | Banco de Testes |
-| Swagger-autogen | 2.23.7 | Geração de Docs |
+## 🏗 Arquitetura
 
-### Segurança
-- Helmet (^8.1.0) para headers HTTP
-- CORS (^2.8.5) para controle de acesso
-- Validação de entrada com Express-validator
-- Autenticação JWT
-- Firebase Auth para autenticação
+O projeto segue os princípios da **Clean Architecture** com separação clara de responsabilidades:
+
+```
+src/
+├── 📁 application/          # Casos de uso e serviços
+│   ├── services/           # Lógica de negócio
+│   ├── modules/            # Módulos da aplicação
+│   └── bootstrap.js        # Inicialização dos módulos
+├── 📁 domain/              # Entidades e regras de negócio
+│   ├── entities/           # Entidades do domínio
+│   ├── models/             # Modelos do Sequelize
+│   └── services/           # Serviços de domínio
+├── 📁 infrastructure/      # Camada de infraestrutura
+│   ├── database/           # Configuração do banco
+│   ├── repositories/       # Implementação dos repositórios
+│   ├── services/           # Serviços externos
+│   └── errors/             # Tratamento de erros
+└── 📁 presentation/        # Camada de apresentação
+    ├── controllers/        # Controladores HTTP
+    ├── routes/             # Definição das rotas
+    ├── middleware/         # Middlewares personalizados
+    └── docs/               # Documentação da API
+```
+
+### Principais Entidades
+
+- **👤 Client**: Clientes do sistema
+- **🏪 Business**: Estabelecimentos comerciais  
+- **🛍 Bag**: Sacolas ecológicas (Doce, Salgada, Mista)
+- **📦 Order**: Pedidos e compras
+- **📍 Address**: Endereços e localização
+- **⭐ Favorite**: Sistema de favoritos
 
 ## 📋 Pré-requisitos
 
 ### Desenvolvimento Local
-- Node.js v14 ou superior
-- PostgreSQL 14
-- Docker e Docker Compose
-- Git
+- **Node.js** v18 ou superior
+- **PostgreSQL** 14+
+- **Docker** e **Docker Compose**
+- **Git**
 
-### Contas e Serviços
-- Conta Firebase (para autenticação)
-- Conta Mapbox (para geolocalização)
+### Contas e Serviços Externos
+- **Firebase Console**: Para autenticação e notificações
+- **Mapbox Account**: Para serviços de geolocalização
 
 ## 🚀 Instalação
 
 ### 1. Clone o Repositório
 ```bash
-# Clone o repositório
 git clone https://github.com/Sustenta-Bag/sustentabag-backend-monolito.git
-
-# Entre no diretório
 cd sustentabag-backend-monolito
 ```
 
 ### 2. Instale as Dependências
 ```bash
-# Instale as dependências
 npm install
-
-# Verifique se há vulnerabilidades
-npm audit
 ```
 
-### 3. Configure as Variáveis de Ambiente
+### 3. Configure o Ambiente
 ```bash
 # Copie o arquivo de exemplo
 cp .env.example .env
 
-# Edite o arquivo .env com suas configurações
-# Use seu editor preferido, por exemplo:
-code .env
+# Edite as variáveis de ambiente
+nano .env
 ```
 
-### 4. Inicie os Serviços com Docker
+### 4. Inicie com Docker (Recomendado)
 ```bash
-# Inicie todos os serviços
+# Suba todos os serviços
 docker-compose up -d
 
-# Verifique se os serviços estão rodando
-docker-compose ps
-
 # Verifique os logs
-docker-compose logs -f
+docker-compose logs -f api
 ```
 
-### 5. Verifique as Conexões
+### 5. Ou Execute Localmente
 ```bash
-# Verifique a documentação da API
-# Acesse: http://localhost:4041/api-docs
+# Inicie o PostgreSQL localmente
+# Configure as variáveis no .env
+
+# Execute as migrações
+npm run migrate
+
+# Inicie em modo desenvolvimento
+npm run dev
 ```
 
 ## ⚙️ Configuração
 
 ### Variáveis de Ambiente
+
+Crie um arquivo `.env` na raiz do projeto:
+
 ```env
-# Servidor
+# 🔧 Servidor
 PORT=4041
 NODE_ENV=development
 
-# PostgreSQL
+# 🗄️ PostgreSQL
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=sustentabag
@@ -253,631 +174,305 @@ DB_USER=postgres
 DB_PASSWORD=postgres
 DB_SCHEMA=public
 
-# JWT
-JWT_SECRET=your_jwt_secret
+# 🔐 JWT
+JWT_SECRET=seu_jwt_secret_super_seguro
 JWT_EXPIRATION=24h
 
-# Logs
+# 📱 Firebase - Autenticação
+FIREBASE_API_KEY=sua_api_key
+FIREBASE_AUTH_DOMAIN=seu_projeto.firebaseapp.com
+FIREBASE_PROJECT_ID=seu_projeto_id
+FIREBASE_STORAGE_BUCKET=seu_projeto.appspot.com
+FIREBASE_MESSAGING_SENDER_ID=123456789
+FIREBASE_APP_ID=1:123456789:web:abcdef
+
+# 🔑 Firebase - Admin SDK
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk@seu-projeto.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nSUA_CHAVE_PRIVADA\n-----END PRIVATE KEY-----\n"
+
+# 🗺️ Mapbox
+MAPBOX_ACCESS_TOKEN= SEU_TOKEN
+
+# 📊 Logs
 LOG_LEVEL=debug
-
-# Firebase
-FIREBASE_API_KEY=your_api_key
-FIREBASE_AUTH_DOMAIN=your_auth_domain
-FIREBASE_PROJECT_ID=your_project_id
-FIREBASE_STORAGE_BUCKET=your_storage_bucket
-FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-FIREBASE_APP_ID=your_app_id
-FIREBASE_CLIENT_EMAIL=your_client_email
-FIREBASE_PRIVATE_KEY=your_private_key
-
-# Mapbox
-MAPBOX_ACCESS_TOKEN=your_mapbox_token
 ```
-
-### Portas dos Serviços
-| Serviço | Porta | Descrição | Acesso |
-|---------|-------|-----------|---------|
-| API Principal | 4041 | API REST principal | http://localhost:4041 |
-| Swagger | 4041/api-docs | Documentação da API | http://localhost:4041/api-docs |
-| PgAdmin | 5050 | Admin do PostgreSQL | http://localhost:5050 |
-
-### Credenciais Padrão
-| Serviço | Usuário | Senha |
-|---------|---------|-------|
-| PostgreSQL | postgres | postgres |
-| PgAdmin | admin@sustentabag.com | admin |
 
 ### Configuração do Firebase
 
-1. Crie um projeto no [Firebase Console](https://console.firebase.google.com)
-2. Ative Authentication
-3. Gere uma chave privada para o serviço
-4. Configure as variáveis de ambiente no `.env`
+1. **Crie um projeto** no [Firebase Console](https://console.firebase.google.com)
+2. **Ative o Authentication** com providers desejados
+3. **Gere uma chave privada** para o Admin SDK:
+   - Acesse Configurações do Projeto → Contas de Serviço
+   - Clique em "Gerar nova chave privada"
+   - Baixe o arquivo JSON
+4. **Configure as variáveis** no `.env` com os dados do arquivo
 
 ### Configuração do Mapbox
 
-1. Crie uma conta no [Mapbox](https://www.mapbox.com)
-2. Gere um token de acesso
-3. Adicione o token no arquivo `.env`
+1. **Crie uma conta** em [Mapbox](https://www.mapbox.com)
+2. **Gere um token** em [Access Tokens](https://account.mapbox.com/access-tokens/)
+3. **Adicione o token** na variável `MAPBOX_ACCESS_TOKEN`
 
-### 🌍 Configuração por Ambiente
+### Portas dos Serviços
 
-#### Desenvolvimento Local
-```bash
-# .env.development
-NODE_ENV=development
-PORT=4041
-LOG_LEVEL=debug
-DB_HOST=localhost
-```
+| Serviço | Porta | URL de Acesso |
+|---------|-------|---------------|
+| 🚀 **API Principal** | 4041 | http://localhost:4041 |
+| 📚 **Swagger Docs** | 4041 | http://localhost:4041/swagger |
+| 🗄️ **PostgreSQL** | 5432 | localhost:5432 |
+| ❤️ **Health Check** | 4041 | http://localhost:4041/api/health |
 
-#### Homologação/Staging
-```bash
-# .env.staging
-NODE_ENV=staging
-PORT=4041
-LOG_LEVEL=info
-DB_HOST=staging-db.sustentabag.com
-CORS_ORIGIN=https://staging.sustentabag.com
-```
+## 🎯 Uso
 
-#### Produção
-```bash
-# .env.production
-NODE_ENV=production
-PORT=4041
-LOG_LEVEL=error
-DB_HOST=prod-db.sustentabag.com
-CORS_ORIGIN=https://app.sustentabag.com
-JWT_EXPIRATION=1h  # Menor tempo em produção
-```
-
-### 🔒 Segurança por Ambiente
-
-| Configuração | Desenvolvimento | Produção |
-|--------------|----------------|----------|
-| **JWT Expiration** | 24h | 1h |
-| **CORS Origin** | * | Domínio específico |
-| **Logs** | Debug | Error apenas |
-
-### Verificação da Instalação
+### Iniciando o Servidor
 
 ```bash
-# Inicie o servidor em modo desenvolvimento
+# Desenvolvimento com hot-reload
 npm run dev
 
-# Em outro terminal, execute os testes
+# Produção
+npm start
+
+# Com Docker
+docker-compose up -d
+```
+
+### Verificando o Status
+
+```bash
+# Health check
+curl http://localhost:4041/api/health
+
+# Versão da API
+curl http://localhost:4041/api/version
+```
+
+### Scripts Disponíveis
+
+```bash
+# 🔧 Desenvolvimento
+npm run dev              # Inicia em modo desenvolvimento
+npm run start:watch      # Inicia com --watch do Node.js
+
+# 🧪 Testes
+npm test                 # Testes unitários
+npm run test:integration # Testes de integração
+npm run test:all         # Todos os testes
+npm run test:coverage    # Cobertura de testes
+npm run coverage:open    # Abre relatório de cobertura
+
+# 📚 Documentação
+npm run swagger          # Gera documentação Swagger
+
+# 🐳 Docker
+docker-compose up -d     # Sobe todos os serviços
+docker-compose logs -f   # Visualiza logs
+docker-compose down      # Para todos os serviços
+```
+
+## 📚 API Documentation
+
+### Swagger UI
+Acesse a documentação interativa em: **http://localhost:4041/swagger**
+
+### Principais Endpoints
+
+#### 🔐 Autenticação
+```http
+POST /api/auth/login     # Login de usuário
+POST /api/auth/register  # Registro de usuário
+POST /api/auth/refresh   # Renovar token
+```
+
+#### 🏪 Estabelecimentos
+```http
+GET    /api/businesses          # Listar estabelecimentos
+POST   /api/businesses          # Criar estabelecimento
+GET    /api/businesses/:id      # Obter estabelecimento
+PUT    /api/businesses/:id      # Atualizar estabelecimento
+DELETE /api/businesses/:id      # Deletar estabelecimento
+```
+
+#### 🛍 Sacolas
+```http
+GET    /api/bags                     # Listar todas as sacolas
+POST   /api/bags                     # Criar sacola
+GET    /api/bags/:id                 # Obter sacola específica
+PUT    /api/bags/:id                 # Atualizar sacola
+DELETE /api/bags/:id                 # Deletar sacola
+GET    /api/bags/business/:id        # Sacolas por estabelecimento
+GET    /api/bags/business/:id/active # Sacolas ativas por estabelecimento
+PATCH  /api/bags/:id/status          # Alterar status da sacola
+```
+
+#### 📦 Pedidos
+```http
+GET    /api/orders              # Listar pedidos
+POST   /api/orders              # Criar pedido
+GET    /api/orders/:id          # Obter pedido
+PUT    /api/orders/:id/status   # Atualizar status
+POST   /api/orders/:id/items    # Adicionar item
+DELETE /api/orders/:id/items/:itemId # Remover item
+```
+
+#### 📍 Localização
+```http
+GET /api/location/nearby/client           # Estabelecimentos próximos
+GET /api/location/geocode                 # Geocodificar endereço
+GET /api/location/bags/nearby/client      # Sacolas próximas
+```
+
+### Autenticação
+
+A API usa **Bearer Token** (JWT) para autenticação:
+
+```bash
+# Exemplo de requisição autenticada
+curl -H "Authorization: Bearer SEU_JWT_TOKEN" \
+     http://localhost:4041/api/bags
+```
+
+## 🧪 Testes
+
+### Executando os Testes
+
+```bash
+# Todos os testes
+npm run test:all
+
+# Apenas testes unitários
 npm test
 
-# Verifique a documentação da API
-# Acesse: http://localhost:4041/api-docs
-```
+# Apenas testes de integração
+npm run test:integration
 
-### Solução de Problemas Comuns
-
-1. **Erro de Conexão com o Banco**
-   ```bash
-   # Verifique se o PostgreSQL está rodando
-   docker-compose ps db
-   
-   # Verifique os logs
-   docker-compose logs db
-   ```
-
-2. **Erro de Porta em Uso**
-   ```bash
-   # Liste processos usando as portas
-   netstat -ano | findstr "4041"
-   
-   # Encerre o processo se necessário
-   taskkill /PID <PID> /F
-   ```
-
-3. **Erro de Variáveis de Ambiente**
-   ```bash
-   # Verifique se o arquivo .env existe
-   ls -la .env
-   
-   # Verifique se as variáveis estão definidas
-   cat .env
-   ```
-
-4. **Erro no Docker**
-   ```bash
-   # Limpe containers parados
-   docker-compose down
-
-   # Remova volumes não utilizados
-   docker volume prune
-
-   # Reconstrua as imagens
-   docker-compose build --no-cache
-   ```
-
-5. **Erro nos Testes**
-   ```bash
-   # Limpe o cache do Jest
-   npm run test -- --clearCache
-
-   # Execute testes específicos
-   npm test -- -t "nome do teste"
-
-   # Verifique a cobertura
-   npm run test:coverage
-   ```
-
-## 🔧 Solução de Problemas
-
-### Problemas Comuns
-
-#### 1. Erro de Conexão com o Banco
-```bash
-# Verifique se o PostgreSQL está rodando
-docker-compose ps db
-
-# Verifique os logs
-docker-compose logs db
-
-# Tente reconectar
-docker-compose restart db
-```
-
-#### 2. Erro de Porta em Uso
-```bash
-# Liste processos usando as portas
-netstat -ano | findstr "4041"
-
-# Encerre o processo se necessário
-taskkill /PID <PID> /F
-
-# Ou altere a porta no .env
-PORT=4042
-```
-
-#### 3. Erro de Variáveis de Ambiente
-```bash
-# Verifique se o arquivo .env existe
-ls -la .env
-
-# Verifique se as variáveis estão definidas
-cat .env
-
-# Copie o arquivo de exemplo novamente
-cp .env.example .env
-```
-
-#### 4. Erro no Docker
-```bash
-# Limpe containers parados
-docker-compose down
-
-# Remova volumes não utilizados
-docker volume prune
-
-# Reconstrua as imagens
-docker-compose build --no-cache
-```
-
-#### 5. Erro nos Testes
-```bash
-# Limpe o cache do Jest
-npm run test -- --clearCache
-
-# Execute testes específicos
-npm test -- -t "nome do teste"
-
-# Verifique a cobertura
+# Com cobertura
 npm run test:coverage
+
+# Modo watch
+npm run test:watch
 ```
 
-### Logs e Monitoramento
+### Cobertura de Testes
 
-#### Visualização de Logs
 ```bash
-# Todos os serviços
-docker-compose logs -f
+# Gerar relatório HTML
+npm run test:coverage:html
 
-# Serviço específico
-docker-compose logs -f api
-
-# Últimas 100 linhas
-docker-compose logs --tail=100 -f api
-
-# Filtrar por nível
-docker-compose logs -f api | grep "ERROR"
+# Abrir relatório no navegador
+npm run coverage:open
 ```
 
-#### Métricas e Saúde
-- **Health Check**: http://localhost:4041/health
+### Estrutura de Testes
 
-### Recuperação de Dados
-
-#### Backup do Banco
-```bash
-# Backup do PostgreSQL
-docker-compose exec db pg_dump -U postgres sustentabag > backup.sql
-
-# Restaurar backup
-cat backup.sql | docker-compose exec -T db psql -U postgres sustentabag
+```
+tests/
+├── unit/                    # Testes unitários
+│   ├── application/         # Testes de serviços
+│   ├── domain/             # Testes de entidades
+│   └── infrastructure/     # Testes de repositórios
+└── integration/            # Testes de integração
+    └── api/                # Testes de endpoints
 ```
 
-#### Logs de Erro
-```bash
-# Exportar logs
-docker-compose logs api > api-logs.txt
+### Exemplo de Teste
 
-# Limpar logs antigos
-docker-compose exec api sh -c "echo '' > /var/log/api.log"
-```
-
-### Contato e Suporte
-
-- **Issues**: [GitHub Issues](https://github.com/Sustenta-Bag/sustentabag-backend-monolito/issues)
-- **Email**: suporte@sustentabag.com
-- **Slack**: [Canal de Suporte](https://sustentabag.slack.com)
-
-## 💻 Uso
-
-### Comandos Disponíveis
-
-#### Desenvolvimento
-```bash
-# Iniciar em diferentes modos
-npm start            # Modo produção
-npm run dev          # Modo desenvolvimento com hot-reload
-npm run start:watch  # Modo watch nativo
-```
-
-#### Documentação
-```bash
-# Gerar documentação
-npm run swagger      # Gera documentação Swagger
-```
-
-#### Testes
-```bash
-# Executar testes
-npm test            # Testes unitários
-npm run test:integration  # Testes de integração
-npm run test:all    # Todos os testes
-npm run test:watch  # Testes em modo watch
-
-# Cobertura de testes
-npm run test:coverage     # Cobertura básica
-npm run test:coverage:html # Relatório HTML
-npm run test:coverage:unit:html # Relatório unitário
-npm run coverage:open     # Abre relatório no navegador
-```
-
-#### Docker
-```bash
-# Gerenciamento de containers
-docker-compose up -d     # Inicia serviços
-docker-compose down      # Para serviços
-docker-compose restart   # Reinicia serviços
-docker-compose logs -f   # Monitora logs
-
-# Manutenção
-docker-compose ps        # Lista containers
-docker-compose build    # Reconstrói imagens
-docker system prune     # Limpa recursos não utilizados
-```
-
-### Acessando os Serviços
-
-#### API e Documentação
-- **API Principal**: http://localhost:4041
-- **Swagger UI**: http://localhost:4041/api-docs
-- **Health Check**: http://localhost:4041/health
-- **Métricas**: http://localhost:4041/metrics
-
-#### Ferramentas de Administração
-- **PgAdmin**: http://localhost:5050
-  - Email: admin@sustentabag.com
-  - Senha: admin
-- **RabbitMQ**: http://localhost:15672
-  - Usuário: admin
-  - Senha: admin
-- **MongoDB Compass**: mongodb://localhost:27017
-
-#### Frontend e Microserviços
-- **Web App**: http://localhost:4079
-- **Serviço de Pagamentos**: http://localhost:3001
-- **Serviço de Notificações**: http://localhost:4409
-
-## 👨‍💻 Desenvolvimento
-
-### Estrutura do Projeto
-```
-src/
-  ├── app.js                # Configuração da aplicação
-  ├── index.js              # Ponto de entrada
-  ├── server.js             # Servidor HTTP
-  ├── application/          # Casos de uso e serviços
-  │   ├── bootstrap.js      # Inicialização
-  │   ├── dtos/            # Objetos de transferência
-  │   ├── modules/         # Módulos da aplicação
-  │   └── services/        # Serviços da aplicação
-  ├── domain/              # Regras de negócio
-  │   ├── entities/        # Entidades do domínio
-  │   ├── models/          # Modelos de dados
-  │   └── value/           # Objetos de valor
-  ├── infrastructure/      # Implementações técnicas
-  │   ├── config/          # Configurações
-  │   ├── database/        # Banco de dados
-  │   ├── errors/          # Tratamento de erros
-  │   └── repositories/    # Repositórios
-  └── presentation/        # Interfaces
-      ├── controllers/     # Controladores
-      ├── http/           # Configurações HTTP
-      ├── middleware/     # Middlewares
-      └── routes/         # Rotas da API
-```
-
-### Convenções de Código
-
-#### Nomenclatura
-- **Variáveis/Funções**: camelCase
-- **Classes**: PascalCase
-- **Arquivos**: kebab-case
-- **Constantes**: UPPER_SNAKE_CASE
-- **Interfaces**: IPascalCase
-- **Tipos**: TPascalCase
-
-#### Organização de Imports
-```typescript
-// Core
-import path from 'path';
-import fs from 'fs';
-
-// Externos
-import express from 'express';
-import { Sequelize } from 'sequelize';
-
-// Internos
-import { User } from '../domain/entities';
-import { UserService } from '../application/services';
-```
-
-#### Documentação
-```typescript
-/**
- * Cria um novo usuário no sistema
- * @param {CreateUserDTO} userData - Dados do usuário
- * @returns {Promise<User>} Usuário criado
- * @throws {ValidationError} Se os dados forem inválidos
- */
-async function createUser(userData: CreateUserDTO): Promise<User>
-```
-
-#### Testes
-```typescript
-describe('UserService', () => {
-  it('deve criar um usuário com dados válidos', async () => {
-    // Arrange
-    const userData = { /* ... */ };
-
-    // Act
-    const user = await userService.create(userData);
-
-    // Assert
-    expect(user).toBeDefined();
-    expect(user.email).toBe(userData.email);
+```javascript
+// tests/unit/application/services/BagService.test.js
+describe('BagService', () => {
+  test('should create bag successfully', async () => {
+    const bagData = {
+      type: 'Mista',
+      price: 15.99,
+      description: 'Sacola mista'
+    };
+    
+    const result = await bagService.createBag(bagData);
+    
+    expect(result.type).toBe('Mista');
+    expect(result.price).toBe(15.99);
   });
 });
 ```
 
-### Workflow de Desenvolvimento
-
-1. **Preparação**
-   ```bash
-   # Atualize a branch develop
-   git checkout develop
-   git pull origin develop
-
-   # Crie uma nova branch
-   git checkout -b feature/nome-da-feature
-   ```
-
-2. **Desenvolvimento**
-   ```bash
-   # Inicie o servidor em modo desenvolvimento
-   npm run dev
-
-   # Em outro terminal, execute os testes
-   npm run test:watch
-   ```
-
-3. **Commit**
-   ```bash
-   # Verifique as alterações
-   git status
-   git diff
-
-   # Adicione as alterações
-   git add .
-
-   # Faça o commit
-   git commit -m "feat: adiciona nova funcionalidade
-
-   - Implementa criação de usuário
-   - Adiciona validação de email
-   - Atualiza documentação"
-   ```
-
-4. **Push e Pull Request**
-   ```bash
-   # Envie para o repositório
-   git push origin feature/nome-da-feature
-
-   # Crie um Pull Request no GitHub
-   # Use o template fornecido
-   ```
-
-### Boas Práticas
-
-1. **Commits**
-   - Use o padrão Conventional Commits
-   - Escreva mensagens claras e descritivas
-   - Referencie issues quando aplicável
-
-2. **Código**
-   - Siga os princípios SOLID
-   - Mantenha a cobertura de testes alta
-   - Documente APIs e funções complexas
-   - Use tipos e interfaces do TypeScript
-
-3. **Segurança**
-   - Nunca comite credenciais
-   - Valide todas as entradas
-   - Use prepared statements
-   - Implemente rate limiting
-
-4. **Performance**
-   - Use índices apropriadamente
-   - Implemente cache quando necessário
-   - Monitore uso de recursos
-   - Otimize queries
-
-### Debugging
-
-1. **Logs**
-   ```bash
-   # Visualize logs em tempo real
-   docker-compose logs -f api
-
-   # Filtre logs por nível
-   docker-compose logs -f api | grep "ERROR"
-   ```
-
-2. **Inspeção**
-   ```bash
-   # Entre no container
-   docker-compose exec api sh
-
-   # Verifique processos
-   ps aux
-
-   # Monitore recursos
-   top
-   ```
-
-3. **Testes**
-   ```bash
-   # Execute um teste específico
-   npm test -- -t "nome do teste"
-
-   # Debug testes
-   npm run test:debug
-   ```
-
-## 🧪 Testes
-
-### Tipos de Testes
-
-- **Unitários**: Testam componentes isolados
-- **Integração**: Testam interação entre componentes
-- **E2E**: Testam fluxos completos (em desenvolvimento)
-
-### Executando Testes
-
-```bash
-# Todos os testes
-npm test
-
-# Testes específicos
-npm test -- -t "nome do teste"
-
-# Cobertura
-npm run test:coverage
-
-# Watch mode
-npm run test:watch
-```
-
-### Relatórios de Cobertura
-
-- HTML: `npm run test:coverage:html`
-- Terminal: `npm run test:coverage`
-- Abrir relatório: `npm run coverage:open`
-
 ## 🚀 Deploy
 
-### Ambiente de Produção
+### Deploy com Docker
 
-1. **Preparação**
-   ```bash
-   # Build da imagem
-   docker build -t sustentabag-backend .
+```bash
+# Build da imagem
+docker build -t sustentabag-backend .
 
-   # Verificar configuração
-   docker-compose config
-   ```
+# Executar container
+docker run -d \
+  --name sustentabag-api \
+  -p 4041:4041 \
+  --env-file .env.production \
+  sustentabag-backend
+```
 
-2. **Deploy**
-   ```bash
-   # Iniciar serviços
-   docker-compose up -d
+### Deploy em Produção
 
-   # Verificar logs
-   docker-compose logs -f
-   ```
+1. **Configure variáveis de ambiente** para produção:
+```env
+NODE_ENV=production
+LOG_LEVEL=error
+JWT_EXPIRATION=1h
+DB_HOST=sua-db-producao.com
+```
+
+2. **Build e deploy**:
+```bash
+# Build do projeto
+npm run build
+
+# Start em produção
+npm start
+```
 
 ### Monitoramento
 
-- **Logs**: Docker logs
-
-## 📚 Documentação
-
-### Documentação da API
-
-- Swagger UI: http://localhost:4041/api-docs
-
-## 🗺️ Roadmap
-
-### 🎯 Versão Atual (v1.0.0)
-- ✅ API REST completa com DDD
-## 🗺️ Roadmap
-
-### 🎯 Versão Atual (v1.0.0)
-- ✅ API REST completa com DDD
-- ✅ Autenticação Firebase + JWT
-- ✅ Documentação Swagger
-- ✅ Testes unitários
+- **Health Check**: `GET /api/health`
+- **Métricas**: Logs estruturados com Morgan
+- **Erros**: Sistema centralizado de tratamento
 
 ## 🤝 Contribuição
 
-1. Fork o projeto
-2. Crie sua branch (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'feat: add some amazing feature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
+### Como Contribuir
 
-### Padrões de Commit
+1. **Fork** o projeto
+2. **Crie** uma branch para sua feature:
+   ```bash
+   git checkout -b feature/nova-funcionalidade
+   ```
+3. **Commit** suas mudanças:
+   ```bash
+   git commit -m 'feat: adiciona nova funcionalidade'
+   ```
+4. **Push** para a branch:
+   ```bash
+   git push origin feature/nova-funcionalidade
+   ```
+5. **Abra** um Pull Request
 
-- `feat`: Nova funcionalidade
-- `fix`: Correção de bug
-- `docs`: Documentação
-- `style`: Formatação
-- `refactor`: Refatoração
-- `test`: Testes
-- `chore`: Tarefas gerais
+### Padrões de Código
 
-## 💬 Suporte
+- **ESLint**: Linting automático
+- **Prettier**: Formatação de código
+- **Conventional Commits**: Padrão de mensagens
+- **Clean Architecture**: Arquitetura em camadas
 
-- **Issues**: [GitHub Issues](https://github.com/Sustenta-Bag/sustentabag-backend-monolito/issues)
-- **Email**: suporte@sustentabag.com
-- **Slack**: [Canal de Suporte](https://sustentabag.slack.com)
+### Estrutura de Commits
 
-## 📄 Licença
-
-Este projeto está sob a licença ISC. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
----
-
-<div align="center">
-  <sub>Built with ❤️ by <a href="https://github.com/Sustenta-Bag">SustentaBag Team</a></sub>
-</div>
+```
+feat: nova funcionalidade
+fix: correção de bug
+docs: atualização de documentação
+style: formatação de código
+refactor: refatoração
+test: adição de testes
+chore: tarefas de manutenção
+```
 
 ## ❓ FAQ (Perguntas Frequentes)
 
@@ -892,16 +487,21 @@ R: Sim, em 24h por padrão. Configure no `.env` com `JWT_EXPIRATION`.
 **P: Posso usar a API sem Firebase?**  
 R: Não atualmente. O Firebase é essencial para autenticação e notificações push.
 
-### 🏗️ **Arquitetura e Deploy**
+### 🗺️ **Geolocalização**
 
-**P: Por que um monolito + microserviços?**  
-R: O core business está no monolito (DDD) para consistência, enquanto serviços especializados (pagamento, notificação) são separados para escalabilidade.
+**P: É obrigatório configurar o Mapbox?**  
+R: Não. O sistema funciona sem Mapbox, mas recursos de geolocalização ficam limitados.
 
-**P: Posso rodar apenas o monolito?**  
-R: Sim, o projeto funciona como monolito standalone.
+**P: Como obtenho um token do Mapbox?**  
+R: Crie uma conta gratuita em [mapbox.com](https://www.mapbox.com) e gere um token de acesso.
 
-**P: Como fazer deploy em produção?**  
-R: Use `docker-compose up -d` com as variáveis de ambiente adequadas.
+### 🛍️ **Funcionalidades**
+
+**P: Quais tipos de sacola existem?**  
+R: Três tipos: **Doce** (produtos doces), **Salgada** (produtos salgados) e **Mista** (produtos diversos).
+
+**P: Como funciona o sistema de status das sacolas?**  
+R: Status 1 = Ativa (disponível para venda), Status 0 = Inativa (indisponível).
 
 ### 🐛 **Problemas Comuns**
 
@@ -917,25 +517,46 @@ R: Gere um novo token em [Mapbox](https://account.mapbox.com/access-tokens/) e a
 **P: Banco não sincroniza**  
 R: Execute `docker-compose down -v && docker-compose up -d` para recriar volumes.
 
-### 📈 **Desenvolvimento**
+### 🚀 **Performance**
 
-**P: Como adicionar novos endpoints?**  
-R: 1) Crie entidade em `/domain`, 2) Implemente repository em `/infrastructure`, 3) Crie service em `/application`, 4) Adicione routes em `/presentation`.
+**P: Como otimizar a performance?**  
+R: Use índices no banco, cache Redis (futuro), paginação nas listagens e compressão gzip.
 
-**P: Como executar apenas testes unitários?**  
-R: `npm test` para todos os testes unitários ou `npm run test:coverage` para relatório.
+**P: Qual o limite de requisições?**  
+R: Não há limite configurado atualmente. Considere implementar rate limiting em produção.
 
-**P: O Swagger não atualiza?**  
-R: Execute `npm run swagger` para regenerar a documentação.
+## 📄 Licença
 
-### 💡 **Dicas de Uso**
-
-**P: Posso usar outros bancos além do PostgreSQL?**  
-R: Tecnicamente sim (Sequelize), mas PostgreSQL é recomendado e testado.
-
-**P: Como contribuir com o projeto?**  
-R: Faça fork, crie branch (`feature/nome`), commit com padrão Conventional, abra PR. Veja [Contribuição](#-contribuição).
+Este projeto está sob a licença **ISC**. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ---
 
-💬 **Não encontrou sua pergunta?** Abra uma [issue](https://github.com/Sustenta-Bag/sustentabag-backend-monolito/issues) ou entre em contato conosco!
+## 🔗 Links Úteis
+
+- **🌐 Repositório**: [GitHub](https://github.com/Sustenta-Bag/sustentabag-backend-monolito)
+- **📚 Documentação**: [Swagger UI](http://localhost:4041/swagger)
+- **🐛 Issues**: [GitHub Issues](https://github.com/Sustenta-Bag/sustentabag-backend-monolito/issues)
+- **🔥 Firebase**: [Console](https://console.firebase.google.com)
+- **🗺️ Mapbox**: [Dashboard](https://account.mapbox.com)
+
+---
+
+## 👥 Equipe
+
+Desenvolvido com ❤️ pela equipe **SustentaBag** como projeto integrador acadêmico.
+
+**📧 Contato**: Para dúvidas ou sugestões, abra uma [issue](https://github.com/Sustenta-Bag/sustentabag-backend-monolito/issues) no GitHub.
+
+---
+
+<div align="center">
+
+**🌱 Juntos por um futuro mais sustentável! 🌱**
+
+[![GitHub](https://img.shields.io/github/license/Sustenta-Bag/sustentabag-backend-monolito)](LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org)
+[![Express](https://img.shields.io/badge/Express-5.1.0-blue)](https://expressjs.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14-blue)](https://postgresql.org)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue)](https://docker.com)
+
+</div>
