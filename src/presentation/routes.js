@@ -5,6 +5,7 @@ import PaymentWebhookController from "./controllers/PaymentWebhookController.js"
 import OrderService from "../application/services/OrderService.js";
 import { getOrderRepository } from "../application/modules/orderModule.js";
 import { getBagService } from "../application/modules/bagModule.js";
+import healthRoutes from "./routes/healthRoutes.js";
 
 const router = express.Router();
 
@@ -22,6 +23,7 @@ const {
   sequelizeInstance: sequelize,
 });
 
+router.use("/api/health", healthRoutes);
 router.use("/api/addresses", addresRouter);
 router.use("/api/clients", clientRouter);
 router.use("/api/businesses", businessRouter);
