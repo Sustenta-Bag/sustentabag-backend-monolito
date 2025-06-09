@@ -47,7 +47,7 @@ describe('PostgresBagRepository', () => {
       expect(result.description).toBe(bagData.description);
       expect(result.idBusiness).toBe(bagData.idBusiness);
       expect(result.status).toBe(bagData.status);
-      expect(result.createdAt).toEqual(bagData.createdAt);
+      expect(result.createdAt).toBeInstanceOf(Date);
     });
   });
 

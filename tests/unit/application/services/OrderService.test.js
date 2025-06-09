@@ -16,11 +16,19 @@ describe('OrderService', () => {
       delete: jest.fn(),
       addItem: jest.fn(),
       removeItem: jest.fn(),
-      updateItemQuantity: jest.fn()
+      updateItemQuantity: jest.fn(),
+      updateStatus: jest.fn(),
+      findByUserId: jest.fn(),
+      findByBusinessId: jest.fn(),
+      getOrderHistoryByUser: jest.fn(),
+      getOrderHistoryByBusiness: jest.fn(),
+      getOrdersByStatus: jest.fn(),
+      getOrdersByDateRange: jest.fn()
     };
 
     mockBagService = {
-      getBag: jest.fn()
+      getBag: jest.fn(),
+      changeBagStatus: jest.fn()
     };
 
     orderService = new OrderService(mockOrderRepository, mockBagService);
@@ -252,6 +260,430 @@ describe('OrderService', () => {
       await expect(orderService.updateItemQuantity(orderId, itemId, quantity))
         .rejects
         .toThrow(AppError);
+    });
+  });
+
+  describe('getOrder', () => {
+    const orderId = 1;
+    const mockOrder = {
+      id: orderId,
+      userId: 1,
+      businessId: 2,
+      status: 'pendente',
+      items: []
+    };
+
+    test('should return order when found', async () => {
+      mockOrderRepository.findById.mockResolvedValue(mockOrder);
+
+      const result = await orderService.getOrder(orderId);
+
+      expect(mockOrderRepository.findById).toHaveBeenCalledWith(orderId);
+      expect(result).toEqual(mockOrder);
+    });
+
+    test('should throw error when order is not found', async () => {
+      mockOrderRepository.findById.mockResolvedValue(null);
+
+      await expect(orderService.getOrder(999))
+        .rejects
+        .toThrow(AppError);
+      await expect(orderService.getOrder(999))
+        .rejects
+        .toThrow(/Pedido não encontrada com o ID: 999/);
+    });
+  });
+
+  describe('getAllOrders', () => {
+    const mockOrders = [
+      { id: 1, status: 'pendente' },
+      { id: 2, status: 'confirmado' }
+    ];
+
+    test('should return all orders', async () => {
+      mockOrderRepository.findAll.mockResolvedValue(mockOrders);
+
+      const result = await orderService.getAllOrders();
+
+      expect(mockOrderRepository.findAll).toHaveBeenCalled();
+      expect(result).toEqual(mockOrders);
+    });
+
+    test('should handle repository errors', async () => {
+      const error = new Error('Database error');
+      mockOrderRepository.findAll.mockRejectedValue(error);
+
+      await expect(orderService.getAllOrders())
+        .rejects
+        .toThrow(error);
+    });
+  });
+
+  describe('getOrdersByUser', () => {
+    const userId = 1;
+    const mockOrders = [
+      { id: 1, userId, status: 'pendente' },
+      { id: 2, userId, status: 'entregue' }
+    ];
+
+    test('should return orders for user', async () => {
+      mockOrderRepository.findByUserId.mockResolvedValue(mockOrders);
+
+      const result = await orderService.getOrdersByUser(userId);
+
+      expect(mockOrderRepository.findByUserId).toHaveBeenCalledWith(userId);
+      expect(result).toEqual(mockOrders);
+    });
+
+    test('should handle repository errors', async () => {
+      const error = new Error('Database error');
+      mockOrderRepository.findByUserId.mockRejectedValue(error);
+
+      await expect(orderService.getOrdersByUser(userId))
+        .rejects
+        .toThrow(error);
+    });
+  });
+
+  describe('getOrdersByBusiness', () => {
+    const businessId = 1;
+    const mockOrders = [
+      { id: 1, businessId, status: 'pendente' },
+      { id: 2, businessId, status: 'entregue' }
+    ];
+
+    test('should return orders for business', async () => {
+      mockOrderRepository.findByBusinessId.mockResolvedValue(mockOrders);
+
+      const result = await orderService.getOrdersByBusiness(businessId);
+
+      expect(mockOrderRepository.findByBusinessId).toHaveBeenCalledWith(businessId);
+      expect(result).toEqual(mockOrders);
+    });
+
+    test('should handle repository errors', async () => {
+      const error = new Error('Database error');
+      mockOrderRepository.findByBusinessId.mockRejectedValue(error);
+
+      await expect(orderService.getOrdersByBusiness(businessId))
+        .rejects
+        .toThrow(error);
+    });
+  });
+
+  describe('updateOrderStatus', () => {
+    const orderId = 1;
+    const mockOrder = {
+      id: orderId,
+      status: 'pendente',
+      items: [
+        { id: 1, bagId: 1, quantity: 2 },
+        { id: 2, bagId: 2, quantity: 1 }
+      ]
+    };
+
+    beforeEach(() => {
+      mockOrderRepository.findById.mockResolvedValue(mockOrder);
+      mockOrderRepository.updateStatus.mockImplementation((id, status) => ({
+        ...mockOrder,
+        status
+      }));
+    });
+
+    test('should update status successfully', async () => {
+      const newStatus = 'confirmado';
+      const result = await orderService.updateOrderStatus(orderId, newStatus);
+
+      expect(mockOrderRepository.findById).toHaveBeenCalledWith(orderId);
+      expect(mockOrderRepository.updateStatus).toHaveBeenCalledWith(orderId, newStatus);
+      expect(result.status).toBe(newStatus);
+    });
+
+    test('should throw error when order is not found', async () => {
+      mockOrderRepository.findById.mockResolvedValue(null);
+
+      await expect(orderService.updateOrderStatus(orderId, 'confirmado'))
+        .rejects
+        .toThrow(AppError);
+    });
+
+    test('should throw error when status is invalid', async () => {
+      await expect(orderService.updateOrderStatus(orderId, 'invalid_status'))
+        .rejects
+        .toThrow('Status inválido');
+    });
+
+    test('should inactivate bags when order is delivered', async () => {
+      const newStatus = 'entregue';
+      mockBagService.changeBagStatus.mockResolvedValue(true);
+
+      const result = await orderService.updateOrderStatus(orderId, newStatus);
+
+      expect(mockOrderRepository.updateStatus).toHaveBeenCalledWith(orderId, newStatus);
+      expect(mockBagService.changeBagStatus).toHaveBeenCalledTimes(2);
+      expect(mockBagService.changeBagStatus).toHaveBeenCalledWith(1, 0);
+      expect(mockBagService.changeBagStatus).toHaveBeenCalledWith(2, 0);
+      expect(result.status).toBe(newStatus);
+    });
+
+    test('should handle bag inactivation errors gracefully', async () => {
+      const newStatus = 'entregue';
+      mockBagService.changeBagStatus
+        .mockResolvedValueOnce(true)
+        .mockRejectedValueOnce(new Error('Bag inactivation failed'));
+
+      const result = await orderService.updateOrderStatus(orderId, newStatus);
+
+      expect(mockOrderRepository.updateStatus).toHaveBeenCalledWith(orderId, newStatus);
+      expect(mockBagService.changeBagStatus).toHaveBeenCalledTimes(2);
+      expect(result.status).toBe(newStatus);
+    });
+  });
+
+  describe('cancelOrder', () => {
+    const orderId = 1;
+    const mockOrder = {
+      id: orderId,
+      status: 'pendente',
+      canBeCancelled: jest.fn().mockReturnValue(true)
+    };
+
+    beforeEach(() => {
+      mockOrderRepository.findById.mockResolvedValue(mockOrder);
+      mockOrderRepository.updateStatus.mockImplementation((id, status) => ({
+        ...mockOrder,
+        status
+      }));
+    });
+
+    test('should cancel order successfully', async () => {
+      const result = await orderService.cancelOrder(orderId);
+
+      expect(mockOrderRepository.findById).toHaveBeenCalledWith(orderId);
+      expect(mockOrder.canBeCancelled).toHaveBeenCalled();
+      expect(mockOrderRepository.updateStatus).toHaveBeenCalledWith(orderId, 'cancelado');
+      expect(result.status).toBe('cancelado');
+    });
+
+    test('should throw error when order is not found', async () => {
+      mockOrderRepository.findById.mockResolvedValue(null);
+
+      await expect(orderService.cancelOrder(orderId))
+        .rejects
+        .toThrow(AppError);
+    });
+
+    test('should throw error when order cannot be cancelled', async () => {
+      mockOrder.canBeCancelled.mockReturnValue(false);
+
+      await expect(orderService.cancelOrder(orderId))
+        .rejects
+        .toThrow('Não é possível cancelar este pedido');
+    });
+  });
+
+  describe('getOrderHistoryByUser', () => {
+    const userId = 1;
+    const options = { limit: 10, offset: 0 };
+    const mockOrders = [
+      { id: 1, userId, status: 'entregue' },
+      { id: 2, userId, status: 'cancelado' }
+    ];
+
+    test('should return order history for user', async () => {
+      mockOrderRepository.getOrderHistoryByUser.mockResolvedValue(mockOrders);
+
+      const result = await orderService.getOrderHistoryByUser(userId, options);
+
+      expect(mockOrderRepository.getOrderHistoryByUser).toHaveBeenCalledWith(userId, options);
+      expect(result).toEqual(mockOrders);
+    });
+
+    test('should handle repository errors', async () => {
+      const error = new Error('Database error');
+      mockOrderRepository.getOrderHistoryByUser.mockRejectedValue(error);
+
+      await expect(orderService.getOrderHistoryByUser(userId, options))
+        .rejects
+        .toThrow(error);
+    });
+  });
+
+  describe('getOrderHistoryByBusiness', () => {
+    const businessId = 1;
+    const options = { limit: 10, offset: 0 };
+    const mockOrders = [
+      { id: 1, businessId, status: 'entregue' },
+      { id: 2, businessId, status: 'cancelado' }
+    ];
+
+    test('should return order history for business', async () => {
+      mockOrderRepository.getOrderHistoryByBusiness.mockResolvedValue(mockOrders);
+
+      const result = await orderService.getOrderHistoryByBusiness(businessId, options);
+
+      expect(mockOrderRepository.getOrderHistoryByBusiness).toHaveBeenCalledWith(businessId, options);
+      expect(result).toEqual(mockOrders);
+    });
+
+    test('should handle repository errors', async () => {
+      const error = new Error('Database error');
+      mockOrderRepository.getOrderHistoryByBusiness.mockRejectedValue(error);
+
+      await expect(orderService.getOrderHistoryByBusiness(businessId, options))
+        .rejects
+        .toThrow(error);
+    });
+  });
+
+  describe('getOrdersByStatus', () => {
+    const status = 'pendente';
+    const options = { limit: 10, offset: 0 };
+    const mockOrders = [
+      { id: 1, status: 'pendente' },
+      { id: 2, status: 'pendente' }
+    ];
+
+    test('should return orders by status', async () => {
+      mockOrderRepository.getOrdersByStatus.mockResolvedValue(mockOrders);
+
+      const result = await orderService.getOrdersByStatus(status, options);
+
+      expect(mockOrderRepository.getOrdersByStatus).toHaveBeenCalledWith(status, options);
+      expect(result).toEqual(mockOrders);
+    });
+
+    test('should throw error when status is invalid', async () => {
+      await expect(orderService.getOrdersByStatus('invalid_status', options))
+        .rejects
+        .toThrow('Status inválido');
+    });
+
+    test('should handle repository errors', async () => {
+      const error = new Error('Database error');
+      mockOrderRepository.getOrdersByStatus.mockRejectedValue(error);
+
+      await expect(orderService.getOrdersByStatus(status, options))
+        .rejects
+        .toThrow(error);
+    });
+  });
+
+  describe('getOrdersByDateRange', () => {
+    const startDate = '2024-01-01';
+    const endDate = '2024-01-31';
+    const options = { limit: 10, offset: 0 };
+    const mockOrders = [
+      { id: 1, createdAt: '2024-01-15' },
+      { id: 2, createdAt: '2024-01-20' }
+    ];
+
+    test('should return orders within date range', async () => {
+      mockOrderRepository.getOrdersByDateRange.mockResolvedValue(mockOrders);
+
+      const result = await orderService.getOrdersByDateRange(startDate, endDate, options);
+
+      expect(mockOrderRepository.getOrdersByDateRange).toHaveBeenCalledWith(startDate, endDate, options);
+      expect(result).toEqual(mockOrders);
+    });
+
+    test('should throw error when date range is invalid', async () => {
+      await expect(orderService.getOrdersByDateRange('2024-02-01', '2024-01-01', options))
+        .rejects
+        .toThrow('Data inicial não pode ser maior que a data final');
+    });
+
+    test('should handle repository errors', async () => {
+      const error = new Error('Database error');
+      mockOrderRepository.getOrdersByDateRange.mockRejectedValue(error);
+
+      await expect(orderService.getOrdersByDateRange(startDate, endDate, options))
+        .rejects
+        .toThrow(error);
+    });
+  });
+
+  describe('getOrderStatsForUser', () => {
+    const userId = 1;
+    const mockOrders = [
+      { id: 1, status: 'pendente', totalAmount: '10.99', createdAt: '2024-01-15' },
+      { id: 2, status: 'confirmado', totalAmount: '15.99', createdAt: '2024-01-16' },
+      { id: 3, status: 'entregue', totalAmount: '20.99', createdAt: '2024-01-17' },
+      { id: 4, status: 'cancelado', totalAmount: '25.99', createdAt: '2024-01-18' }
+    ];
+
+    test('should return order statistics for user', async () => {
+      mockOrderRepository.findByUserId.mockResolvedValue(mockOrders);
+
+      const result = await orderService.getOrderStatsForUser(userId);
+
+      expect(mockOrderRepository.findByUserId).toHaveBeenCalledWith(userId);
+      expect(result).toMatchObject({
+        total: 4,
+        totalAmount: expect.any(Number),
+        lastOrderDate: expect.any(String),
+        byStatus: {
+          pendente: 1,
+          confirmado: 1,
+          preparando: 0,
+          pronto: 0,
+          entregue: 1,
+          cancelado: 1
+        }
+      });
+      expect(result.totalAmount).toBeCloseTo(73.96, 2); // Allow for floating point precision
+      expect(result.lastOrderDate).toBe('2024-01-18');
+    });
+
+    test('should handle repository errors', async () => {
+      const error = new Error('Database error');
+      mockOrderRepository.findByUserId.mockRejectedValue(error);
+
+      await expect(orderService.getOrderStatsForUser(userId))
+        .rejects
+        .toThrow(error);
+    });
+  });
+
+  describe('getOrderStatsForBusiness', () => {
+    const businessId = 1;
+    const mockOrders = [
+      { id: 1, status: 'pendente', totalAmount: '10.99', createdAt: '2024-01-15' },
+      { id: 2, status: 'confirmado', totalAmount: '15.99', createdAt: '2024-01-16' },
+      { id: 3, status: 'entregue', totalAmount: '20.99', createdAt: '2024-01-17' },
+      { id: 4, status: 'cancelado', totalAmount: '25.99', createdAt: '2024-01-18' }
+    ];
+
+    test('should return order statistics for business', async () => {
+      mockOrderRepository.findByBusinessId.mockResolvedValue(mockOrders);
+
+      const result = await orderService.getOrderStatsForBusiness(businessId);
+
+      expect(mockOrderRepository.findByBusinessId).toHaveBeenCalledWith(businessId);
+      expect(result).toMatchObject({
+        total: 4,
+        totalRevenue: expect.any(Number),
+        lastOrderDate: expect.any(String),
+        byStatus: {
+          pendente: 1,
+          confirmado: 1,
+          preparando: 0,
+          pronto: 0,
+          entregue: 1,
+          cancelado: 1
+        }
+      });
+      expect(result.totalRevenue).toBeCloseTo(73.96, 2); // Allow for floating point precision
+      expect(result.lastOrderDate).toBe('2024-01-18');
+    });
+
+    test('should handle repository errors', async () => {
+      const error = new Error('Database error');
+      mockOrderRepository.findByBusinessId.mockRejectedValue(error);
+
+      await expect(orderService.getOrderStatsForBusiness(businessId))
+        .rejects
+        .toThrow(error);
     });
   });
 }); 
