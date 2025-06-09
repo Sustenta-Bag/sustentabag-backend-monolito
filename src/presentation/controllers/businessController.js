@@ -7,8 +7,8 @@ class BusinessController {
   
     async createBusiness(req, res, next) {
       try {
-        const business = await this.businessService.createBusiness(req.body, req.file);
-        return res.status(201).json(business);
+        await this.businessService.createBusiness(req.body, req.file);
+        return res.created();
       } catch (error) {
         next(error);
       }
@@ -16,9 +16,10 @@ class BusinessController {
   
     async getBusiness(req, res, next) {
       try {
-        const includeAddress = req.query.includeAddress === 'true';
-        const business = await this.businessService.getBusiness(req.params.id, { includeAddress });
-        return res.json(business);
+        let includeAddress = req.query.includeAddress;
+        includeAddress === true || 'true' ? includeAddress = true : includeAddress = false;
+        const business = await this.businessService.getBusiness(req.params.id, includeAddress);
+        return res.hateoasItem(business);
       } catch (error) {
         next(error);
       }
@@ -27,12 +28,12 @@ class BusinessController {
     async listBusinesses(req, res, next) {
       try {
         const { page, limit, onlyActive } = req.query;
-        const businesses = await this.businessService.listBusinesses({
-          page: page ? parseInt(page) : 1,
-          limit: limit ? parseInt(limit) : 10,
-          onlyActive: onlyActive === 'true'
-        });
-        return res.json(businesses);
+        const businesses = await this.businessService.listBusinesses(
+          page ? parseInt(page) : 1,
+          limit ? parseInt(limit) : 10,
+          onlyActive === true || 'true' || 1 ? true : false, 
+        );
+        return res.hateoasList(businesses.data, businesses.pages);
       } catch (error) {
         next(error);
       }
@@ -40,8 +41,9 @@ class BusinessController {
   
     async updateBusiness(req, res, next) {
       try {
+        checkBusinessOwnership(req.params.id, req.user.entityId);
         const business = await this.businessService.updateBusiness(req.params.id, req.body, req.file);
-        return res.json(business);
+        return res.ok(business);
       } catch (error) {
         next(error);
       }
@@ -49,17 +51,9 @@ class BusinessController {
   
     async deleteBusiness(req, res, next) {
       try {
+        checkBusinessOwnership(req.params.id, req.user.entityId);
         await this.businessService.deleteBusiness(req.params.id);
-        return res.status(204).send();
-      } catch (error) {
-        next(error);
-      }
-    }
-  
-    async getActiveBusiness(req, res, next) {
-      try {
-        const businesses = await this.businessService.getActiveBusiness();
-        return res.json(businesses);
+        return res.no_content();
       } catch (error) {
         next(error);
       }
@@ -70,38 +64,20 @@ class BusinessController {
         if (req.body.status === undefined) {
           throw new AppError('Status não fornecido', 'MISSING_STATUS');
         }
-        const business = await this.businessService.changeBusinessStatus(req.params.id, req.body.status);
-        return res.json(business);
+        checkBusinessOwnership(req.params.id, req.user.entityId);
+        const status = req.body.status === true || req.body.status === 'true' || req.body.status === 1 ? true : false;
+        const business = await this.businessService.changeBusinessStatus(req.params.id, status);
+        return res.ok(business);
       } catch (error) {
         next(error);
       }
     }
-  
-    async authenticateBusiness(req, res, next) {
-      try {
-        const { cnpj, password } = req.body;
-        if (!cnpj || !password) {
-          throw new AppError('CNPJ e senha são obrigatórios', 'MISSING_CREDENTIALS');
-        }
-        const business = await this.businessService.authenticateBusiness(cnpj, password);
-        return res.json(business);
-      } catch (error) {
-        next(error);
-      }
-    }
-  
-    async changePassword(req, res, next) {
-      try {
-        const { currentPassword, newPassword } = req.body;
-        if (!currentPassword || !newPassword) {
-          throw new AppError('Senha atual e nova senha são obrigatórias', 'MISSING_PASSWORD');
-        }
-        await this.businessService.changePassword(req.params.id, currentPassword, newPassword);
-        return res.status(204).send();
-      } catch (error) {
-        next(error);
-      }
-    }
+}
+
+function checkBusinessOwnership(idParam, idUser) {
+  if (idUser !== parseInt(idParam)) {
+    throw new AppError('Você não tem permissão para alterar o status desta empresa', 'FORBIDDEN');
+  }
 }
 
 export default BusinessController;

@@ -35,7 +35,7 @@ class BusinessService {
     return await this.businessRepository.create(data);
   }
 
-  async getBusiness(id, { includeAddress = false } = {}) {
+  async getBusiness(id, includeAddress = {}) {
     let business;
     if (includeAddress) {
       business = await this.businessRepository.findByIdWithAddress(id);
@@ -48,15 +48,21 @@ class BusinessService {
     return business;
   }
 
-  async listBusinesses({ page = 1, limit = 10, onlyActive = false } = {}) {
+  async listBusinesses(page, limit, onlyActive) {
     const offset = (page - 1) * limit;
     const options = { offset, limit };
 
-    if (onlyActive) {
-      options.where = { status: 1 };
+    if (onlyActive === true) {
+      options.where = { status: true };
     }
 
-    return await this.businessRepository.findAll(options);
+    const result = await this.businessRepository.findAll(options);
+
+    return {
+      total: result.count,
+      pages: Math.ceil(result.count / limit),
+      data: result.rows
+    }
   }
 
   async updateBusiness(id, data, file) {
@@ -111,10 +117,6 @@ class BusinessService {
     return deleted;
   }
 
-  async getActiveBusiness() {
-    return await this.businessRepository.findActiveBusiness();
-  }
-
   async changeBusinessStatus(id, status) {
     if (typeof status === "boolean") {
       status = status ? 1 : 0;
@@ -132,51 +134,6 @@ class BusinessService {
     }
 
     return await this.businessRepository.update(id, { status });
-  }
-
-  async authenticateBusiness(cnpj, password) {
-    const business = await this.businessRepository.findByCnpj(cnpj);
-    if (!business) {
-      throw new AppError(
-        "Credenciais inválidas",
-        "INVALID_CREDENTIALS",
-        401
-      );
-    }
-    if (business.status !== 1) {
-      throw new AppError(
-        "Conta inativa",
-        "ACCOUNT_INACTIVE",
-        401
-      );
-    }
-    const ok = await bcrypt.compare(password, business.password);
-    if (!ok) {
-      throw new AppError(
-        "Credenciais inválidas",
-        "INVALID_CREDENTIALS",
-        401
-      );
-    }
-    return business;
-  }
-
-  async changePassword(id, currentPassword, newPassword) {
-    const business = await this.businessRepository.findById(id);
-    if (!business) {
-      throw AppError.notFound("Business", id);
-    }
-    const match = await bcrypt.compare(currentPassword, business.password);
-    if (!match) {
-      throw new AppError(
-        "Senha atual incorreta",
-        "INVALID_CREDENTIALS",
-        401
-      );
-    }
-    const hashed = await bcrypt.hash(newPassword, 10);
-    await this.businessRepository.update(id, { password: hashed });
-    return true;
   }
 }
 

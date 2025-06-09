@@ -89,8 +89,6 @@ class PostgresBusinessRepository extends BusinessRepository {
         where: { status: true }
       });
 
-      console.log(`Encontrados ${records.length} registros de empresas`);
-
       return records.map(record => {
         const business = this._mapToDomainEntity(record);
         
@@ -117,14 +115,16 @@ class PostgresBusinessRepository extends BusinessRepository {
         return business;
       });
     } catch (error) {
-      console.error('Erro ao buscar empresas com endereços:', error);
       throw error;
     }
   }
 
-  async findAll(options = {}) {
-    const records = await this.BusinessModel.findAll(options);
-    return records.map(r => this._mapToDomainEntity(r));
+  async findAll(options) {
+    const { count, rows } = await this.BusinessModel.findAndCountAll(options);
+    return {
+      count,
+      rows: rows.map(r => this._mapToDomainEntity(r))
+    };
   }
 
   async findByCnpj(cnpj) {
@@ -133,12 +133,6 @@ class PostgresBusinessRepository extends BusinessRepository {
     });
     if (!record) return null;
     return this._mapToDomainEntity(record);
-  }
-  async findActiveBusiness() {
-    const records = await this.BusinessModel.findAll({
-      where: { status: true }
-    });
-    return records.map(r => this._mapToDomainEntity(r));
   }
 
   async update(id, businessData) {
@@ -168,10 +162,11 @@ class PostgresBusinessRepository extends BusinessRepository {
       record.logo,
       record.delivery,
       record.deliveryTax,
+      record.deliveryTime,
       record.idAddress,
+      record.openingHours,
       record.status,
-      record.createdAt,
-      record.updatedAt
+      record.createdAt
     );
   }
 }

@@ -51,7 +51,7 @@ export const setupBusinessRoutes = (router, options = {}) => {
             idAddress: { type: "integer", example: 1 },
             logo: { type: "string", format: "binary" }
           },
-          required: ["legalName", "cnpj", "appName", "cellphone", "password"]
+          required: ["legalName", "cnpj", "appName", "cellphone", "password", "openingHours", "idAddress", "delivery"]
         }
       }
     }
@@ -70,16 +70,6 @@ export const setupBusinessRoutes = (router, options = {}) => {
     #swagger.responses[200]
     */
     businessController.listBusinesses.bind(businessController)
-  );
-
-  router.get(`/active`,
-    /*
-    #swagger.path = '/api/businesses/active'
-    #swagger.tags = ["Business"]
-    #swagger.responses[200]
-    #swagger.description = "Retorna apenas empresas ativas (status=1)"
-    */
-    businessController.getActiveBusiness.bind(businessController)
   );
 
   router.get(`/:id`,

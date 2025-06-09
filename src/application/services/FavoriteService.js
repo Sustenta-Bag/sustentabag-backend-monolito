@@ -1,5 +1,3 @@
-import Favorite from '../../domain/entities/Favorite.js';
-
 class FavoriteService {
     constructor(favoriteRepository) {
         this.favoriteRepository = favoriteRepository;
@@ -15,8 +13,7 @@ class FavoriteService {
         if(existing && existing.length > 0) {
             throw new Error('Favorite already exists for this client and business');
         }
-        const favorite = new Favorite(data.idClient, data.idBusiness);
-        return await this.favoriteRepository.create(favorite);
+        return await this.favoriteRepository.create(data);
     }
 
     async listFavorites({ page = 1, limit = 10, idClient}) {

@@ -1,12 +1,14 @@
 import reviewRepository from '../repositories/ReviewRepository.js';
 import Review from '../../domain/entities/Review.js';
 import ReviewModel from '../../domain/models/ReviewModel.js';
+import ClientModel from '../../domain/models/ClientModel.js';
 
 class PostgresReviewRepository extends reviewRepository {
-    constructor(reviewModel = ReviewModel, orderRepository) {
+    constructor(reviewModel = ReviewModel, orderRepository, clientModel = ClientModel) {
         super();
         this.ReviewModel = reviewModel;
         this.orderRepository = orderRepository;
+        this.ClientModel = clientModel;
     }
 
     async create(reviewData) {
@@ -31,8 +33,18 @@ class PostgresReviewRepository extends reviewRepository {
         if(rating) {
             return this._findBusinessesByRating(rating);
         }
+
+        options.include = [{
+            model: this.ClientModel,
+            as: 'client',
+            attributes: ['name']
+        }];
+
         const records = await this.ReviewModel.findAll(options);
-        return records.map(r => this._mapToDomainEntity(r));
+        return records.map(r => ({
+            clientName: r.client ? r.client.name : null,
+            ...this._mapToDomainEntity(r)
+        }));
     }
 
     async _findAllByBusiness(idBusiness) {

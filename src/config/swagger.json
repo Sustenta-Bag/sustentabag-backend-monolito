@@ -1538,7 +1538,10 @@
                   "cnpj",
                   "appName",
                   "cellphone",
-                  "password"
+                  "password",
+                  "openingHours",
+                  "idAddress",
+                  "delivery"
                 ]
               }
             }
@@ -1573,19 +1576,6 @@
             }
           }
         ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/businesses/active": {
-      "get": {
-        "tags": [
-          "Business"
-        ],
-        "description": "Retorna apenas empresas ativas (status=1)",
         "responses": {
           "200": {
             "description": "OK"
@@ -1741,9 +1731,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "204": {
-            "description": "No Content"
           },
           "401": {
             "description": "Unauthorized - Authentication required or invalid token",
