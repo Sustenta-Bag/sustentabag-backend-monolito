@@ -78,8 +78,8 @@ export const validateCreateBusiness = [
 
   body('status')
     .optional()
-    .isIn([0, 1])
-    .withMessage('Status deve ser 0 (inativo) ou 1 (ativo)'),
+    .isIn([0, 1, true, false, "true", "false"])
+    .withMessage('Status deve ser 0 (inativo) ou 1 (ativo), true(ativo) ou false(inativo)'),
 
   handleValidationErrors
 ];
@@ -137,8 +137,8 @@ export const validateUpdateBusiness = [
 
   body('status')
     .optional()
-    .isIn([0, 1])
-    .withMessage('Status deve ser 0 (inativo) ou 1 (ativo)'),
+    .isIn([0, 1, true, false, "true", "false"])
+    .withMessage('Status deve ser 0 (inativo) ou 1 (ativo), true(ativo) ou false(inativo)'),
 
   handleValidationErrors
 ];
@@ -162,22 +162,7 @@ export const validateStatusUpdate = [
     .exists()
     .withMessage('Status é obrigatório')
     .bail()
-    .isIn([0, 1])
-    .withMessage('Status deve ser 0 (inativo) ou 1 (ativo)'),
-  handleValidationErrors
-];
-
-export const validateAuthenticateBusiness = [
-  body('cnpj')
-    .exists()
-    .withMessage('CNPJ é obrigatório')
-    .bail()
-    .matches(/^\d{14}$/)
-    .withMessage('CNPJ deve conter exatos 14 dígitos numéricos'),
-
-  body('password')
-    .exists()
-    .withMessage('Password é obrigatória'),
-  
+    .isIn([0, 1, true, false, "true", "false"])
+    .withMessage('Status deve ser 0 (inativo) ou 1 (ativo), true(ativo) ou false(inativo)'),
   handleValidationErrors
 ];

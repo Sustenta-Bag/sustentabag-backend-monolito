@@ -19,12 +19,7 @@ class PostgresAddressRepository extends AddressRepository {
     return this._mapToDomainEntity(record);
   }
 
-  async findAll(options = {}) {
-    const records = await this.AddressModel.findAll(options);
-    return records.map(r => this._mapToDomainEntity(r));
-  }
-
-  async findAndCountAll({ where = {}, offset = 0, limit = 10 } = {}) {
+  async findAll({ where = {}, offset = 0, limit = 10 } = {}) {
     const { count, rows } = await this.AddressModel.findAndCountAll({ where, offset, limit });
     return {
       count,

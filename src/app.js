@@ -41,6 +41,7 @@ app.use(morgan("dev"));
 app.use(handlers);
 app.use(hateoas);
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerFile));
+app.use("/uploads", express.static(path.resolve(process.cwd(), "src", "uploads")));
 app.use(routes);
 app.use(errorHandler);
 
