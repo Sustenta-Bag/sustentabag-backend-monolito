@@ -68,3 +68,4 @@ Thumbs.db
 # MongoDB data directory
 data/
 mongodb/
+src/uploads/*

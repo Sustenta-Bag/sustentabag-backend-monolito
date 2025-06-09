@@ -59,7 +59,7 @@ class AddressService {
     if(page < 1) page = 1;
 
     const offset = (page - 1) * limit;
-    const result = await this.addressRepository.findAndCountAll({
+    const result = await this.addressRepository.findAll({
       where,
       offset,
       limit

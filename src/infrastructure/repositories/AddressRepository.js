@@ -11,10 +11,6 @@ class AddressRepository {
     throw new Error('Método não implementado');
   }
 
-  async findAndCountAll(options) {
-    throw new Error('Método não implementado');
-  }
-
   async findByUnique({ zipCode, city, street, number }) {
     throw new Error('Método não implementado');
   }

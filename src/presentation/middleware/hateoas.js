@@ -20,7 +20,7 @@ export default (req, res, next) => {
         #swagger.ignore = true
         */
         const page = parseInt(req.query.page) || 1;
-        const size = parseInt(req.query.size) || 10;
+        const size = parseInt(req.query.limit) || 10;
 
         res.ok({
             data: data.map((item) => ({
@@ -38,7 +38,7 @@ export default (req, res, next) => {
                 { rel: "self", href: req.baseUrl, method: req.method },
                 { rel: "create", href: req.baseUrl, method: "POST" },
                 { rel: "previous", href: page > 1 ? `${req.baseUrl}?page=${page - 1}&size=${size}` : null, method: req.method },
-                { rel: "next", href: page < totalPages ? `${req.baseUrl}?page=${page + 1}&size=${size}` : null, method: req.method }
+                { rel: "next", href: page < totalPages ? `${req.baseUrl}?page=${page + 1}&limit=${size}` : null, method: req.method }
             ],
         });
     }

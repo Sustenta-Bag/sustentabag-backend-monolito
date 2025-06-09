@@ -1,5 +1,3 @@
-import Review from '../../domain/entities/Review.js';
-
 class ReviewService {
     constructor(reviewRepository) {
         this.reviewRepository = reviewRepository;
@@ -17,8 +15,7 @@ class ReviewService {
             throw new Error('Order already reviewed')
         }
 
-        const review = new Review(data.idClient, data.idOrder, data.rating, data.comment);
-        return await this.reviewRepository.create(review);
+        return await this.reviewRepository.create(data);
     }
 
     async listReviews({ page, limit, idClient, idBusiness, rating }) {
