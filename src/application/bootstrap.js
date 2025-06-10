@@ -93,8 +93,7 @@ export const setupModuleRouters = (options = {}) => {
     addressRepository: addressRepository,
     locationService: locationService
   });
-  
-  const locationRouter = locationModule.setupLocationRoutes(express.Router(), {
+    const locationRouter = locationModule.setupLocationModule(express.Router(), {
     sequelize: options.sequelizeInstance
   });
 
