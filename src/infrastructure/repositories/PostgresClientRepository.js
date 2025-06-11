@@ -16,8 +16,8 @@ class PostgresClientRepository extends ClientRepository {
     return this._mapToDomainEntity(clientRecord);
   }
 
-  async findById(id) {
-    const clientRecord = await this.ClientModel.findByPk(id);
+  async getClient(where) {
+    const clientRecord = await this.ClientModel.findOne({ where });
     if (!clientRecord) return null;
 
     return this._mapToDomainEntity(clientRecord);
@@ -74,27 +74,16 @@ class PostgresClientRepository extends ClientRepository {
     }
   }
 
-  async findByEmail(email) {
-    const clientRecord = await this.ClientModel.findOne({
-      where: { email },
+  async findAll(offset, limit, where = {}) {
+    const { count, rows } = await this.ClientModel.findAndCountAll({
+      where,
+      offset,
+      limit,
     });
-    if (!clientRecord) return null;
-
-    return this._mapToDomainEntity(clientRecord);
-  }
-
-  async findByCpf(cpf) {
-    const clientRecord = await this.ClientModel.findOne({
-      where: { cpf },
-    });
-    if (!clientRecord) return null;
-
-    return this._mapToDomainEntity(clientRecord);
-  }
-
-  async findAll() {
-    const clientRecords = await this.ClientModel.findAll();
-    return clientRecords.map((record) => this._mapToDomainEntity(record));
+    return {
+      count,
+      rows: rows.map(record => this._mapToDomainEntity(record))
+    }
   }
 
   async findAllWithAddress() {
@@ -149,6 +138,64 @@ class PostgresClientRepository extends ClientRepository {
       throw error;
     }
   }
+
+  async findAllWithAddressAndCount(offset = 0, limit = 10, where = {}) {
+    try {
+      if (!this.ClientModel.associations || !this.ClientModel.associations.address) {
+        console.warn('Associação entre Client e Address não encontrada. Tentando configurar manualmente...');
+        
+        this.ClientModel.belongsTo(this.AddressModel, {
+          foreignKey: 'idAddress',
+          targetKey: 'id',
+          as: 'address'
+        });
+      }
+      
+      const { count, rows } = await this.ClientModel.findAndCountAll({
+        where,
+        offset,
+        limit,
+        include: [{ 
+          model: this.AddressModel, 
+          as: 'address',
+          required: false
+        }]
+      });
+
+      return {
+        count,
+        rows: rows.map(record => {
+          const client = this._mapToDomainEntity(record);
+          
+          if (record.address) {
+            const addr = record.address;
+            console.log(`Cliente ${client.id} tem endereço: ID=${addr.id}`);
+            client.address = new Address(
+              addr.id,
+              addr.zipCode,
+              addr.state,
+              addr.city,
+              addr.street,
+              addr.number,
+              addr.complement,
+              addr.latitude,
+              addr.longitude,
+              addr.status,
+              addr.createdAt
+            );
+          } else {
+            console.log(`Cliente ${client.id} não tem endereço associado`);
+          }
+          
+          return client;
+        })
+      }
+    } catch (error) {
+      console.error('Erro ao buscar clientes com endereços:', error);
+      throw error;
+    }
+  }
+
   async update(id, clientData, options = {}) {
     await this.ClientModel.update(clientData, {
       where: { id },
@@ -165,18 +212,9 @@ class PostgresClientRepository extends ClientRepository {
   }
 
   async delete(id) {
-    const deleted = await this.ClientModel.destroy({
+    return await this.ClientModel.destroy({
       where: { id },
     });
-    return deleted > 0;
-  }
-
-  async findActiveClients() {
-    const clientRecords = await this.ClientModel.findAll({
-      where: { status: 1 },
-    });
-
-    return clientRecords.map((record) => this._mapToDomainEntity(record));
   }
 
   _mapToDomainEntity(record) {
@@ -188,7 +226,8 @@ class PostgresClientRepository extends ClientRepository {
       record.phone,
       record.idAddress,
       record.status,
-      record.createdAt
+      record.createdAt,
+      record.updatedAt,
     );
   }
 }

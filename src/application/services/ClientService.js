@@ -1,7 +1,7 @@
-import Client from "../../domain/entities/Client.js";
 import AppError from "../../infrastructure/errors/AppError.js";
 import bcrypt from "bcrypt";
 import FirebaseService from "./FirebaseService.js";
+import { Op } from "sequelize";
 
 class ClientService {
   constructor(clientRepository, authService) {
@@ -11,17 +11,17 @@ class ClientService {
   }
 
   async createClient(clientData, userData) {
-    const existingClientByCpf = await this.clientRepository.findByCpf(
-      clientData.cpf
-    );
-    if (existingClientByCpf) {
+    const existingCpf = await this.clientRepository.getClient({
+      cpf: clientData.cpf
+    });
+    if (existingCpf) {
       throw new AppError("CPF já cadastrado", "CPF_ALREADY_EXISTS");
     }
 
-    const existingClientByEmail = await this.clientRepository.findByEmail(
-      clientData.email
-    );
-    if (existingClientByEmail) {
+    const existingEmail = await this.clientRepository.getClient({
+      email: clientData.email
+    });
+    if (existingEmail) {
       throw new AppError("Email já cadastrado", "EMAIL_ALREADY_EXISTS");
     }
 
@@ -67,16 +67,17 @@ class ClientService {
 
     } catch (error) {
       console.error("Erro ao salvar usuário no banco local:", error);
+      next(error);
       throw error;
     }
   }
 
-  async getClient(id, { includeAddress = false } = {}) {
+  async getClient(id, includeAddress) {
     let client;
-    if (includeAddress) {
+    if (includeAddress === true) {
       client = await this.clientRepository.findByIdWithAddress(id);
     } else {
-      client = await this.clientRepository.findById(id);
+      client = await this.clientRepository.getClient({where: id});
     }
     if (!client) {
       throw AppError.notFound("Cliente", id);
@@ -84,23 +85,55 @@ class ClientService {
     return client;
   }
 
-  async getAllClients({ includeAddress = false } = {}) {
-    if (includeAddress) {
-      return await this.clientRepository.findAllWithAddress();
+  async getAllClients(page, limit, filters) {
+    const offset = (page - 1) * limit;
+    const where = {};
+    if (filters.name) {
+      where.name = { [Op.iLike]: `%${filters.name}%` };
     }
-    return await this.clientRepository.findAll();
+    if (filters.email) {
+      where.email = { [Op.iLike]: `%${filters.email}%` };
+    }
+    if (filters.cpf) {
+      where.cpf = { [Op.iLike]: `%${filters.cpf}%` };
+    }
+    if (filters.phone) {
+      where.phone = { [Op.iLike]: `%${filters.phone}%` };
+    }
+    if (filters.status) {
+      where.status = filters.status;
+    }
+    if(filters.includeAddress === true) {
+      const result = await this.clientRepository.findAllWithAddressAndCount(
+        offset,
+        limit,
+        where
+      );
+      return {
+        data: result.rows,
+        pages: Math.ceil(result.count / limit),
+        total: result.count
+      }
+    } else {
+      const result = await this.clientRepository.findAll(offset, limit, where);
+      return {
+        data: result.rows,
+        pages: Math.ceil(result.count / limit),
+        total: result.count
+      }
+    }
   }
 
   async updateClient(id, clientData) {
-    const existingClient = await this.clientRepository.findById(id);
+    const existingClient = await this.clientRepository.getClient({id: id});
     if (!existingClient) {
       throw AppError.notFound("Cliente", id);
     }
 
     if (clientData.email && clientData.email !== existingClient.email) {
-      const clientWithEmail = await this.clientRepository.findByEmail(
-        clientData.email
-      );
+      const clientWithEmail = await this.clientRepository.getClient({
+        email: clientData.email
+      });
       if (clientWithEmail && clientWithEmail.id !== id) {
         throw new AppError(
           "Email já cadastrado por outro cliente",
@@ -110,9 +143,9 @@ class ClientService {
     }
 
     if (clientData.cpf && clientData.cpf !== existingClient.cpf) {
-      const clientWithCpf = await this.clientRepository.findByCpf(
-        clientData.cpf
-      );
+      const clientWithCpf = await this.clientRepository.getClient({
+        cpf: clientData.cpf
+      });
       if (clientWithCpf && clientWithCpf.id !== id) {
         throw new AppError(
           "CPF já cadastrado por outro cliente",
@@ -126,35 +159,25 @@ class ClientService {
     }
 
     if (clientData.idAddress) {
-      // Aqui você pode adicionar uma validação do endereço se necessário
-      // Por exemplo, verificar se o endereço existe
+      const address = await this.clientRepository.getAddress(clientData.idAddress);
+      if (!address) {
+        throw new AppError("Endereço não existe", "ADDRESS_NOT_FOUND");
+      }
     }
 
-    const client = await this.clientRepository.update(id, clientData);
-    return client;
+    return await this.clientRepository.update(id, clientData);
   }
 
   async deleteClient(id) {
-    const result = await this.clientRepository.delete(id);
-    if (!result) {
+    const existing = await this.clientRepository.getClient({ id });
+    if (!existing) {
       throw AppError.notFound("Cliente", id);
     }
-    return result;
-  }
-
-  async getActiveClients({ includeAddress = false } = {}) {
-    if (includeAddress) {
-      const clients = await this.clientRepository.findAllWithAddress();
-      return clients.filter(client => client.status === 1);
-    }
-    return await this.clientRepository.findActiveClients();
+    return await this.clientRepository.delete(id);
   }
 
   async changeClientStatus(id, status) {
-    if (typeof status === "boolean") {
-      status = status ? 1 : 0;
-    }
-
+    parseInt(status);
     if (status !== 0 && status !== 1) {
       throw new AppError(
         "Status inválido. Deve ser 0 (inativo) ou 1 (ativo)",
@@ -162,7 +185,7 @@ class ClientService {
       );
     }
 
-    const client = await this.clientRepository.findById(id);
+    const client = await this.clientRepository.getClient({ id });
     if (!client) {
       throw AppError.notFound("Cliente", id);
     }

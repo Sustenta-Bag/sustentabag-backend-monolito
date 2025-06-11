@@ -18,14 +18,6 @@ class BagRepository {
   async delete(id) {
     throw new Error('Método não implementado');
   }
-  
-  async findByBusinessId(idBusiness) {
-    throw new Error('Método não implementado');
-  }
-  
-  async findActiveByBusinessId(idBusiness) {
-    throw new Error('Método não implementado');
-  }
 }
 
 export default BagRepository;

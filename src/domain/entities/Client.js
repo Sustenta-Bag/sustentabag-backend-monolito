@@ -7,7 +7,8 @@ class Client {
     phone,
     idAddress = null,
     status = 1,
-    createdAt = new Date()
+    createdAt = new Date(),
+    updatedAt = new Date(),
   ) {
     this.id = id;
     this.name = name; 
@@ -16,7 +17,8 @@ class Client {
     this.phone = phone;
     this.idAddress = idAddress;
     this.status = status; 
-    this.createdAt = createdAt; 
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
   }
 
   updateStatus(newStatus) {

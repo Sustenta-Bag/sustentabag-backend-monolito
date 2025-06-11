@@ -11,6 +11,10 @@ class BagController {
         ...req.body,
         idBusiness: req.user.entityId,
       };
+      const idBusiness = req.user.entityId;
+      if (idBusiness !== bagData.idBusiness) {
+        throw new AppError('Você não tem permissão para criar uma bag para esta empresa', 'UNAUTHORIZED');
+      }
       const bag = await this.bagService.createBag(bagData);
       try {
         const usersFavorites =
@@ -57,7 +61,7 @@ class BagController {
         }
       }
 
-      return res.status(201).json(bag);
+      return res.created();
     } catch (error) {
       next(error);
     }
@@ -66,7 +70,7 @@ class BagController {
   async getBag(req, res, next) {
     try {
       const bag = await this.bagService.getBag(req.params.id);
-      return res.json(bag);
+      return res.hateoasItem(bag);
     } catch (error) {
       next(error);
     }
@@ -74,8 +78,15 @@ class BagController {
 
   async getAllBags(req, res, next) {
     try {
-      const bags = await this.bagService.getAllBags();
-      return res.json(bags);
+      const filters = {
+        idBusiness: req.query.idBusiness,
+        type: req.query.type
+      }
+      const page = req.query.page ? parseInt(req.query.page) : 1;
+      const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+      const bags = await this.bagService.getAllBags(page, limit, filters);
+      const totalPages = bags.pages;
+      return res.hateoasList(bags.data, totalPages);
     } catch (error) {
       next(error);
     }
@@ -88,7 +99,7 @@ class BagController {
         idBusiness: req.user.entityId,
       };
       const bag = await this.bagService.updateBag(req.params.id, bagData);
-      return res.json(bag);
+      return res.ok(bag);
     } catch (error) {
       next(error);
     }
@@ -96,30 +107,16 @@ class BagController {
 
   async deleteBag(req, res, next) {
     try {
+      const currentId = req.user.entityId;
+      const bag = await this.bagService.getBag(req.params.id);
+      if (bag.idBusiness !== currentId) {
+        throw new AppError(
+          "Você não tem permissão para excluir esta bag",
+          "UNAUTHORIZED"
+        );
+      }
       await this.bagService.deleteBag(req.params.id);
-      return res.status(204).send();
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async getBagsByBusiness(req, res, next) {
-    try {
-      const bags = await this.bagService.getBagsByBusinessId(
-        req.params.idBusiness
-      );
-      return res.json(bags);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async getActiveBagsByBusiness(req, res, next) {
-    try {
-      const bags = await this.bagService.getActiveBagsByBusinessId(
-        req.params.idBusiness
-      );
-      return res.json(bags);
+      return res.no_content();
     } catch (error) {
       next(error);
     }
@@ -131,11 +128,20 @@ class BagController {
         throw new AppError("Status não fornecido", "MISSING_STATUS");
       }
 
-      const bag = await this.bagService.changeBagStatus(
+      const currentId = req.user.entityId;
+      const bag = await this.bagService.getBag(req.params.id);
+      if (bag.idBusiness !== currentId) {
+        throw new AppError(
+          "Você não tem permissão para alterar o status desta bag",
+          "UNAUTHORIZED"
+        );
+      }
+
+      const newBag = await this.bagService.changeBagStatus(
         req.params.id,
         req.body.status
       );
-      return res.json(bag);
+      return res.ok(newBag);
     } catch (error) {
       next(error);
     }
@@ -159,7 +165,7 @@ class BagController {
         "PODE_CONTER_SULFITOS",
         "PODE_CONTER_CARNE",
       ];
-      return res.json(ALLOWED_TAGS);
+      return res.ok(ALLOWED_TAGS);
     } catch (error) {
       next(error);
     }
