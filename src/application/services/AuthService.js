@@ -19,9 +19,9 @@ class AuthService {
       throw new AppError("Email já cadastrado", "EMAIL_ALREADY_EXISTS");
     }
 
-    const existingClientByCpf = await this.clientRepository.findByCpf(
-      clientData.cpf
-    );
+    const existingClientByCpf = await this.clientRepository.getClient({
+      cpf: clientData.cpf
+    });
     if (existingClientByCpf) {
       throw new AppError("CPF já cadastrado", "CPF_ALREADY_EXISTS");
     }
@@ -176,7 +176,7 @@ class AuthService {
 
     let entity = null;
     if (user.role === "client") {
-      entity = await this.clientRepository.findById(user.entityId);
+      entity = await this.clientRepository.getClient({id: user.entityId});
     } else if (user.role === "business") {
       entity = await this.businessRepository.findById(user.entityId);
     }

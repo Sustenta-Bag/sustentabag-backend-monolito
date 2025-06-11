@@ -9,7 +9,6 @@ import {
   validateUpdateClient, 
   validateClientId, 
   validateStatusUpdate,
-  validateLogin 
 } from '../middleware/clientValidation.js';
 import { 
   authenticate, 
@@ -34,7 +33,7 @@ export const setupClientRoutes = (router, options = {}) => {
     #swagger.tags = ["Client"]
     #swagger.requestBody = {
       required: true,
-      schema: { $ref: '#components/schemas/ClientInput' },
+      schema: { $ref: '#components/schemas/Client' },
     }
     #swagger.responses[201]
     */
@@ -50,37 +49,16 @@ export const setupClientRoutes = (router, options = {}) => {
     #swagger.responses[200]
     #swagger.responses[401] = {
       description: "Unauthorized - Authentication required or invalid token",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
     }
     #swagger.responses[403] = {
       description: "Forbidden - Insufficient permissions",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
     }
     */
     authenticate,
     requireBusinessRole,
     clientController.getAllClients.bind(clientController)
-  );
-  
-  router.get(`/active`,
-    /*
-    #swagger.path = '/api/clients/active'
-    #swagger.tags = ["Client"]
-    #swagger.security = [{ "bearerAuth": [] }]
-    #swagger.description = "Retorna apenas clientes ativos (status=1)"
-    #swagger.responses[200]
-    #swagger.responses[401] = {
-      description: "Unauthorized - Authentication required or invalid token",
-      schema: { $ref: "#/components/schemas/Error" }
-    }
-    #swagger.responses[403] = {
-      description: "Forbidden - Insufficient permissions",
-      schema: { $ref: "#/components/schemas/Error" }
-    }
-    */
-    authenticate,
-    requireBusinessRole,
-    clientController.getActiveClients.bind(clientController)
   );
   
   router.get(`/:id`,
@@ -91,11 +69,11 @@ export const setupClientRoutes = (router, options = {}) => {
     #swagger.responses[200]
     #swagger.responses[401] = {
       description: "Unauthorized - Authentication required or invalid token",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
     }
     #swagger.responses[403] = {
       description: "Forbidden - Insufficient permissions",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
     }
     */
     authenticate,
@@ -111,16 +89,16 @@ export const setupClientRoutes = (router, options = {}) => {
     #swagger.security = [{ "bearerAuth": [] }]
     #swagger.requestBody = {
       required: true,
-      schema: { $ref: '#components/schemas/ClientInput' },
+      schema: { $ref: '#components/schemas/Client' },
     }
     #swagger.responses[200]
     #swagger.responses[401] = {
       description: "Unauthorized - Authentication required or invalid token",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
     }
     #swagger.responses[403] = {
       description: "Forbidden - Insufficient permissions",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
     }
     */
     authenticate,
@@ -137,11 +115,11 @@ export const setupClientRoutes = (router, options = {}) => {
     #swagger.responses[200]
     #swagger.responses[401] = {
       description: "Unauthorized - Authentication required or invalid token",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
     }
     #swagger.responses[403] = {
       description: "Forbidden - Insufficient permissions",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
     }
     */
     authenticate,
@@ -155,14 +133,18 @@ export const setupClientRoutes = (router, options = {}) => {
     #swagger.path = '/api/clients/{id}/status'
     #swagger.tags = ["Client"]
     #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.requestBody = {
+      required: true,
+      schema: { $ref: '#components/schemas/UpdateStatus' },
+    }
     #swagger.responses[200]
     #swagger.responses[401] = {
       description: "Unauthorized - Authentication required or invalid token",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
     }
     #swagger.responses[403] = {
       description: "Forbidden - Insufficient permissions",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
     }
     */
     authenticate,

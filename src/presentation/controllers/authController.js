@@ -45,7 +45,7 @@ class AuthController {
         delete result.business.password;
       }
 
-      return res.status(201).json(result);
+      return res.created();
     } catch (error) {
       next(error);
     }
@@ -67,7 +67,7 @@ class AuthController {
 
       const { password: _, ...userData } = result.user;
 
-      return res.json({
+      return res.ok({
         user: userData,
         entity: result.entity,
         token: result.token,
@@ -93,7 +93,7 @@ class AuthController {
 
       const { password: _, ...userData } = result.user;
 
-      return res.json({
+      return res.ok({
         user: userData,
         entity: result.entity,
         token: result.token,
@@ -122,7 +122,7 @@ class AuthController {
         newPassword
       );
 
-      return res.status(204).send();
+      return res.no_content();
     } catch (error) {
       next(error);
     }
@@ -142,7 +142,7 @@ class AuthController {
 
       await this.authService.updateDeviceToken(userId, deviceToken);
 
-      return res.status(204).send();
+      return res.no_content();
     } catch (error) {
       next(error);
     }
@@ -162,7 +162,7 @@ class AuthController {
 
       const fcmToken = await this.authService.getUserFcmToken(userId);
 
-      return res.json({
+      return res.ok({
         token: fcmToken
       });
     } catch (error) {

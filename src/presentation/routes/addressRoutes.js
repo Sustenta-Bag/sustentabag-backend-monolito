@@ -39,12 +39,12 @@ export const setupAddressRoutes = (router, options = {}) => {
   #swagger.security = [{ "bearerAuth": [] }]
   #swagger.requestBody = {
     required: true,
-    schema: { $ref: '#components/schemas/AddressInput' },
+    schema: { $ref: '#components/schemas/Address' },
   }
   #swagger.responses[201]
   #swagger.responses[401] = {
     description: "Unauthorized - Authentication required or invalid token",
-    schema: { $ref: "#/components/schemas/Error" }
+    schema: { $ref: "#/components/schemas/UnauthorizedError" }
   }
   */
     authenticate,
@@ -61,7 +61,7 @@ export const setupAddressRoutes = (router, options = {}) => {
   #swagger.responses[200]
   #swagger.responses[401] = {
     description: "Unauthorized - Authentication required or invalid token",
-    schema: { $ref: "#/components/schemas/Error" }
+    schema: { $ref: "#/components/schemas/UnauthorizedError" }
   }
   */
     authenticate,
@@ -77,11 +77,11 @@ export const setupAddressRoutes = (router, options = {}) => {
     #swagger.responses[200]
     #swagger.responses[401] = {
       description: "Unauthorized - Authentication required or invalid token",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
     }
     #swagger.responses[404] = {
       description: "Not Found - Address not found",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/NotFoundError" }
     }
     */
     `/:id`,
@@ -98,20 +98,20 @@ export const setupAddressRoutes = (router, options = {}) => {
     #swagger.security = [{ "bearerAuth": [] }]
     #swagger.requestBody = {
       required: true,
-      schema: { $ref: '#components/schemas/AddressInput' },
+      schema: { $ref: '#components/schemas/Address' },
     }
     #swagger.responses[200]
     #swagger.responses[401] = {
       description: "Unauthorized - Authentication required or invalid token",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
     }
     #swagger.responses[403] = {
       description: "Forbidden - Insufficient permissions",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
     }
     #swagger.responses[404] = {
       description: "Not Found - Address not found",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/NotFoundError" }
     }
     */
     `/:id`,
@@ -129,15 +129,15 @@ export const setupAddressRoutes = (router, options = {}) => {
     #swagger.responses[204]
     #swagger.responses[401] = {
       description: "Unauthorized - Authentication required or invalid token",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
     }
     #swagger.responses[403] = {
       description: "Forbidden - Insufficient permissions",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
     }
     #swagger.responses[404] = {
       description: "Not Found - Address not found",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/NotFoundError" }
     }
     */
     `/:id`,
@@ -159,15 +159,15 @@ export const setupAddressRoutes = (router, options = {}) => {
     #swagger.responses[200]
     #swagger.responses[401] = {
       description: "Unauthorized - Authentication required or invalid token",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
     }
     #swagger.responses[403] = {
       description: "Forbidden - Insufficient permissions",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
     }
     #swagger.responses[404] = {
       description: "Not Found - Address not found",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/NotFoundError" }
     }
     */
     `/:id/status`,

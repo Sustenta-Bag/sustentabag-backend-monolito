@@ -36,14 +36,16 @@ class FavoriteModel extends Model {
         if(models.BusinessModel) {
             this.belongsTo(models.BusinessModel, {
                 foreignKey: 'idBusiness',
-                as: 'business'
+                as: 'business',
+                onDelete: 'CASCADE'
             });
         }
 
-        if(models.UserModel) {
+        if(models.ClientModel) {
             this.belongsTo(models.ClientModel, {
                 foreignKey: 'idClient',
-                as: 'client'
+                as: 'client',
+                onDelete: 'CASCADE'
             });
         }
     }

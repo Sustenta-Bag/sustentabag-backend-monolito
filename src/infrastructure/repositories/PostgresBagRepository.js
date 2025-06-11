@@ -20,10 +20,13 @@ class PostgresBagRepository extends BagRepository {
     return this._mapToDomainEntity(bagRecord);
   }
 
-  async findAll() {
-    const bagRecords = await this.BagModel.findAll();
-    return bagRecords.map(record => this._mapToDomainEntity(record));
-  }
+  async findAll(offset, limit, where) {
+    const { count, rows } = await this.BagModel.findAndCountAll({ where, offset, limit });
+    return {
+      count,
+      rows: rows.map(r => this._mapToDomainEntity(r))
+    }
+  };
 
   async update(id, bagData) {
     await this.BagModel.update(bagData, {
@@ -42,25 +45,6 @@ class PostgresBagRepository extends BagRepository {
     });
     return deleted > 0;
   }
-
-  async findByBusinessId(idBusiness) {
-    const bagRecords = await this.BagModel.findAll({
-      where: { idBusiness }
-    });
-    
-    return bagRecords.map(record => this._mapToDomainEntity(record));
-  }
-
-  async findActiveByBusinessId(idBusiness) {
-    const bagRecords = await this.BagModel.findAll({
-      where: { 
-        idBusiness,
-        status: 1
-      }
-    });
-    
-    return bagRecords.map(record => this._mapToDomainEntity(record));
-  }
   
   _mapToDomainEntity(record) {
     return new Bag(
@@ -71,7 +55,8 @@ class PostgresBagRepository extends BagRepository {
       record.idBusiness,
       record.status,
       record.tags,
-      record.createdAt
+      record.createdAt,
+      record.updatedAt
     );
   }
 }
