@@ -1,5 +1,5 @@
-import Bag from '../../domain/entities/Bag.js';
 import AppError from '../../infrastructure/errors/AppError.js';
+import { Op } from 'sequelize';
 
 class BagService {
   constructor(bagRepository, favoriteRepository, authRepository) {
@@ -20,8 +20,25 @@ class BagService {
     return bag;
   }
 
-  async getAllBags() {
-    return await this.bagRepository.findAll();
+  async getAllBags(page, limit, filters) {
+    if(!page || page < 1) page = 1;
+    if(!limit) limit = 10;
+    const offset = (page - 1) * limit;
+    const business = filters?.idBusiness || null;
+    const type = filters?.type || null;
+    const where = {};
+    if(business) {
+      where.idBusiness = business;
+    }
+    if(type) {
+      where.type = { [Op.iLike]: `%${type}%` };
+    }
+    const result = await this.bagRepository.findAll(offset, limit, where);
+    return {
+      total: result.count,
+      pages: Math.ceil(result.count / limit),
+      data: result.rows
+    }
   }
 
   async updateBag(id, bagData) {
@@ -40,10 +57,6 @@ class BagService {
     return result;
   }
 
-  async getBagsByBusinessId(idBusiness) {
-    return await this.bagRepository.findByBusinessId(idBusiness);
-  }
-
   async getUsersFavoritesByBusinessId(idBusiness) {
     const favorites = await this.favoriteRepository.findByBusinessId(idBusiness);
     if (!favorites || favorites.length === 0) {
@@ -57,10 +70,6 @@ class BagService {
     return users.map(user => ({
       fcmToken: user.fcmToken
     }));
-  }
-
-  async getActiveBagsByBusinessId(idBusiness) {
-    return await this.bagRepository.findActiveByBusinessId(idBusiness);
   }
 
   async changeBagStatus(id, status) {

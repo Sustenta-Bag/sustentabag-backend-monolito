@@ -37,7 +37,7 @@ export default (req, res, next) => {
             _links: [
                 { rel: "self", href: req.baseUrl, method: req.method },
                 { rel: "create", href: req.baseUrl, method: "POST" },
-                { rel: "previous", href: page > 1 ? `${req.baseUrl}?page=${page - 1}&size=${size}` : null, method: req.method },
+                { rel: "previous", href: page > 1 ? `${req.baseUrl}?page=${page - 1}&limit=${size}` : null, method: req.method },
                 { rel: "next", href: page < totalPages ? `${req.baseUrl}?page=${page + 1}&limit=${size}` : null, method: req.method }
             ],
         });

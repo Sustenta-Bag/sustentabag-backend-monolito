@@ -89,7 +89,6 @@ const doc = {
       },
       
       User: {
-        id: 1,
         email: "usuario@example.com",
         role: "client",
         entityId: 2,
@@ -99,21 +98,11 @@ const doc = {
       },
       
       Bag: {
-        id: 1,
         type: "Doce",
         price: 10.99,
         description: "Sacola com diversos doces e sobremesas",
-        idBusiness: 1,
         status: 1,
-        createdAt: "2023-01-01T00:00:00Z"
-      },
-      
-      BagInput: {
-        type: "Doce",
-        price: 10.99,
-        description: "Sacola com diversos doces e sobremesas",
-        idBusiness: 1,
-        status: 1
+        tags: ["PODE_CONTER_GLUTEN", "PODE_CONTER_LACTOSE"],
       },
       
       StatusUpdate: {
@@ -121,21 +110,6 @@ const doc = {
       },
       
       Business: {
-        id: 1,
-        legalName: "Sustenta Bag LTDA",
-        cnpj: "12345678000195",
-        appName: "Sustenta Bag - Centro",
-        cellphone: "11987654321",
-        description: "Empresa especializada em sacolas ecológicas",
-        logo: "uploads/logos/logo123.png",
-        delivery: true,
-        deliveryTax: 5.99,
-        idAddress: 1,
-        status: 1,
-        createdAt: "2023-01-01T00:00:00Z"
-      },
-      
-      BusinessInput: {
         legalName: "Sustenta Bag LTDA",
         cnpj: "12345678000195",
         appName: "Sustenta Bag - Centro",
@@ -150,7 +124,6 @@ const doc = {
       },
       
       Address: {
-        id: 1,
         zipCode: "12345678",
         state: "PR",
         city: "Curitiba",
@@ -158,16 +131,6 @@ const doc = {
         number: "123",
         complement: "Apto 45",
         status: 1,
-        createdAt: "2023-01-01T00:00:00Z"
-      },
-      
-      AddressInput: {
-        zipCode: "12345678",
-        state: "PR",
-        city: "Curitiba",
-        street: "Rua das Flores",
-        number: "123",
-        complement: "Apto 45"
       },
 
       UpdateStatus: {
@@ -175,20 +138,11 @@ const doc = {
       },
       
       Client: {
-        id: 1,
         name: "João Silva",
         email: "joao.silva@email.com",
         cpf: "12345678901",
         phone: "11987654321",
         status: 1,
-        createdAt: "2023-01-01T00:00:00Z"
-      },
-      
-      ClientInput: {
-        name: "Gabriel da Silva Costa",
-        email: "silva@gabriel.com",
-        cpf: "12345678901",
-        phone: "11987654321"
       },
       
       ClientLoginRequest: {
@@ -227,6 +181,27 @@ const doc = {
         errorCode: "BAG_NOT_FOUND",
         message: "Sacola não encontrada com o ID fornecido",
         timestamp: "2023-01-01T00:00:00Z"
+      },
+
+      UnauthorizedError: {
+        statusCode: 401,
+        errorCode: "UNAUTHORIZED",
+        message: "Usuário não autenticado ou token inválido",
+        timestamp: Date.now().toString()
+      },
+
+      ForbiddenError: {
+        statusCode: 403,
+        errorCode: "FORBIDDEN",
+        message: "Acesso negado - usuário não tem permissão para esta ação",
+        timestamp: Date.now().toString()
+      },
+
+      NotFoundError: {
+        statusCode: 404,
+        errorCode: "NOT_FOUND",
+        message: "Recurso solicitado não encontrado",
+        timestamp: Date.now().toString()
       },
       
       ValidationError: {

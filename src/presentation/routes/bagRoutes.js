@@ -5,13 +5,11 @@ import {
   validateCreateBag, 
   validateUpdateBag, 
   validateBagId, 
-  validateBusinessId,
   validateStatusUpdate
 } from '../middleware/bagValidation.js';
 import { 
   authenticate, 
   requireBusinessRole, 
-  requireClientRole, 
   requireAnyRole 
 } from '../middleware/authMiddleware.js';
 
@@ -30,16 +28,16 @@ export const setupBagRoutes = (router, options = {}) => {
     #swagger.security = [{ "bearerAuth": [] }]
     #swagger.requestBody = {
       required: true,
-      schema: { $ref: '#components/schemas/BagInput' },
+      schema: { $ref: '#components/schemas/Bag' }
     }
     #swagger.responses[201]
     #swagger.responses[401] = {
       description: "Unauthorized - Authentication required or invalid token",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
     }
     #swagger.responses[403] = {
       description: "Forbidden - Insufficient permissions",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
     }
     */
     authenticate,
@@ -55,12 +53,34 @@ export const setupBagRoutes = (router, options = {}) => {
     #swagger.responses[200]
     #swagger.responses[401] = {
       description: "Unauthorized - Authentication required or invalid token",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
     }
     */
     authenticate,
     requireAnyRole,
     bagController.getAllBags.bind(bagController));
+
+  router.get('/tags',
+    /*
+    #swagger.path = '/api/bags/tags'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.tags = ["Bag"]
+    #swagger.description = "Retorna a lista de tags permitidas para sacolas"
+    #swagger.responses[200] = {
+      description: "Lista de tags permitidas",
+      schema: {
+        type: "array",
+        items: {
+          type: "string"
+        },
+        example: ["PODE_CONTER_GLUTEN", "PODE_CONTER_LACTOSE"]
+      }
+    }
+    */
+    authenticate,
+    requireAnyRole,
+    bagController.getAllowedTags.bind(bagController)
+  );
   
   router.get(`/:id`,
     /*
@@ -70,11 +90,11 @@ export const setupBagRoutes = (router, options = {}) => {
     #swagger.responses[200]
     #swagger.responses[401] = {
       description: "Unauthorized - Authentication required or invalid token",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
     }
     #swagger.responses[404] = {
       description: "Not Found - Bag not found",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/NotFoundError" }
     }
     */
     authenticate,
@@ -89,20 +109,20 @@ export const setupBagRoutes = (router, options = {}) => {
     #swagger.security = [{ "bearerAuth": [] }]
     #swagger.requestBody = {
       required: true,
-      schema: { $ref: '#components/schemas/BagInput' },
+      schema: { $ref: '#components/schemas/Bag' },
     }
     #swagger.responses[200]
     #swagger.responses[401] = {
       description: "Unauthorized - Authentication required or invalid token",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
     }
     #swagger.responses[403] = {
       description: "Forbidden - Insufficient permissions",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
     }
     #swagger.responses[404] = {
       description: "Not Found - Bag not found",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/NotFoundError" }
     }
     */
     authenticate,
@@ -118,53 +138,21 @@ export const setupBagRoutes = (router, options = {}) => {
     #swagger.responses[204]
     #swagger.responses[401] = {
       description: "Unauthorized - Authentication required or invalid token",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
     }
     #swagger.responses[403] = {
       description: "Forbidden - Insufficient permissions",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
     }
     #swagger.responses[404] = {
       description: "Not Found - Bag not found",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/NotFoundError" }
     }
     */
     authenticate,
     requireBusinessRole,
     validateBagId, 
     bagController.deleteBag.bind(bagController));
-
-  router.get(`/business/:idBusiness`,
-    /*
-    #swagger.path = '/api/bags/business/{idBusiness}'
-    #swagger.tags = ["Bag"]
-    #swagger.security = [{ "bearerAuth": [] }]
-    #swagger.responses[200]
-    #swagger.responses[401] = {
-      description: "Unauthorized - Authentication required or invalid token",
-      schema: { $ref: "#/components/schemas/Error" }
-    }
-    */
-    authenticate,
-    requireAnyRole,
-    validateBusinessId, 
-    bagController.getBagsByBusiness.bind(bagController));
-
-  router.get(`/business/:idBusiness/active`,
-    /*
-    #swagger.path = '/api/bags/business/{idBusiness}/active'
-    #swagger.tags = ["Bag"]
-    #swagger.security = [{ "bearerAuth": [] }]
-    #swagger.responses[200]
-    #swagger.responses[401] = {
-      description: "Unauthorized - Authentication required or invalid token",
-      schema: { $ref: "#/components/schemas/Error" }
-    }
-    */
-    authenticate,
-    requireAnyRole,
-    validateBusinessId, 
-    bagController.getActiveBagsByBusiness.bind(bagController));
 
   router.patch(`/:id/status`,
     /*
@@ -173,55 +161,22 @@ export const setupBagRoutes = (router, options = {}) => {
     #swagger.security = [{ "bearerAuth": [] }]
     #swagger.requestBody = {
       required: true,
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            properties: {
-              status: {
-                type: "integer",
-                enum: [0, 1],
-                description: "0 for inactive, 1 for active"
-              }
-            },
-            required: ["status"]
-          }
-        }
-      }
+      schema: { $ref: '#components/schemas/StatusUpdate' }
     }
     #swagger.responses[200]
     #swagger.responses[401] = {
       description: "Unauthorized - Authentication required or invalid token",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
     }
     #swagger.responses[403] = {
       description: "Forbidden - Insufficient permissions",
-      schema: { $ref: "#/components/schemas/Error" }
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
     }
     */
     authenticate,
     requireBusinessRole,
     validateStatusUpdate, 
     bagController.changeBagStatus.bind(bagController));
-
-  router.get('/tags',
-    /*
-    #swagger.path = '/api/bags/tags'
-    #swagger.tags = ["Bag"]
-    #swagger.description = "Retorna a lista de tags permitidas para sacolas"
-    #swagger.responses[200] = {
-      description: "Lista de tags permitidas",
-      schema: {
-        type: "array",
-        items: {
-          type: "string"
-        },
-        example: ["PODE_CONTER_GLUTEN", "PODE_CONTER_LACTOSE"]
-      }
-    }
-    */
-    bagController.getAllowedTags.bind(bagController)
-  );
 
   return router;
 };
