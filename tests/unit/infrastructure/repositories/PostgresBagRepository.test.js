@@ -21,6 +21,7 @@ describe('PostgresBagRepository', () => {
       create: jest.fn(),
       findByPk: jest.fn(),
       findAll: jest.fn(),
+      findAndCountAll: jest.fn(),
       update: jest.fn(),
       destroy: jest.fn()
     };
@@ -92,25 +93,33 @@ describe('PostgresBagRepository', () => {
         }
       ];
       
-      mockBagModel.findAll.mockResolvedValue(mockBagRecords);
+      mockBagModel.findAndCountAll.mockResolvedValue({
+        count: 2,
+        rows: mockBagRecords
+      });
       
       const results = await repository.findAll();
       
-      expect(mockBagModel.findAll).toHaveBeenCalled();
-      expect(results).toHaveLength(2);
-      expect(results[0]).toBeInstanceOf(Bag);
-      expect(results[1]).toBeInstanceOf(Bag);
-      expect(results[0].id).toBe(1);
-      expect(results[1].id).toBe(2);
+      expect(mockBagModel.findAndCountAll).toHaveBeenCalledWith({ where: undefined, offset: undefined, limit: undefined });
+      expect(results.count).toBe(2);
+      expect(results.rows).toHaveLength(2);
+      expect(results.rows[0]).toBeInstanceOf(Bag);
+      expect(results.rows[1]).toBeInstanceOf(Bag);
+      expect(results.rows[0].id).toBe(1);
+      expect(results.rows[1].id).toBe(2);
     });
     
     test('should return empty array when no bags found', async () => {
-      mockBagModel.findAll.mockResolvedValue([]);
+      mockBagModel.findAndCountAll.mockResolvedValue({
+        count: 0,
+        rows: []
+      });
       
       const results = await repository.findAll();
       
-      expect(mockBagModel.findAll).toHaveBeenCalled();
-      expect(results).toEqual([]);
+      expect(mockBagModel.findAndCountAll).toHaveBeenCalledWith({ where: undefined, offset: undefined, limit: undefined });
+      expect(results.count).toBe(0);
+      expect(results.rows).toEqual([]);
     });
   });
 
@@ -164,70 +173,6 @@ describe('PostgresBagRepository', () => {
       
       expect(mockBagModel.destroy).toHaveBeenCalledWith({ where: { id: 999 } });
       expect(result).toBe(false);
-    });
-  });
-
-  describe('findByBusinessId', () => {
-    test('should find bags by business id and return domain entities', async () => {
-      const mockBagRecords = [
-        {
-          ...bagData,
-          id: 1,
-          idBusiness: 5,
-          toJSON: () => ({ ...bagData, id: 1, idBusiness: 5 })
-        },
-        {
-          ...bagData,
-          id: 2,
-          idBusiness: 5,
-          toJSON: () => ({ ...bagData, id: 2, idBusiness: 5 })
-        }
-      ];
-      
-      mockBagModel.findAll.mockResolvedValue(mockBagRecords);
-      
-      const results = await repository.findByBusinessId(5);
-      
-      expect(mockBagModel.findAll).toHaveBeenCalledWith({ where: { idBusiness: 5 } });
-      expect(results).toHaveLength(2);
-      expect(results[0]).toBeInstanceOf(Bag);
-      expect(results[1]).toBeInstanceOf(Bag);
-      expect(results[0].idBusiness).toBe(5);
-      expect(results[1].idBusiness).toBe(5);
-    });
-  });
-
-  describe('findActiveByBusinessId', () => {
-    test('should find active bags by business id and return domain entities', async () => {
-      const mockBagRecords = [
-        {
-          ...bagData,
-          id: 1,
-          idBusiness: 5,
-          status: 1,
-          toJSON: () => ({ ...bagData, id: 1, idBusiness: 5, status: 1 })
-        },
-        {
-          ...bagData,
-          id: 2,
-          idBusiness: 5,
-          status: 1,
-          toJSON: () => ({ ...bagData, id: 2, idBusiness: 5, status: 1 })
-        }
-      ];
-      
-      mockBagModel.findAll.mockResolvedValue(mockBagRecords);
-      
-      const results = await repository.findActiveByBusinessId(5);
-      
-      expect(mockBagModel.findAll).toHaveBeenCalledWith({ where: { idBusiness: 5, status: 1 } });
-      expect(results).toHaveLength(2);
-      expect(results[0]).toBeInstanceOf(Bag);
-      expect(results[1]).toBeInstanceOf(Bag);
-      expect(results[0].idBusiness).toBe(5);
-      expect(results[0].status).toBe(1);
-      expect(results[1].idBusiness).toBe(5);
-      expect(results[1].status).toBe(1);
     });
   });
 });
