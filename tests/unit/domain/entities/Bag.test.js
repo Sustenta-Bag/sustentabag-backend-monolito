@@ -1,16 +1,16 @@
 import Bag from '../../../../src/domain/entities/Bag.js';
 
-describe('Bag Entity', () => {
-  test('should create a bag with correct properties', () => {
+describe('Bag Entity', () => {  test('should create a bag with correct properties', () => {
     const id = 1;
     const type = 'Mista';
     const price = 15.99;
     const description = 'Mixed bag with various items';
     const idBusiness = 5;
     const status = 1;
+    const tags = ['tag1', 'tag2'];
     const createdAt = new Date('2023-01-01');
 
-    const bag = new Bag(id, type, price, description, idBusiness, status, createdAt);
+    const bag = new Bag(id, type, price, description, idBusiness, status, tags, createdAt);
 
     expect(bag.id).toBe(id);
     expect(bag.type).toBe(type);
@@ -18,6 +18,7 @@ describe('Bag Entity', () => {
     expect(bag.description).toBe(description);
     expect(bag.idBusiness).toBe(idBusiness);
     expect(bag.status).toBe(status);
+    expect(bag.tags).toEqual(tags);
     expect(bag.createdAt).toBe(createdAt);
   });
 

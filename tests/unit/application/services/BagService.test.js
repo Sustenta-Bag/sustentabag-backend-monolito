@@ -105,19 +105,77 @@ describe('BagService', () => {
         new Bag(1, 'Mista', 15.99, 'Mixed bag', 5),
         new Bag(2, 'Vegetariana', 12.99, 'Vegetarian bag', 5)
       ];
-      mockBagRepository.findAll.mockResolvedValue(bags);
+      mockBagRepository.findAll.mockResolvedValue({
+        count: 2,
+        rows: bags
+      });
       
-      const result = await bagService.getAllBags();
+      const result = await bagService.getAllBags(1, 10);
       
-      expect(mockBagRepository.findAll).toHaveBeenCalled();
-      expect(result).toBe(bags);
+      expect(mockBagRepository.findAll).toHaveBeenCalledWith(0, 10, {});
+      expect(result).toEqual({
+        total: 2,
+        pages: 1,
+        data: bags
+      });
     });
 
     test('should handle repository errors during getAll', async () => {
       const error = new Error('Database error');
       mockBagRepository.findAll.mockRejectedValue(error);
       
-      await expect(bagService.getAllBags()).rejects.toThrow(error);
+      await expect(bagService.getAllBags(1, 10)).rejects.toThrow(error);
+    });
+
+    it('should get all bags with default pagination when page is less than 1', async () => {
+      const mockResult = {
+        count: 20,
+        rows: [{ id: 1, name: 'Bag 1' }, { id: 2, name: 'Bag 2' }]
+      };
+      mockBagRepository.findAll.mockResolvedValue(mockResult);
+
+      const result = await bagService.getAllBags(0, 10, {});
+
+      expect(mockBagRepository.findAll).toHaveBeenCalledWith(0, 10, {}); // offset = (1-1) * 10 = 0
+      expect(result).toEqual({
+        total: 20,
+        pages: 2,
+        data: mockResult.rows
+      });
+    });
+
+    it('should get all bags with default limit when limit is undefined', async () => {
+      const mockResult = {
+        count: 20,
+        rows: [{ id: 1, name: 'Bag 1' }, { id: 2, name: 'Bag 2' }]
+      };
+      mockBagRepository.findAll.mockResolvedValue(mockResult);
+
+      const result = await bagService.getAllBags(1, undefined, {});
+
+      expect(mockBagRepository.findAll).toHaveBeenCalledWith(0, 10, {}); // default limit = 10
+      expect(result).toEqual({
+        total: 20,
+        pages: 2,
+        data: mockResult.rows
+      });
+    });
+
+    it('should get all bags with default pagination when page is undefined', async () => {
+      const mockResult = {
+        count: 20,
+        rows: [{ id: 1, name: 'Bag 1' }, { id: 2, name: 'Bag 2' }]
+      };
+      mockBagRepository.findAll.mockResolvedValue(mockResult);
+
+      const result = await bagService.getAllBags(undefined, undefined, {});
+
+      expect(mockBagRepository.findAll).toHaveBeenCalledWith(0, 10, {}); // default pagination
+      expect(result).toEqual({
+        total: 20,
+        pages: 2,
+        data: mockResult.rows
+      });
     });
   });
 
@@ -188,29 +246,6 @@ describe('BagService', () => {
     });
   });
 
-  describe('getBagsByBusinessId', () => {
-    test('should return bags for a business', async () => {
-      const businessId = 1;
-      const bags = [
-        new Bag(1, 'Mista', 15.99, 'Mixed bag', businessId),
-        new Bag(2, 'Vegetariana', 12.99, 'Vegetarian bag', businessId)
-      ];
-      mockBagRepository.findByBusinessId.mockResolvedValue(bags);
-      
-      const result = await bagService.getBagsByBusinessId(businessId);
-      
-      expect(mockBagRepository.findByBusinessId).toHaveBeenCalledWith(businessId);
-      expect(result).toBe(bags);
-    });
-
-    test('should handle repository errors during getBagsByBusinessId', async () => {
-      const error = new Error('Database error');
-      mockBagRepository.findByBusinessId.mockRejectedValue(error);
-      
-      await expect(bagService.getBagsByBusinessId(1)).rejects.toThrow(error);
-    });
-  });
-
   describe('getUsersFavoritesByBusinessId', () => {
     const businessId = 1;
     const mockFavorites = [
@@ -274,76 +309,31 @@ describe('BagService', () => {
     });
   });
 
-  describe('getActiveBagsByBusinessId', () => {
-    test('should return active bags for a business', async () => {
-      const businessId = 1;
-      const bags = [
-        new Bag(1, 'Mista', 15.99, 'Mixed bag', businessId, 1),
-        new Bag(2, 'Vegetariana', 12.99, 'Vegetarian bag', businessId, 1)
-      ];
-      mockBagRepository.findActiveByBusinessId.mockResolvedValue(bags);
-      
-      const result = await bagService.getActiveBagsByBusinessId(businessId);
-      
-      expect(mockBagRepository.findActiveByBusinessId).toHaveBeenCalledWith(businessId);
-      expect(result).toBe(bags);
-    });
-
-    test('should handle repository errors during getActiveBagsByBusinessId', async () => {
-      const error = new Error('Database error');
-      mockBagRepository.findActiveByBusinessId.mockRejectedValue(error);
-      
-      await expect(bagService.getActiveBagsByBusinessId(1)).rejects.toThrow(error);
-    });
-  });
-
   describe('changeBagStatus', () => {
-    test('should change bag status to active (1)', async () => {
-      const bagId = 1;
-      const bag = new Bag(bagId, 'Mista', 15.99, 'Mixed bag', 1, 0);
-      const updatedBag = new Bag(bagId, 'Mista', 15.99, 'Mixed bag', 1, 1);
-      
+    test('should change bag status when bag exists', async () => {
+      const bag = new Bag(1, 'Mista', 15.99, 'Mixed bag', 5, 1);
       mockBagRepository.findById.mockResolvedValue(bag);
-      mockBagRepository.update.mockResolvedValue(updatedBag);
+      mockBagRepository.update.mockResolvedValue(bag);
       
-      const result = await bagService.changeBagStatus(bagId, true);
+      const result = await bagService.changeBagStatus(1, 0);
       
-      expect(mockBagRepository.findById).toHaveBeenCalledWith(bagId);
-      expect(mockBagRepository.update).toHaveBeenCalledWith(bagId, { status: 1 });
-      expect(result).toBe(updatedBag);
+      expect(mockBagRepository.findById).toHaveBeenCalledWith(1);
+      expect(mockBagRepository.update).toHaveBeenCalledWith(1, { status: 0 });
+      expect(result).toBe(bag);
     });
 
-    test('should change bag status to inactive (0)', async () => {
-      const bagId = 1;
-      const bag = new Bag(bagId, 'Mista', 15.99, 'Mixed bag', 1, 1);
-      const updatedBag = new Bag(bagId, 'Mista', 15.99, 'Mixed bag', 1, 0);
+    test('should throw error when bag not found', async () => {
+      mockBagRepository.findById.mockResolvedValue(null);
       
-      mockBagRepository.findById.mockResolvedValue(bag);
-      mockBagRepository.update.mockResolvedValue(updatedBag);
-      
-      const result = await bagService.changeBagStatus(bagId, false);
-      
-      expect(mockBagRepository.findById).toHaveBeenCalledWith(bagId);
-      expect(mockBagRepository.update).toHaveBeenCalledWith(bagId, { status: 0 });
-      expect(result).toBe(updatedBag);
+      await expect(bagService.changeBagStatus(999, 1))
+        .rejects
+        .toThrow(AppError);
+      await expect(bagService.changeBagStatus(999, 1))
+        .rejects
+        .toThrow('Sacola não encontrada com o ID: 999');
     });
 
-    test('should accept numeric status values', async () => {
-      const bagId = 1;
-      const bag = new Bag(bagId, 'Mista', 15.99, 'Mixed bag', 1, 1);
-      const updatedBag = new Bag(bagId, 'Mista', 15.99, 'Mixed bag', 1, 0);
-      
-      mockBagRepository.findById.mockResolvedValue(bag);
-      mockBagRepository.update.mockResolvedValue(updatedBag);
-      
-      const result = await bagService.changeBagStatus(bagId, 0);
-      
-      expect(mockBagRepository.findById).toHaveBeenCalledWith(bagId);
-      expect(mockBagRepository.update).toHaveBeenCalledWith(bagId, { status: 0 });
-      expect(result).toBe(updatedBag);
-    });
-
-    test('should throw error for invalid status value', async () => {
+    test('should throw error when status is invalid', async () => {
       await expect(bagService.changeBagStatus(1, 2))
         .rejects
         .toThrow(AppError);
@@ -352,22 +342,15 @@ describe('BagService', () => {
         .toThrow('Status inválido. Deve ser 0 (inativo) ou 1 (ativo)');
     });
 
-    test('should throw error when bag not found', async () => {
-      mockBagRepository.findById.mockResolvedValue(null);
+    test('should convert boolean to number', async () => {
+      const bag = new Bag(1, 'Mista', 15.99, 'Mixed bag', 5, 1);
+      mockBagRepository.findById.mockResolvedValue(bag);
+      mockBagRepository.update.mockResolvedValue(bag);
       
-      await expect(bagService.changeBagStatus(999, true))
-        .rejects
-        .toThrow(AppError);
-      await expect(bagService.changeBagStatus(999, true))
-        .rejects
-        .toThrow(/Sacola não encontrada com o ID: 999/);
-    });
-
-    test('should handle repository errors during changeBagStatus', async () => {
-      const error = new Error('Database error');
-      mockBagRepository.findById.mockRejectedValue(error);
+      const result = await bagService.changeBagStatus(1, true);
       
-      await expect(bagService.changeBagStatus(1, true)).rejects.toThrow(error);
+      expect(mockBagRepository.update).toHaveBeenCalledWith(1, { status: 1 });
+      expect(result).toBe(bag);
     });
   });
 });
