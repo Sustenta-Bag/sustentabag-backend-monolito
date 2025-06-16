@@ -126,6 +126,57 @@ describe('BagService', () => {
       
       await expect(bagService.getAllBags(1, 10)).rejects.toThrow(error);
     });
+
+    it('should get all bags with default pagination when page is less than 1', async () => {
+      const mockResult = {
+        count: 20,
+        rows: [{ id: 1, name: 'Bag 1' }, { id: 2, name: 'Bag 2' }]
+      };
+      mockBagRepository.findAll.mockResolvedValue(mockResult);
+
+      const result = await bagService.getAllBags(0, 10, {});
+
+      expect(mockBagRepository.findAll).toHaveBeenCalledWith(0, 10, {}); // offset = (1-1) * 10 = 0
+      expect(result).toEqual({
+        total: 20,
+        pages: 2,
+        data: mockResult.rows
+      });
+    });
+
+    it('should get all bags with default limit when limit is undefined', async () => {
+      const mockResult = {
+        count: 20,
+        rows: [{ id: 1, name: 'Bag 1' }, { id: 2, name: 'Bag 2' }]
+      };
+      mockBagRepository.findAll.mockResolvedValue(mockResult);
+
+      const result = await bagService.getAllBags(1, undefined, {});
+
+      expect(mockBagRepository.findAll).toHaveBeenCalledWith(0, 10, {}); // default limit = 10
+      expect(result).toEqual({
+        total: 20,
+        pages: 2,
+        data: mockResult.rows
+      });
+    });
+
+    it('should get all bags with default pagination when page is undefined', async () => {
+      const mockResult = {
+        count: 20,
+        rows: [{ id: 1, name: 'Bag 1' }, { id: 2, name: 'Bag 2' }]
+      };
+      mockBagRepository.findAll.mockResolvedValue(mockResult);
+
+      const result = await bagService.getAllBags(undefined, undefined, {});
+
+      expect(mockBagRepository.findAll).toHaveBeenCalledWith(0, 10, {}); // default pagination
+      expect(result).toEqual({
+        total: 20,
+        pages: 2,
+        data: mockResult.rows
+      });
+    });
   });
 
   describe('updateBag', () => {

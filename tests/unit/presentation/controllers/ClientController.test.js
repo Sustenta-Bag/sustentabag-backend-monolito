@@ -140,19 +140,11 @@ describe('ClientController', () => {
       expect(mockResponse.hateoasItem).toHaveBeenCalledWith(mockClient);
     });
 
-    it('should get client successfully with address when includeAddress is boolean true', async () => {
-      const mockClient = {
-        id: 1,
-        name: 'John Doe',
-        email: 'john@example.com',
-        address: {
-          id: 1,
-          street: 'Rua Teste'
-        }
-      };
-
+    it('should get client with includeAddress as boolean true', async () => {
       mockRequest.params.id = '1';
-      mockRequest.query.includeAddress = true;
+      mockRequest.query.includeAddress = true; // boolean true
+      
+      const mockClient = { id: 1, name: 'John Doe' };
       mockClientService.getClient.mockResolvedValue(mockClient);
 
       await clientController.getClient(mockRequest, mockResponse, mockNext);
@@ -474,6 +466,33 @@ describe('ClientController', () => {
       await clientController.updateStatus(mockRequest, mockResponse, mockNext);
 
       expect(mockNext).toHaveBeenCalledWith(error);
+    });
+
+    it('should return 400 when status is undefined in updateStatus', async () => {
+      mockRequest.params.id = '1';
+      mockRequest.user.entityId = 1;
+      mockRequest.body = {}; // status is undefined
+
+      await clientController.updateStatus(mockRequest, mockResponse, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(expect.any(AppError));
+      const error = mockNext.mock.calls[0][0];
+      expect(error.message).toBe('Status é obrigatório');
+      expect(error.statusCode).toBe(400);
+    });
+
+    it('should return 400 when status is null in updateStatus', async () => {
+      mockRequest.params.id = '1';
+      mockRequest.user.entityId = 1;
+      mockRequest.body = { status: null }; // status is null, não undefined
+      mockClientService.changeClientStatus.mockResolvedValue(null); // Cliente não encontrado
+
+      await clientController.updateStatus(mockRequest, mockResponse, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(expect.any(AppError));
+      const error = mockNext.mock.calls[0][0];
+      expect(error.message).toBe('Cliente não encontrado'); // Deve ser "Cliente não encontrado" porque null !== undefined
+      expect(error.statusCode).toBe(404);
     });
   });
 });

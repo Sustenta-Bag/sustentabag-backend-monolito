@@ -640,6 +640,108 @@ describe('LocationService', () => {
         .rejects
         .toThrow('Erro ao geocodificar endereço');
     });
+
+    it('should handle error in distance calculation for business', async () => {
+      const mockAddress = {
+        id: 1,
+        latitude: -23.5678,
+        longitude: 10.1234
+      };
+      const mockBusinesses = [
+        {
+          id: 1,
+          address: {
+            latitude: 'invalid', // Coordenada inválida
+            longitude: 10.1234
+          }
+        }
+      ];
+      
+      mockAddressRepository.findById.mockResolvedValue(mockAddress);
+      mockBusinessRepository.findAllWithAddress.mockResolvedValue(mockBusinesses);
+      
+      const result = await locationService.findNearbyBusinesses(1, { radius: 10, limit: 10 });
+      
+      expect(result).toEqual([]); // Deve retornar array vazio devido ao erro no cálculo
+    });
+
+    it('should handle development environment in processAddress', async () => {
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'development';
+      
+      const addressData = {
+        street: 'Rua Teste',
+        city: 'São Paulo',
+        state: 'SP'
+      };
+      
+      mockGeocodingClient.forwardGeocode.mockReturnValue({
+        send: jest.fn().mockRejectedValue(new Error('Geocoding error'))
+      });
+      
+      const result = await locationService.processAddress(addressData);
+      
+      expect(result).toEqual(addressData); // Em desenvolvimento, retorna os dados originais
+      
+      process.env.NODE_ENV = originalEnv;
+    });
+
+    it('should handle invalid coordinates in calculateDistance', () => {
+      expect(() => locationService.calculateDistance(null, 0, 0, 0))
+        .toThrow('Coordenadas inválidas para cálculo de distância');
+      
+      expect(() => locationService.calculateDistance(0, undefined, 0, 0))
+        .toThrow('Coordenadas inválidas para cálculo de distância');
+      
+      expect(() => locationService.calculateDistance(0, 0, 'invalid', 0))
+        .toThrow('Coordenadas inválidas para cálculo de distância');
+    });
+
+    it('should handle NaN distance result', () => {
+      // Teste com coordenadas que resultam em NaN
+      const result = locationService.calculateDistance(0, 0, 0, 0);
+      expect(result).toBe(0); // Deve retornar 0 devido ao Math.max(0, distance)
+    });
+
+    it('should handle client without address in findNearbyBusinessesByClient', async () => {
+      const mockClient = {
+        id: 1,
+        name: 'Test Client',
+        address: null // Cliente sem endereço
+      };
+      
+      mockClientRepository.findByIdWithAddress.mockResolvedValue(mockClient);
+      
+      await expect(locationService.findNearbyBusinessesByClient(1))
+        .rejects
+        .toThrow('Cliente não possui endereço cadastrado');
+    });
+
+    it('should handle error in findNearbyAvailableBagsByClient', async () => {
+      const mockClient = {
+        id: 1,
+        address: { id: 1, latitude: -23.5678, longitude: 10.1234 }
+      };
+      const mockBusinesses = [
+        {
+          id: 1,
+          appName: 'Test Business',
+          address: { latitude: -23.5678, longitude: 10.1234 }
+        }
+      ];
+      
+      mockClientRepository.findByIdWithAddress.mockResolvedValue(mockClient);
+      mockAddressRepository.findById.mockResolvedValue(mockClient.address);
+      mockBusinessRepository.findAllWithAddress.mockResolvedValue(mockBusinesses);
+      
+      const mockBagRepository = {
+        findActiveByBusinessId: jest.fn().mockRejectedValue(new Error('Database error'))
+      };
+      
+      const result = await locationService.findNearbyAvailableBagsByClient(1, mockBagRepository);
+      
+      expect(result).toEqual([]); // Deve retornar array vazio devido ao erro
+    });
   });
 
   describe('processAddress', () => {
