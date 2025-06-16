@@ -129,6 +129,25 @@ describe('Client Entity Unit Tests', () => {
       expect(returnValue).toBe(client); // Should return this for method chaining
     });
 
+    test('updateIdAddress should change idAddress and return this', () => {
+      const client = new Client(
+        clientData.id,
+        clientData.name,
+        clientData.email,
+        clientData.cpf,
+        clientData.phone,
+        null,
+        clientData.status,
+        clientData.createdAt
+      );
+      
+      const newIdAddress = 2;
+      const returnValue = client.updateIdAddress(newIdAddress);
+      
+      expect(client.idAddress).toBe(newIdAddress);
+      expect(returnValue).toBe(client); // Should return this for method chaining
+    });
+
     test('deactivate should set status to 0 and return this', () => {
       const client = new Client(
         clientData.id,

@@ -9,9 +9,7 @@ describe('BagRepository Unit Tests', () => {
   });
 
   test('create method should throw "Método não implementado"', async () => {
-    const bag = { id: 1, type: 'Doce', price: 25.5 };
-    
-    await expect(bagRepository.create(bag)).rejects.toThrow('Método não implementado');
+    await expect(bagRepository.create({})).rejects.toThrow('Método não implementado');
   });
 
   test('findById method should throw "Método não implementado"', async () => {
@@ -23,20 +21,10 @@ describe('BagRepository Unit Tests', () => {
   });
 
   test('update method should throw "Método não implementado"', async () => {
-    const bag = { id: 1, type: 'Doce', price: 25.5 };
-    
-    await expect(bagRepository.update(1, bag)).rejects.toThrow('Método não implementado');
+    await expect(bagRepository.update(1, {})).rejects.toThrow('Método não implementado');
   });
 
   test('delete method should throw "Método não implementado"', async () => {
     await expect(bagRepository.delete(1)).rejects.toThrow('Método não implementado');
-  });
-
-  test('findByBusinessId method should throw "Método não implementado"', async () => {
-    await expect(bagRepository.findByBusinessId(1)).rejects.toThrow('Método não implementado');
-  });
-
-  test('findActiveByBusinessId method should throw "Método não implementado"', async () => {
-    await expect(bagRepository.findActiveByBusinessId(1)).rejects.toThrow('Método não implementado');
   });
 });

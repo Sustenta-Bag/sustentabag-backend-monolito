@@ -10,6 +10,7 @@ describe('LocationService', () => {
   let mockClientRepository;
   let locationService;
   let mockMapboxToken;
+  let mockGeocodingClient;
 
   beforeEach(() => {
     mockBusinessRepository = {
@@ -27,12 +28,16 @@ describe('LocationService', () => {
     
     mockMapboxToken = 'pk.eyJ1IjoiZXhhbXBsZSIsImEiOiJqazBqcXoifQ.1234567890abcdefghijklmnopqrstuvwxyz';
     
+    mockGeocodingClient = {
+      forwardGeocode: jest.fn()
+    };
+    
     locationService = new LocationService(
       mockBusinessRepository, 
       mockAddressRepository,
       mockClientRepository,
       mockMapboxToken,
-      { isTesting: true }
+      { isTesting: true, mockGeocoding: mockGeocodingClient }
     );
     
     // Mock console methods
@@ -52,7 +57,7 @@ describe('LocationService', () => {
         mockAddressRepository,
         mockClientRepository,
         mockMapboxToken,
-        { isTesting: true }
+        { isTesting: true, mockGeocoding: mockGeocodingClient }
       );
       
       expect(service.businessRepository).toBe(mockBusinessRepository);
@@ -69,7 +74,7 @@ describe('LocationService', () => {
         mockAddressRepository,
         mockClientRepository,
         validToken,
-        { isTesting: true } // Add isTesting flag to bypass token validation
+        { isTesting: true, mockGeocoding: mockGeocodingClient }
       );
       
       expect(service.businessRepository).toBe(mockBusinessRepository);
@@ -218,8 +223,7 @@ describe('LocationService', () => {
         mockBusinessRepository,
         mockAddressRepository,
         mockClientRepository,
-        null,
-        { isTesting: true }
+        null
       );
       
       // Ensure geocoding client is null
@@ -427,28 +431,18 @@ describe('LocationService', () => {
     });
 
     test('should handle timeout during geocoding request', async () => {
-      // Mock the Promise.race to simulate a timeout
-      const originalRace = Promise.race;
-      Promise.race = jest.fn().mockRejectedValue(new Error('Timeout na requisição de geocodificação'));
-      
+      // Simula o método send que rejeita com erro de timeout
+      mockGeocodingClient.forwardGeocode.mockReturnValue({
+        send: jest.fn().mockRejectedValue(new Error('Timeout na requisição de geocodificação'))
+      });
       const address = {
-        street: 'Av. Paulista',
-        number: '1000',
+        street: 'Rua Teste',
         city: 'São Paulo',
-        state: 'SP',
-        zipCode: '01310-100'
+        state: 'SP'
       };
-      
-      try {
-        await locationService.geocodeAddress(address);
-        fail('Should have thrown an error');
-      } catch (error) {
-        expect(error).toBeInstanceOf(AppError);
-        expect(error.message).toContain('Timeout na requisição');
-      } finally {
-        // Restore the original Promise.race
-        Promise.race = originalRace;
-      }
+      await expect(locationService.geocodeAddress(address))
+        .rejects
+        .toThrow('Timeout na requisição');
     });
 
     test('should handle AbortError during geocoding', async () => {
@@ -487,21 +481,302 @@ describe('LocationService', () => {
         expect(error.errorCode).toBe('GEOCODING_REQUEST_ABORTED');
       }
     });
-  });
 
-  describe('processAddress', () => {
-    test('should process an address and add coordinates', async () => {
+    it('should process an address and add coordinates', async () => {
+      const mockResponse = {
+        body: {
+          features: [{
+            place_name: 'Test Address',
+            center: [10.1234, -23.5678]
+          }]
+        }
+      };
+      mockGeocodingClient.forwardGeocode.mockReturnValue({
+        send: jest.fn().mockResolvedValue(mockResponse)
+      });
       const addressData = {
-        street: 'Sample Street',
-        number: '123',
-        city: 'Sample City',
-        state: 'Sample State'
+        street: 'Rua Teste',
+        city: 'São Paulo',
+        state: 'SP'
+      };
+      const result = await locationService.processAddress(addressData);
+      expect(result).toEqual({
+        ...addressData,
+        latitude: -23.5678,
+        longitude: 10.1234
+      });
+    });
+
+    it('should attempt to geocode an address without coordinates', async () => {
+      const mockAddress = {
+        id: 1,
+        street: 'Rua Teste',
+        city: 'São Paulo',
+        state: 'SP'
+      };
+      const mockResponse = {
+        body: {
+          features: [{
+            place_name: 'Test Address',
+            center: [10.1234, -23.5678]
+          }]
+        }
+      };
+      mockAddressRepository.findById.mockResolvedValue(mockAddress);
+      mockAddressRepository.update.mockResolvedValue();
+      mockGeocodingClient.forwardGeocode.mockReset();
+      mockGeocodingClient.forwardGeocode.mockReturnValue({
+        send: jest.fn().mockResolvedValue(mockResponse)
+      });
+      mockBusinessRepository.findAllWithAddress.mockResolvedValue([]);
+      const result = await locationService.findNearbyBusinesses(1);
+      expect(result).toEqual([]);
+    });
+
+    it('should handle geocoding with empty features array', async () => {
+      const mockResponse = {
+        body: {
+          features: []
+        }
+      };
+      mockGeocodingClient.forwardGeocode.mockReturnValue({
+        send: jest.fn().mockResolvedValue(mockResponse)
+      });
+      
+      const address = {
+        street: 'Rua Teste',
+        city: 'São Paulo',
+        state: 'SP'
       };
       
-      // No need to mock geocodeAddress since we're using the real method with mocked dependencies
+      await expect(locationService.geocodeAddress(address))
+        .rejects
+        .toThrow('Não foi possível geocodificar este endereço');
+    });
+
+    it('should handle geocoding with null features', async () => {
+      const mockResponse = {
+        body: {
+          features: null
+        }
+      };
+      mockGeocodingClient.forwardGeocode.mockReturnValue({
+        send: jest.fn().mockResolvedValue(mockResponse)
+      });
+      
+      const address = {
+        street: 'Rua Teste',
+        city: 'São Paulo',
+        state: 'SP'
+      };
+      
+      await expect(locationService.geocodeAddress(address))
+        .rejects
+        .toThrow('Não foi possível geocodificar este endereço');
+    });
+
+    it('should handle geocoding with undefined features', async () => {
+      const mockResponse = {
+        body: {}
+      };
+      mockGeocodingClient.forwardGeocode.mockReturnValue({
+        send: jest.fn().mockResolvedValue(mockResponse)
+      });
+      
+      const address = {
+        street: 'Rua Teste',
+        city: 'São Paulo',
+        state: 'SP'
+      };
+      
+      await expect(locationService.geocodeAddress(address))
+        .rejects
+        .toThrow('Não foi possível geocodificar este endereço');
+    });
+
+    it('should handle geocoding with invalid center coordinates', async () => {
+      const mockResponse = {
+        body: {
+          features: [{
+            place_name: 'Test Address',
+            center: ['invalid', 'coordinates']
+          }]
+        }
+      };
+      mockGeocodingClient.forwardGeocode.mockReturnValue({
+        send: jest.fn().mockResolvedValue(mockResponse)
+      });
+      
+      const address = {
+        street: 'Rua Teste',
+        city: 'São Paulo',
+        state: 'SP'
+      };
+      
+      await expect(locationService.geocodeAddress(address))
+        .rejects
+        .toThrow('Coordenadas inválidas retornadas pelo serviço');
+    });
+
+    it('should handle geocoding with missing center property', async () => {
+      const mockResponse = {
+        body: {
+          features: [{
+            place_name: 'Test Address'
+          }]
+        }
+      };
+      mockGeocodingClient.forwardGeocode.mockReturnValue({
+        send: jest.fn().mockResolvedValue(mockResponse)
+      });
+      
+      const address = {
+        street: 'Rua Teste',
+        city: 'São Paulo',
+        state: 'SP'
+      };
+      
+      await expect(locationService.geocodeAddress(address))
+        .rejects
+        .toThrow('Erro ao geocodificar endereço');
+    });
+
+    it('should handle error in distance calculation for business', async () => {
+      const mockAddress = {
+        id: 1,
+        latitude: -23.5678,
+        longitude: 10.1234
+      };
+      const mockBusinesses = [
+        {
+          id: 1,
+          address: {
+            latitude: 'invalid', // Coordenada inválida
+            longitude: 10.1234
+          }
+        }
+      ];
+      
+      mockAddressRepository.findById.mockResolvedValue(mockAddress);
+      mockBusinessRepository.findAllWithAddress.mockResolvedValue(mockBusinesses);
+      
+      const result = await locationService.findNearbyBusinesses(1, { radius: 10, limit: 10 });
+      
+      expect(result).toEqual([]); // Deve retornar array vazio devido ao erro no cálculo
+    });
+
+    it('should handle development environment in processAddress', async () => {
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'development';
+      
+      const addressData = {
+        street: 'Rua Teste',
+        city: 'São Paulo',
+        state: 'SP'
+      };
+      
+      mockGeocodingClient.forwardGeocode.mockReturnValue({
+        send: jest.fn().mockRejectedValue(new Error('Geocoding error'))
+      });
       
       const result = await locationService.processAddress(addressData);
       
+      expect(result).toEqual(addressData); // Em desenvolvimento, retorna os dados originais
+      
+      process.env.NODE_ENV = originalEnv;
+    });
+
+    it('should handle invalid coordinates in calculateDistance', () => {
+      expect(() => locationService.calculateDistance(null, 0, 0, 0))
+        .toThrow('Coordenadas inválidas para cálculo de distância');
+      
+      expect(() => locationService.calculateDistance(0, undefined, 0, 0))
+        .toThrow('Coordenadas inválidas para cálculo de distância');
+      
+      expect(() => locationService.calculateDistance(0, 0, 'invalid', 0))
+        .toThrow('Coordenadas inválidas para cálculo de distância');
+    });
+
+    it('should handle NaN distance result', () => {
+      // Teste com coordenadas que resultam em NaN
+      const result = locationService.calculateDistance(0, 0, 0, 0);
+      expect(result).toBe(0); // Deve retornar 0 devido ao Math.max(0, distance)
+    });
+
+    it('should handle client without address in findNearbyBusinessesByClient', async () => {
+      const mockClient = {
+        id: 1,
+        name: 'Test Client',
+        address: null // Cliente sem endereço
+      };
+      
+      mockClientRepository.findByIdWithAddress.mockResolvedValue(mockClient);
+      
+      await expect(locationService.findNearbyBusinessesByClient(1))
+        .rejects
+        .toThrow('Cliente não possui endereço cadastrado');
+    });
+
+    it('should handle error in findNearbyAvailableBagsByClient', async () => {
+      const mockClient = {
+        id: 1,
+        address: { id: 1, latitude: -23.5678, longitude: 10.1234 }
+      };
+      const mockBusinesses = [
+        {
+          id: 1,
+          appName: 'Test Business',
+          address: { latitude: -23.5678, longitude: 10.1234 }
+        }
+      ];
+      
+      mockClientRepository.findByIdWithAddress.mockResolvedValue(mockClient);
+      mockAddressRepository.findById.mockResolvedValue(mockClient.address);
+      mockBusinessRepository.findAllWithAddress.mockResolvedValue(mockBusinesses);
+      
+      const mockBagRepository = {
+        findActiveByBusinessId: jest.fn().mockRejectedValue(new Error('Database error'))
+      };
+      
+      const result = await locationService.findNearbyAvailableBagsByClient(1, mockBagRepository);
+      
+      expect(result).toEqual([]); // Deve retornar array vazio devido ao erro
+    });
+  });
+
+  describe('processAddress', () => {
+    let locationService;
+    beforeEach(() => {
+      locationService = new LocationService(
+        mockBusinessRepository,
+        mockAddressRepository,
+        mockClientRepository,
+        'test-token',
+        {
+          isTesting: true,
+          mockGeocoding: mockGeocodingClient
+        }
+      );
+      mockGeocodingClient.forwardGeocode.mockReset();
+      mockGeocodingClient.forwardGeocode.mockReturnValue({
+        send: jest.fn().mockResolvedValue({
+          body: {
+            features: [{
+              place_name: 'Test Address',
+              center: [10.1234, -23.5678]
+            }]
+          }
+        })
+      });
+    });
+
+    test('should process an address and add coordinates', async () => {
+      const addressData = {
+        street: 'Rua Teste',
+        city: 'São Paulo',
+        state: 'SP'
+      };
+      const result = await locationService.processAddress(addressData);
       expect(result).toEqual({
         ...addressData,
         latitude: -23.5678,
@@ -647,6 +922,31 @@ describe('LocationService', () => {
   });
 
   describe('findNearbyBusinesses', () => {
+    let locationService;
+    beforeEach(() => {
+      locationService = new LocationService(
+        mockBusinessRepository,
+        mockAddressRepository,
+        mockClientRepository,
+        'test-token',
+        {
+          isTesting: true,
+          mockGeocoding: mockGeocodingClient
+        }
+      );
+      mockGeocodingClient.forwardGeocode.mockReset();
+      mockGeocodingClient.forwardGeocode.mockReturnValue({
+        send: jest.fn().mockResolvedValue({
+          body: {
+            features: [{
+              place_name: 'Test Address',
+              center: [10.1234, -23.5678]
+            }]
+          }
+        })
+      });
+    });
+
     test('should find businesses near a given address', async () => {
       const testAddress = new Address(
         1, '12345', 'Sample State', 'Sample City', 
@@ -1221,7 +1521,7 @@ describe('LocationService', () => {
       mockAddressRepository,
       mockClientRepository,
       validToken,
-      { isTesting: true }
+      { isTesting: true, mockGeocoding: mockGeocodingClient }
     );
     
     expect(service.businessRepository).toBe(mockBusinessRepository);
@@ -1307,6 +1607,123 @@ describe('LocationService', () => {
         .rejects.toThrow(AppError);
       await expect(locationService.findNearbyBusinessesByClient(1))
         .rejects.toThrow('Erro ao buscar estabelecimentos próximos ao cliente');
+    });
+  });
+
+  describe('findNearbyAvailableBagsByClient', () => {
+    it('should find nearby available bags by client successfully', async () => {
+      const mockClient = {
+        id: 1,
+        address: {
+          id: 1,
+          latitude: -23.5678,
+          longitude: -46.6489
+        }
+      };
+
+      const mockBusinesses = [
+        {
+          id: 1,
+          appName: 'Business 1',
+          legalName: 'Legal Name 1',
+          logo: 'logo1.jpg',
+          address: {
+            latitude: -23.5678,
+            longitude: -46.6489
+          }
+        }
+      ];
+
+      const mockBags = [
+        {
+          id: 1,
+          type: 'type1',
+          price: 10.0,
+          description: 'Bag 1',
+          idBusiness: 1,
+          status: 1,
+          createdAt: new Date()
+        }
+      ];
+
+      mockClientRepository.findByIdWithAddress.mockResolvedValue(mockClient);
+      mockAddressRepository.findById.mockResolvedValue(mockClient.address);
+      mockBusinessRepository.findAllWithAddress.mockResolvedValue(mockBusinesses);
+
+      // Mock the bagRepository parameter
+      const mockBagRepository = {
+        findActiveByBusinessId: jest.fn().mockResolvedValue(mockBags)
+      };
+
+      const result = await locationService.findNearbyAvailableBagsByClient(1, mockBagRepository);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].business).toBeDefined();
+    });
+
+    it('should throw error for invalid client ID', async () => {
+      const mockBagRepository = {};
+
+      await expect(locationService.findNearbyAvailableBagsByClient('invalid', mockBagRepository))
+        .rejects
+        .toThrow(AppError);
+    });
+
+    it('should return empty array when no nearby businesses', async () => {
+      const mockClient = {
+        id: 1,
+        address: {
+          id: 1,
+          latitude: -23.5678,
+          longitude: -46.6489
+        }
+      };
+
+      mockClientRepository.findByIdWithAddress.mockResolvedValue(mockClient);
+      mockAddressRepository.findById.mockResolvedValue(mockClient.address);
+      mockBusinessRepository.findAllWithAddress.mockResolvedValue([]);
+
+      const mockBagRepository = {};
+
+      const result = await locationService.findNearbyAvailableBagsByClient(1, mockBagRepository);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should handle errors when fetching bags from business', async () => {
+      const mockClient = {
+        id: 1,
+        address: {
+          id: 1,
+          latitude: -23.5678,
+          longitude: -46.6489
+        }
+      };
+
+      const mockBusinesses = [
+        {
+          id: 1,
+          appName: 'Business 1',
+          legalName: 'Legal Name 1',
+          logo: 'logo1.jpg',
+          address: {
+            latitude: -23.5678,
+            longitude: -46.6489
+          }
+        }
+      ];
+
+      mockClientRepository.findByIdWithAddress.mockResolvedValue(mockClient);
+      mockAddressRepository.findById.mockResolvedValue(mockClient.address);
+      mockBusinessRepository.findAllWithAddress.mockResolvedValue(mockBusinesses);
+
+      const mockBagRepository = {
+        findActiveByBusinessId: jest.fn().mockRejectedValue(new Error('Database error'))
+      };
+
+      const result = await locationService.findNearbyAvailableBagsByClient(1, mockBagRepository);
+
+      expect(result).toEqual([]);
     });
   });
 });
