@@ -1,5 +1,6 @@
 import PostgresClientRepository from '../../../../src/infrastructure/repositories/PostgresClientRepository.js';
 import Client from '../../../../src/domain/entities/Client.js';
+import Address from '../../../../src/domain/entities/Address.js';
 import { jest } from '@jest/globals';
 
 describe('PostgresClientRepository', () => {
