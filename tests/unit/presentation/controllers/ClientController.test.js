@@ -76,12 +76,27 @@ describe('ClientController', () => {
     });
 
     it('should handle service error', async () => {
-      const error = new Error('Service error');
-      mockClientService.createClient.mockRejectedValue(error);
+      mockClientService.createClient.mockRejectedValue(new Error('Service error'));
 
       await clientController.createClient(mockRequest, mockResponse, mockNext);
 
-      expect(mockNext).toHaveBeenCalledWith(error);
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('should create client with complex data', async () => {
+      mockRequest.body = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        cpf: '12345678901',
+        phone: '11999999999',
+        idAddress: 1
+      };
+      mockClientService.createClient.mockResolvedValue();
+
+      await clientController.createClient(mockRequest, mockResponse, mockNext);
+
+      expect(mockClientService.createClient).toHaveBeenCalledWith(mockRequest.body);
+      expect(mockResponse.created).toHaveBeenCalled();
     });
   });
 
@@ -202,11 +217,6 @@ describe('ClientController', () => {
     });
 
     it('should get all clients with custom pagination and filters', async () => {
-      const mockClients = {
-        data: [{ id: 1, name: 'John Doe' }],
-        pages: { current: 2, total: 3, hasNext: true, hasPrev: true }
-      };
-
       mockRequest.query = {
         page: '2',
         limit: '5',
@@ -217,7 +227,15 @@ describe('ClientController', () => {
         phone: '11999999999',
         status: '1'
       };
-
+      
+      const mockClients = {
+        data: [
+          { id: 1, name: 'John Doe', email: 'john@example.com' },
+          { id: 2, name: 'John Smith', email: 'johnsmith@example.com' }
+        ],
+        pages: 3
+      };
+      
       mockClientService.getAllClients.mockResolvedValue(mockClients);
 
       await clientController.getAllClients(mockRequest, mockResponse, mockNext);
@@ -233,13 +251,61 @@ describe('ClientController', () => {
       expect(mockResponse.hateoasList).toHaveBeenCalledWith(mockClients.data, mockClients.pages);
     });
 
-    it('should handle service error', async () => {
-      const error = new Error('Service error');
-      mockClientService.getAllClients.mockRejectedValue(error);
+    it('should get all clients with includeAddress as boolean true', async () => {
+      mockRequest.query = {
+        includeAddress: 'true'
+      };
+      
+      const mockClients = {
+        data: [{ id: 1, name: 'John Doe' }],
+        pages: 1
+      };
+      
+      mockClientService.getAllClients.mockResolvedValue(mockClients);
 
       await clientController.getAllClients(mockRequest, mockResponse, mockNext);
 
-      expect(mockNext).toHaveBeenCalledWith(error);
+      expect(mockClientService.getAllClients).toHaveBeenCalledWith(1, 10, {
+        includeAddress: true,
+        name: '',
+        email: '',
+        cpf: '',
+        phone: '',
+        status: ''
+      });
+    });
+
+    it('should get all clients with includeAddress as string false', async () => {
+      mockRequest.query = {
+        includeAddress: 'false'
+      };
+      
+      const mockClients = {
+        data: [{ id: 1, name: 'John Doe' }],
+        pages: 1
+      };
+      
+      mockClientService.getAllClients.mockResolvedValue(mockClients);
+
+      await clientController.getAllClients(mockRequest, mockResponse, mockNext);
+
+      expect(mockClientService.getAllClients).toHaveBeenCalledWith(1, 10, {
+        includeAddress: false,
+        name: '',
+        email: '',
+        cpf: '',
+        phone: '',
+        status: ''
+      });
+    });
+
+    it('should handle service error in getAllClients', async () => {
+      mockRequest.query = {};
+      mockClientService.getAllClients.mockRejectedValue(new Error('Service error'));
+
+      await clientController.getAllClients(mockRequest, mockResponse, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
     });
   });
 

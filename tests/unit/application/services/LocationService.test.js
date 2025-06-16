@@ -532,6 +532,114 @@ describe('LocationService', () => {
       const result = await locationService.findNearbyBusinesses(1);
       expect(result).toEqual([]);
     });
+
+    it('should handle geocoding with empty features array', async () => {
+      const mockResponse = {
+        body: {
+          features: []
+        }
+      };
+      mockGeocodingClient.forwardGeocode.mockReturnValue({
+        send: jest.fn().mockResolvedValue(mockResponse)
+      });
+      
+      const address = {
+        street: 'Rua Teste',
+        city: 'São Paulo',
+        state: 'SP'
+      };
+      
+      await expect(locationService.geocodeAddress(address))
+        .rejects
+        .toThrow('Não foi possível geocodificar este endereço');
+    });
+
+    it('should handle geocoding with null features', async () => {
+      const mockResponse = {
+        body: {
+          features: null
+        }
+      };
+      mockGeocodingClient.forwardGeocode.mockReturnValue({
+        send: jest.fn().mockResolvedValue(mockResponse)
+      });
+      
+      const address = {
+        street: 'Rua Teste',
+        city: 'São Paulo',
+        state: 'SP'
+      };
+      
+      await expect(locationService.geocodeAddress(address))
+        .rejects
+        .toThrow('Não foi possível geocodificar este endereço');
+    });
+
+    it('should handle geocoding with undefined features', async () => {
+      const mockResponse = {
+        body: {}
+      };
+      mockGeocodingClient.forwardGeocode.mockReturnValue({
+        send: jest.fn().mockResolvedValue(mockResponse)
+      });
+      
+      const address = {
+        street: 'Rua Teste',
+        city: 'São Paulo',
+        state: 'SP'
+      };
+      
+      await expect(locationService.geocodeAddress(address))
+        .rejects
+        .toThrow('Não foi possível geocodificar este endereço');
+    });
+
+    it('should handle geocoding with invalid center coordinates', async () => {
+      const mockResponse = {
+        body: {
+          features: [{
+            place_name: 'Test Address',
+            center: ['invalid', 'coordinates']
+          }]
+        }
+      };
+      mockGeocodingClient.forwardGeocode.mockReturnValue({
+        send: jest.fn().mockResolvedValue(mockResponse)
+      });
+      
+      const address = {
+        street: 'Rua Teste',
+        city: 'São Paulo',
+        state: 'SP'
+      };
+      
+      await expect(locationService.geocodeAddress(address))
+        .rejects
+        .toThrow('Coordenadas inválidas retornadas pelo serviço');
+    });
+
+    it('should handle geocoding with missing center property', async () => {
+      const mockResponse = {
+        body: {
+          features: [{
+            place_name: 'Test Address'
+          }]
+        }
+      };
+      mockGeocodingClient.forwardGeocode.mockReturnValue({
+        send: jest.fn().mockResolvedValue(mockResponse)
+      });
+      
+      const address = {
+        street: 'Rua Teste',
+        city: 'São Paulo',
+        state: 'SP'
+      };
+      
+      await expect(locationService.geocodeAddress(address))
+        .rejects
+        .toThrow('Erro ao geocodificar endereço');
+    });
   });
 
   describe('processAddress', () => {
