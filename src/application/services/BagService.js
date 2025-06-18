@@ -33,7 +33,7 @@ class BagService {
     if(type) {
       where.type = { [Op.iLike]: `%${type}%` };
     }
-    const result = await this.bagRepository.findAll(offset, limit, where);
+    const result = await this.bagRepository.findAll(where, limit, offset);
     return {
       total: result.count,
       pages: Math.ceil(result.count / limit),

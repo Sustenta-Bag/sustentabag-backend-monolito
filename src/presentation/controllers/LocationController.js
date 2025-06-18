@@ -18,7 +18,7 @@ class LocationController {
         options
       );
 
-      return res.json({
+      return res.ok({
         count: businesses.length,
         data: businesses.map(business => ({
           id: business.id,
@@ -64,7 +64,7 @@ class LocationController {
         options
       );
 
-      return res.json({
+      return res.ok({
         count: businesses.length,
         data: businesses.map(business => ({
           id: business.id,
@@ -92,7 +92,7 @@ class LocationController {
       
       const processedAddress = await this.locationService.processAddress(address);
       
-      return res.json({
+      return res.ok({
         latitude: processedAddress.latitude,
         longitude: processedAddress.longitude,
         fullAddress: `${processedAddress.street}, ${processedAddress.number}, ${processedAddress.city}, ${processedAddress.state}, ${processedAddress.zipCode}`
@@ -127,7 +127,7 @@ class LocationController {
         options
       );
 
-      return res.json({
+      return res.ok({
         count: bags.length,
         data: bags.map(bag => ({
           id: bag.id,

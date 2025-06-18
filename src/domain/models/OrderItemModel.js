@@ -13,7 +13,7 @@ class OrderItemModel extends Model {
         primaryKey: true,
         field: 'idItemPedido'
       },
-      orderId: {
+      idOrder: {
         type: DataTypes.INTEGER,
         allowNull: false,
         field: 'idPedido',
@@ -22,7 +22,7 @@ class OrderItemModel extends Model {
           key: 'idPedido'
         }
       },
-      bagId: {
+      idBag: {
         type: DataTypes.INTEGER,
         allowNull: false,
         field: 'idSacola',
@@ -71,14 +71,14 @@ class OrderItemModel extends Model {
   static associate(models) {
     if (models.OrderModel) {
       this.belongsTo(models.OrderModel, { 
-        foreignKey: 'orderId',
+        foreignKey: 'idOrder',
         as: 'order'
       });
     }
     
     if (models.BagModel) {
       this.belongsTo(models.BagModel, { 
-        foreignKey: 'bagId',
+        foreignKey: 'idBag',
         as: 'bag'
       });
     }

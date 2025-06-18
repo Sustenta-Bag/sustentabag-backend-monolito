@@ -20,7 +20,7 @@ class PostgresBagRepository extends BagRepository {
     return this._mapToDomainEntity(bagRecord);
   }
 
-  async findAll(offset, limit, where) {
+  async findAll(where, limit = 10, offset = 0) {
     const { count, rows } = await this.BagModel.findAndCountAll({ where, offset, limit });
     return {
       count,

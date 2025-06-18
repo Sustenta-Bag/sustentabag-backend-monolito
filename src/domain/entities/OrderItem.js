@@ -1,11 +1,12 @@
 class OrderItem {
-  constructor(id, orderId, bagId, quantity, price, createdAt = new Date()) {
+  constructor({ id = null, idOrder = null, idBag, quantity, price, createdAt = new Date(), updatedAt = new Date() }) {
     this.id = id;
-    this.orderId = orderId;
-    this.bagId = bagId;
+    this.idOrder = idOrder;
+    this.idBag = idBag;
     this.quantity = quantity;
     this.price = price;
     this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
   }
 
   updateQuantity(newQuantity) {
@@ -29,4 +30,4 @@ class OrderItem {
   }
 }
 
-export default OrderItem; 
+export default OrderItem;
