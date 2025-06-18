@@ -104,6 +104,16 @@ const doc = {
         status: 1,
         tags: ["PODE_CONTER_GLUTEN", "PODE_CONTER_LACTOSE"],
       },
+
+      Order: {
+        idBusiness: 1,
+        items: [
+          {
+            idBag: 1,
+            quantity: 2,
+          }
+        ]
+      },
       
       StatusUpdate: {
         status: 1
@@ -135,6 +145,19 @@ const doc = {
 
       UpdateStatus: {
         status: true
+      },
+
+      OrderStatusUpdate: {
+        status: "pronto"
+      },
+
+      OrderItens: {
+        idBag: 1,
+        quantity: 2
+      },
+
+      ItemQuantity: {
+        quantity: 3
       },
       
       Client: {

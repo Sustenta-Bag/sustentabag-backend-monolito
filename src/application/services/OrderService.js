@@ -7,6 +7,7 @@ class OrderService {
     this.orderRepository = orderRepository;
     this.bagService = bagService;
   }
+
   async createOrder(orderData) {
     const { items, ...orderFields } = orderData;
     
@@ -16,9 +17,9 @@ class OrderService {
     
     // Validate all bags exist and are active
     for (const item of items) {
-      const bag = await this.bagService.getBag(item.bagId);
+      const bag = await this.bagService.getBag(item.idBag);
       if (!bag) {
-        throw AppError.notFound('Sacola', item.bagId);
+        throw AppError.notFound('Sacola', item.idBag);
       }
       if (bag.status !== 1) {
         throw new AppError(`Sacola ${bag.id} está inativa`, 'INACTIVE_BAG');
@@ -26,32 +27,30 @@ class OrderService {
       // Use the current bag price
       item.price = bag.price;
     }
-    
+
     const order = new Order(
-      null,
-      orderFields.userId,
-      orderFields.businessId
+      orderFields.idClient,
+      orderFields.idBusiness
     );
     
     items.forEach(item => {
-      order.addItem(new OrderItem(
-        null,
-        null,
-        item.bagId,
-        item.quantity,
-        item.price
-      ));
+      order.addItem(new OrderItem({
+        idBag: item.idBag,
+        quantity: item.quantity,
+        price: item.price
+      }));
     });
 
     return await this.orderRepository.create({
       ...orderFields,
       items: order.items.map(item => ({
-        bagId: item.bagId,
+        idBag: item.idBag,
         quantity: item.quantity,
         price: item.price
       }))
     });
   }
+
   async getOrder(id) {
     const order = await this.orderRepository.findById(id);
     if (!order) {
@@ -64,17 +63,29 @@ class OrderService {
     return order;
   }
 
-  async getAllOrders() {
-    return await this.orderRepository.findAll();
+  async getAllOrders(page, limit, filters = {}) {
+    if (!page || page < 1) page = 1;
+    if (!limit) limit = 10;
+    const offset = (page - 1) * limit;
+    const where = {};
+    if (filters.idClient) {
+      where.idClient = filters.idClient;
+    }
+    if (filters.idBusiness) {
+      where.idBusiness = filters.idBusiness;
+    }
+    if (filters.status) {
+      where.status = filters.status;
+    }
+    const result = await this.orderRepository.findAll(where, limit, offset);
+    return {
+      total: result.count,
+      pages: Math.ceil(result.count / limit),
+      data: result.rows
+    }
   }
 
-  async getOrdersByUser(userId) {
-    return await this.orderRepository.findByUserId(userId);
-  }
-
-  async getOrdersByBusiness(businessId) {
-    return await this.orderRepository.findByBusinessId(businessId);
-  }  async updateOrderStatus(id, status) {
+  async updateOrderStatus(id, status) {
     const order = await this.orderRepository.findById(id);
     if (!order) {
       throw AppError.notFound('Pedido', id);
@@ -96,62 +107,62 @@ class OrderService {
     return updatedOrder;
   }
 
-  async addItemToOrder(orderId, itemData) {
-    const order = await this.orderRepository.findById(orderId);
+  async addItemToOrder(idOrder, itemData) {
+    const order = await this.orderRepository.findById(idOrder);
     if (!order) {
-      throw AppError.notFound('Pedido', orderId);
+      throw AppError.notFound('Pedido', idOrder);
     }
       if (order.status !== 'pendente') {
       throw new AppError('Não é possível adicionar itens a um pedido que não está pendente', 'INVALID_ORDER_STATUS');
     }
     
-    const bag = await this.bagService.getBag(itemData.bagId);
+    const bag = await this.bagService.getBag(itemData.idBag);
     if (!bag) {
-      throw AppError.notFound('Sacola', itemData.bagId);
+      throw AppError.notFound('Sacola', itemData.idBag);
     }
     if (bag.status !== 1) {
       throw new AppError(`Sacola ${bag.id} está inativa`, 'INACTIVE_BAG');
     }
     
-    const item = await this.orderRepository.addItem(orderId, {
+    const item = await this.orderRepository.addItem(idOrder, {
       ...itemData,
       price: bag.price
     });
     
     // Update order total
-    await this.orderRepository.update(orderId, {
+    await this.orderRepository.update(idOrder, {
       totalAmount: order.items.reduce((total, item) => total + (item.price * item.quantity), 0)
     });
     
     return item;
   }
 
-  async removeItemFromOrder(orderId, itemId) {
-    const order = await this.orderRepository.findById(orderId);
+  async removeItemFromOrder(idOrder, idItem) {
+    const order = await this.orderRepository.findById(idOrder);
     if (!order) {
-      throw AppError.notFound('Pedido', orderId);
+      throw AppError.notFound('Pedido', idOrder);
     }
       if (order.status !== 'pendente') {
       throw new AppError('Não é possível remover itens de um pedido que não está pendente', 'INVALID_ORDER_STATUS');
     }
     
-    const removed = await this.orderRepository.removeItem(orderId, itemId);
+    const removed = await this.orderRepository.removeItem(idOrder, idItem);
     if (!removed) {
-      throw AppError.notFound('Item do pedido', itemId);
+      throw AppError.notFound('Item do pedido', idItem);
     }
     
     // Update order total
-    await this.orderRepository.update(orderId, {
+    await this.orderRepository.update(idOrder, {
       totalAmount: order.items.reduce((total, item) => total + (item.price * item.quantity), 0)
     });
     
     return true;
   }
 
-  async updateItemQuantity(orderId, itemId, quantity) {
-    const order = await this.orderRepository.findById(orderId);
+  async updateItemQuantity(idOrder, idItem, quantity) {
+    const order = await this.orderRepository.findById(idOrder);
     if (!order) {
-      throw AppError.notFound('Pedido', orderId);
+      throw AppError.notFound('Pedido', idOrder);
     }
       if (order.status !== 'pendente') {
       throw new AppError('Não é possível atualizar itens de um pedido que não está pendente', 'INVALID_ORDER_STATUS');
@@ -161,30 +172,17 @@ class OrderService {
       throw new AppError('Quantidade deve ser maior que zero', 'INVALID_QUANTITY');
     }
     
-    const item = await this.orderRepository.updateItemQuantity(orderId, itemId, quantity);
+    const item = await this.orderRepository.updateItemQuantity(idOrder, idItem, quantity);
     if (!item) {
-      throw AppError.notFound('Item do pedido', itemId);
+      throw AppError.notFound('Item do pedido', idItem);
     }
     
     // Update order total
-    await this.orderRepository.update(orderId, {
+    await this.orderRepository.update(idOrder, {
       totalAmount: order.items.reduce((total, item) => total + (item.price * item.quantity), 0)
     });
     
     return item;
-  }
-  async cancelOrder(id) {
-    const order = await this.orderRepository.findById(id);
-    if (!order) {
-      throw AppError.notFound('Pedido', id);
-    }
-    
-    if (!order.canBeCancelled()) {
-      throw new AppError('Não é possível cancelar este pedido', 'INVALID_ORDER_STATUS');
-    }    // Removida a lógica de cancelamento/reembolso de pagamento
-    // O payment-service deve ser informado sobre o cancelamento do pedido
-    // através de um mecanismo de comunicação assíncrona (eventos, webhooks, etc.)
-      return await this.orderRepository.updateStatus(id, 'cancelado');
   }
 
   /**
@@ -197,10 +195,10 @@ class OrderService {
       
       for (const item of order.items) {
         try {
-          await this.bagService.changeBagStatus(item.bagId, 0); // 0 = inativo
-          console.log(`✅ Sacola ${item.bagId} inativada com sucesso (quantidade: ${item.quantity})`);
+          await this.bagService.changeBagStatus(item.idBag, 0); // 0 = inativo
+          console.log(`✅ Sacola ${item.idBag} inativada com sucesso (quantidade: ${item.quantity})`);
         } catch (error) {
-          console.error(`❌ Erro ao inativar sacola ${item.bagId}:`, error.message);
+          console.error(`❌ Erro ao inativar sacola ${item.idBag}:`, error.message);
           // Continua o processo mesmo se uma sacola falhar
           // para não bloquear a finalização do pedido
         }
@@ -213,20 +211,8 @@ class OrderService {
     }
   }
 
-  async getOrderHistoryByUser(userId, options = {}) {
-    return await this.orderRepository.getOrderHistoryByUser(userId, options);
-  }
-
-  async getOrderHistoryByBusiness(businessId, options = {}) {
-    return await this.orderRepository.getOrderHistoryByBusiness(businessId, options);
-  }
-
-  async getOrdersByStatus(status, options = {}) {
-    const validStatuses = ['pendente', 'confirmado', 'preparando', 'pronto', 'entregue', 'cancelado'];
-    if (!validStatuses.includes(status)) {
-      throw new AppError('Status inválido', 'INVALID_STATUS');
-    }
-    return await this.orderRepository.getOrdersByStatus(status, options);
+  async getOrderHistory(where, limit, offset, orderBy, orderDirection) {
+    return await this.orderRepository.getOrderHistory(where, limit, offset, orderBy, orderDirection);
   }
 
   async getOrdersByDateRange(startDate, endDate, options = {}) {
@@ -236,12 +222,12 @@ class OrderService {
     return await this.orderRepository.getOrdersByDateRange(startDate, endDate, options);
   }
 
-  // Método para obter estatísticas rápidas do histórico
-  async getOrderStatsForUser(userId) {
-    const allOrders = await this.orderRepository.findByUserId(userId);
-    
+  async getOrderStats(entityId, entityType) {
+    entityId = entityType === 'business' ? { idBusiness: entityId } : { idClient: entityId };
+    const allOrders = await this.orderRepository.findAll(entityId, null, null);
+
     const stats = {
-      total: allOrders.length,
+      total: allOrders.count,
       byStatus: {
         pendente: 0,
         confirmado: 0,
@@ -254,43 +240,16 @@ class OrderService {
       lastOrderDate: null
     };
 
-    allOrders.forEach(order => {
+    allOrders.rows.forEach(order => {
       stats.byStatus[order.status]++;
       stats.totalAmount += parseFloat(order.totalAmount || 0);
-      
+
       if (!stats.lastOrderDate || order.createdAt > stats.lastOrderDate) {
         stats.lastOrderDate = order.createdAt;
       }
     });
 
-    return stats;
-  }
-
-  async getOrderStatsForBusiness(businessId) {
-    const allOrders = await this.orderRepository.findByBusinessId(businessId);
-    
-    const stats = {
-      total: allOrders.length,
-      byStatus: {
-        pendente: 0,
-        confirmado: 0,
-        preparando: 0,
-        pronto: 0,
-        entregue: 0,
-        cancelado: 0
-      },
-      totalRevenue: 0,
-      lastOrderDate: null
-    };
-
-    allOrders.forEach(order => {
-      stats.byStatus[order.status]++;
-      stats.totalRevenue += parseFloat(order.totalAmount || 0);
-      
-      if (!stats.lastOrderDate || order.createdAt > stats.lastOrderDate) {
-        stats.lastOrderDate = order.createdAt;
-      }
-    });
+    stats.totalAmount = stats.totalAmount.toFixed(2);
 
     return stats;
   }

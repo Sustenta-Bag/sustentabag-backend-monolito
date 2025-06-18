@@ -13,16 +13,16 @@ class OrderModel extends Model {
         primaryKey: true,
         field: 'idPedido'
       },
-      userId: {
+      idClient: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: 'idUsuario',
+        field: 'idCliente',
         references: {
-          model: 'usuarios',
-          key: 'idUsuario'
+          model: 'clientes',
+          key: 'idCliente'
         }
       },
-      businessId: {
+      idBusiness: {
         type: DataTypes.INTEGER,
         allowNull: false,
         field: 'idEmpresa',
@@ -30,7 +30,8 @@ class OrderModel extends Model {
           model: 'empresas',
           key: 'idEmpresa'
         }
-      },      status: {
+      },
+      status: {
         type: DataTypes.STRING,
         allowNull: false,
         defaultValue: 'pendente',
@@ -38,7 +39,8 @@ class OrderModel extends Model {
         validate: {
           isIn: [['pendente', 'confirmado', 'preparando', 'pronto', 'entregue', 'cancelado']]
         }
-      },totalAmount: {
+      },
+      totalAmount: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         defaultValue: 0,
@@ -65,23 +67,23 @@ class OrderModel extends Model {
   }
   
   static associate(models) {
-    if (models.UserModel) {
-      this.belongsTo(models.UserModel, { 
-        foreignKey: 'userId',
-        as: 'user'
+    if (models.ClientModel) {
+      this.belongsTo(models.ClientModel, { 
+        foreignKey: 'idClient',
+        as: 'client'
       });
     }
     
     if (models.BusinessModel) {
       this.belongsTo(models.BusinessModel, { 
-        foreignKey: 'businessId',
+        foreignKey: 'idBusiness',
         as: 'business'
       });
     }
     
     if (models.OrderItemModel) {
       this.hasMany(models.OrderItemModel, {
-        foreignKey: 'orderId',
+        foreignKey: 'idOrder',
         as: 'items'
       });
     }

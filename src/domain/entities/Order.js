@@ -1,10 +1,12 @@
-class Order {  constructor(id, userId, businessId, status = 'pendente', totalAmount = 0, createdAt = new Date()) {
+class Order {  
+  constructor(id = null, idClient, idBusiness, status = 'pendente', totalAmount = 0, createdAt = new Date(), updatedAt = new Date()) {
     this.id = id;
-    this.userId = userId;
-    this.businessId = businessId;
+    this.idClient = idClient;
+    this.idBusiness = idBusiness;
     this.status = status;
     this.totalAmount = totalAmount;
     this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
     this.items = [];
   }
 
