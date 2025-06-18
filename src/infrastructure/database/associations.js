@@ -45,12 +45,12 @@ const setupAssociations = (models) => {
     console.log('Configurando associação entre Order e OrderItem');
     
     models.OrderModel.hasMany(models.OrderItemModel, {
-      foreignKey: 'orderId',
+      foreignKey: 'idOrder',
       as: 'items'
     });
     
     models.OrderItemModel.belongsTo(models.OrderModel, {
-      foreignKey: 'orderId',
+      foreignKey: 'idOrder',
       as: 'order'
     });
   } else {
@@ -58,31 +58,31 @@ const setupAssociations = (models) => {
   }
 
   if (models.OrderModel && models.UserModel) {
-    console.log('Configurando associação entre Order e User');
+    console.log('Configurando associação entre Order e Client');
     
     models.OrderModel.belongsTo(models.UserModel, {
-      foreignKey: 'userId',
-      as: 'user'
+      foreignKey: 'idClient',
+      as: 'client'
     });
     
     models.UserModel.hasMany(models.OrderModel, {
-      foreignKey: 'userId',
+      foreignKey: 'idClient',
       as: 'orders'
     });
   } else {
-    console.warn('Não foi possível configurar associação entre Order e User. Modelos não disponíveis.');
+    console.warn('Não foi possível configurar associação entre Order e Client. Modelos não disponíveis.');
   }
 
   if (models.OrderModel && models.BusinessModel) {
     console.log('Configurando associação entre Order e Business');
     
     models.OrderModel.belongsTo(models.BusinessModel, {
-      foreignKey: 'businessId',
+      foreignKey: 'idBusiness',
       as: 'business'
     });
     
     models.BusinessModel.hasMany(models.OrderModel, {
-      foreignKey: 'businessId',
+      foreignKey: 'idBusiness',
       as: 'orders'
     });
   } else {
@@ -93,12 +93,12 @@ const setupAssociations = (models) => {
     console.log('Configurando associação entre OrderItem e Bag');
     
     models.OrderItemModel.belongsTo(models.BagModel, {
-      foreignKey: 'bagId',
+      foreignKey: 'idBag',
       as: 'bag'
     });
     
     models.BagModel.hasMany(models.OrderItemModel, {
-      foreignKey: 'bagId',
+      foreignKey: 'idBag',
       as: 'orderItems'
     });
   } else {

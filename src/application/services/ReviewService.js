@@ -12,7 +12,16 @@ class ReviewService {
         });
 
         if(existing && existing.length > 0) {
-            throw new Error('Order already reviewed')
+            throw new Error('Order already reviewed');
+        }
+
+        const order = await this.reviewRepository.orderRepository.findById(data.idOrder);
+        if(!order) {
+            throw new Error('Order not found');
+        }
+
+        if(order.status !== 'entregue') {
+            throw new Error('Order not delivered yet');
         }
 
         return await this.reviewRepository.create(data);

@@ -19,14 +19,6 @@ class OrderRepository {
     throw new Error('Método não implementado');
   }
 
-  async findByUserId(userId) {
-    throw new Error('Método não implementado');
-  }
-
-  async findByBusinessId(businessId) {
-    throw new Error('Método não implementado');
-  }
-
   async findAllBusinessWithOrders() {
     throw new Error('Método não implementado');
   }
@@ -52,10 +44,6 @@ class OrderRepository {
   }
 
   async getOrderHistoryByBusiness(businessId, options = {}) {
-    throw new Error('Método não implementado');
-  }
-
-  async getOrdersByStatus(status, options = {}) {
     throw new Error('Método não implementado');
   }
 

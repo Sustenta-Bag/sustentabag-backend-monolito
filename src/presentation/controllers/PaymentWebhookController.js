@@ -12,7 +12,7 @@ class PaymentWebhookController {
       const { orderId, status, paymentId } = req.body;
 
       if (!orderId || !status) {
-        return res.status(400).json({
+        return res.payment_required({
           message: "Dados incompletos. orderId e status são obrigatórios",
         });
       }
@@ -24,10 +24,10 @@ class PaymentWebhookController {
           throw new Error("OrderId inválido");
         }
       } catch (error) {
-        console.log(
+        console.error(
           `❌ OrderId inválido recebido: ${orderId} (tipo: ${typeof orderId})`
         );
-        return res.status(400).json({
+        return res.payment_required({
           message: `OrderId inválido: ${orderId}. Esperado um número inteiro.`,
         });
       }
@@ -37,9 +37,7 @@ class PaymentWebhookController {
       );
       const order = await this.orderService.getOrder(orderIdInt);
       if (!order) {
-        return res.status(404).json({
-          message: `Pedido com ID ${orderIdInt} não encontrado`,
-        });
+        return res.not_found();
       }
       console.log(
         `Webhook do payment-service recebido: Pedido ${orderIdInt}, status ${status}, paymentId: ${paymentId}`
@@ -62,12 +60,12 @@ class PaymentWebhookController {
         console.log(
           `Status de pagamento desconhecido: ${status} para pedido ${orderIdInt}`
         );
-        return res.status(400).json({
+        return res.payment_required({
           message: `Status de pagamento desconhecido: ${status}`,
         });
       }
 
-      return res.status(200).json({
+      return res.ok({
         message: "Notificação processada com sucesso",
       });
     } catch (error) {

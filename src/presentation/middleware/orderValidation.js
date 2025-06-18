@@ -2,11 +2,7 @@ import { body, param } from 'express-validator';
 import { handleValidationErrors } from './errorHandler.js';
 
 export const validateCreateOrder = [
-  body('userId')
-    .isInt({ min: 1 })
-    .withMessage('ID do usuário deve ser um número inteiro positivo'),
-
-  body('businessId')
+  body('idBusiness')
     .isInt({ min: 1 })
     .withMessage('ID da empresa deve ser um número inteiro positivo'),
 
@@ -14,7 +10,7 @@ export const validateCreateOrder = [
     .isArray({ min: 1 })
     .withMessage('Pedido deve conter pelo menos um item'),
 
-  body('items.*.bagId')
+  body('items.*.idBag')
     .isInt({ min: 1 })
     .withMessage('ID da sacola deve ser um número inteiro positivo'),
 
@@ -52,11 +48,11 @@ export const validateOrderStatus = [
 ];
 
 export const validateAddItem = [
-  param('orderId')
+  param('idOrder')
     .isInt({ min: 1 })
     .withMessage('ID do pedido deve ser um número inteiro positivo'),
 
-  body('bagId')
+  body('idBag')
     .isInt({ min: 1 })
     .withMessage('ID da sacola deve ser um número inteiro positivo'),
 
@@ -68,11 +64,11 @@ export const validateAddItem = [
 ];
 
 export const validateUpdateItemQuantity = [
-  param('orderId')
+  param('idOrder')
     .isInt({ min: 1 })
     .withMessage('ID do pedido deve ser um número inteiro positivo'),
 
-  param('itemId')
+  param('idItem')
     .isInt({ min: 1 })
     .withMessage('ID do item deve ser um número inteiro positivo'),
 
@@ -84,11 +80,11 @@ export const validateUpdateItemQuantity = [
 ];
 
 export const validateRemoveItem = [
-  param('orderId')
+  param('idOrder')
     .isInt({ min: 1 })
     .withMessage('ID do pedido deve ser um número inteiro positivo'),
 
-  param('itemId')
+  param('idItem')
     .isInt({ min: 1 })
     .withMessage('ID do item deve ser um número inteiro positivo'),
 

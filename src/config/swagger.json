@@ -2920,12 +2920,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/UnauthorizedError"
                 }
               },
               "application/xml": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/UnauthorizedError"
                 }
               }
             }
@@ -2935,12 +2935,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ForbiddenError"
                 }
               },
               "application/xml": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ForbiddenError"
                 }
               }
             }
@@ -2956,64 +2956,12 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "userId": {
-                    "type": "integer",
-                    "example": 1
-                  },
-                  "businessId": {
-                    "type": "integer",
-                    "example": 1
-                  },
-                  "items": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "bagId": {
-                          "type": "integer",
-                          "example": 1
-                        },
-                        "quantity": {
-                          "type": "integer",
-                          "example": 2
-                        }
-                      }
-                    }
-                  }
-                }
+                "$ref": "#/components/schemas/Order"
               }
             },
             "application/xml": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "userId": {
-                    "type": "integer",
-                    "example": 1
-                  },
-                  "businessId": {
-                    "type": "integer",
-                    "example": 1
-                  },
-                  "items": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "bagId": {
-                          "type": "integer",
-                          "example": 1
-                        },
-                        "quantity": {
-                          "type": "integer",
-                          "example": 2
-                        }
-                      }
-                    }
-                  }
-                }
+                "$ref": "#/components/schemas/Order"
               }
             }
           }
@@ -3031,768 +2979,30 @@
             "schema": {
               "type": "string"
             }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized - Authentication required or invalid token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden - Insufficient permissions",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/orders/{id}": {
-      "get": {
-        "tags": [
-          "Order"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
           },
           {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized - Authentication required or invalid token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found - Order not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/orders/user/{userId}": {
-      "get": {
-        "tags": [
-          "Order"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized - Authentication required or invalid token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/orders/business/{businessId}": {
-      "get": {
-        "tags": [
-          "Order"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "businessId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized - Authentication required or invalid token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/orders/{id}/status": {
-      "patch": {
-        "tags": [
-          "Order"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized - Authentication required or invalid token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden - Insufficient permissions",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found - Order not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "status": {
-                    "type": "string",
-                    "enum": [
-                      "pending",
-                      "confirmed",
-                      "preparing",
-                      "ready",
-                      "delivered",
-                      "cancelled"
-                    ],
-                    "example": "confirmed"
-                  }
-                }
-              }
-            },
-            "application/xml": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "status": {
-                    "type": "string",
-                    "enum": [
-                      "pending",
-                      "confirmed",
-                      "preparing",
-                      "ready",
-                      "delivered",
-                      "cancelled"
-                    ],
-                    "example": "confirmed"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/orders/{orderId}/items": {
-      "post": {
-        "tags": [
-          "Order"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "orderId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Created"
-          },
-          "401": {
-            "description": "Unauthorized - Authentication required or invalid token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden - Insufficient permissions",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found - Order not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "bagId": {
-                    "type": "integer",
-                    "example": 1
-                  },
-                  "quantity": {
-                    "type": "integer",
-                    "example": 2
-                  }
-                }
-              }
-            },
-            "application/xml": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "bagId": {
-                    "type": "integer",
-                    "example": 1
-                  },
-                  "quantity": {
-                    "type": "integer",
-                    "example": 2
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/orders/{orderId}/items/{itemId}": {
-      "delete": {
-        "tags": [
-          "Order"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "orderId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "itemId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "401": {
-            "description": "Unauthorized - Authentication required or invalid token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden - Insufficient permissions",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found - Order or item not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/orders/{orderId}/items/{itemId}/quantity": {
-      "patch": {
-        "tags": [
-          "Order"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "orderId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "itemId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized - Authentication required or invalid token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden - Insufficient permissions",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found - Order or item not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "quantity": {
-                    "type": "integer",
-                    "example": 3
-                  }
-                }
-              }
-            },
-            "application/xml": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "quantity": {
-                    "type": "integer",
-                    "example": 3
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/orders/{id}/cancel": {
-      "post": {
-        "tags": [
-          "Order"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized - Authentication required or invalid token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden - Insufficient permissions",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found - Order not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/orders/history/user/{userId}": {
-      "get": {
-        "tags": [
-          "Order History"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "User ID"
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "orderBy",
+            "name": "page",
             "in": "query",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "orderDirection",
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "idClient",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "idBusiness",
             "in": "query",
             "schema": {
               "type": "string"
@@ -3801,159 +3011,41 @@
           {
             "name": "status",
             "in": "query",
-            "description": "Filter by order status",
-            "required": false,
-            "enum": [
-              "pendente",
-              "confirmado",
-              "preparando",
-              "pronto",
-              "entregue",
-              "cancelado"
-            ],
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "startDate",
-            "in": "query",
-            "description": "Filter from date (YYYY-MM-DD)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "endDate",
-            "in": "query",
-            "description": "Filter to date (YYYY-MM-DD)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Number of orders per page",
-            "required": false,
-            "default": 10,
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "description": "Number of orders to skip",
-            "required": false,
-            "default": 0,
-            "schema": {
-              "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "User order history retrieved successfully",
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required or invalid token",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "example": "object"
-                    },
-                    "properties": {
-                      "type": "object",
-                      "properties": {
-                        "orders": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "array"
-                            },
-                            "items": {
-                              "$ref": "#/components/schemas/Order"
-                            }
-                          }
-                        },
-                        "total": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "integer"
-                            }
-                          }
-                        },
-                        "hasMore": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "boolean"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "xml": {
-                    "name": "main"
-                  }
+                  "$ref": "#/components/schemas/UnauthorizedError"
                 }
               },
               "application/xml": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "example": "object"
-                    },
-                    "properties": {
-                      "type": "object",
-                      "properties": {
-                        "orders": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "array"
-                            },
-                            "items": {
-                              "$ref": "#/components/schemas/Order"
-                            }
-                          }
-                        },
-                        "total": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "integer"
-                            }
-                          }
-                        },
-                        "hasMore": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "boolean"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "xml": {
-                    "name": "main"
-                  }
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenError"
                 }
               }
             }
@@ -3966,22 +3058,13 @@
         ]
       }
     },
-    "/api/orders/history/business/{businessId}": {
+    "/api/orders/history": {
       "get": {
         "tags": [
           "Order History"
         ],
         "description": "",
         "parameters": [
-          {
-            "name": "businessId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Business ID"
-          },
           {
             "name": "authorization",
             "in": "header",
@@ -4018,7 +3101,7 @@
             }
           },
           {
-            "name": "offset",
+            "name": "page",
             "in": "query",
             "schema": {
               "type": "string"
@@ -4041,7 +3124,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Business order history retrieved successfully"
+            "description": "OK"
           }
         },
         "security": [
@@ -4051,7 +3134,7 @@
         ]
       }
     },
-    "/api/orders/stats/user/{userId}": {
+    "/api/orders/stats": {
       "get": {
         "tags": [
           "Order Statistics"
@@ -4059,14 +3142,6 @@
         "description": "",
         "parameters": [
           {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "schema": {
@@ -4076,338 +3151,7 @@
         ],
         "responses": {
           "200": {
-            "description": "User order statistics retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "example": "object"
-                    },
-                    "properties": {
-                      "type": "object",
-                      "properties": {
-                        "total": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "integer"
-                            }
-                          }
-                        },
-                        "byStatus": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "object"
-                            }
-                          }
-                        },
-                        "totalAmount": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "number"
-                            }
-                          }
-                        },
-                        "lastOrderDate": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "string"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "xml": {
-                    "name": "main"
-                  }
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "example": "object"
-                    },
-                    "properties": {
-                      "type": "object",
-                      "properties": {
-                        "total": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "integer"
-                            }
-                          }
-                        },
-                        "byStatus": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "object"
-                            }
-                          }
-                        },
-                        "totalAmount": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "number"
-                            }
-                          }
-                        },
-                        "lastOrderDate": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "string"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "xml": {
-                    "name": "main"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/orders/stats/business/{businessId}": {
-      "get": {
-        "tags": [
-          "Order Statistics"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "businessId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Business order statistics retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "example": "object"
-                    },
-                    "properties": {
-                      "type": "object",
-                      "properties": {
-                        "total": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "integer"
-                            }
-                          }
-                        },
-                        "byStatus": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "object"
-                            }
-                          }
-                        },
-                        "totalRevenue": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "number"
-                            }
-                          }
-                        },
-                        "lastOrderDate": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "string"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "xml": {
-                    "name": "main"
-                  }
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "example": "object"
-                    },
-                    "properties": {
-                      "type": "object",
-                      "properties": {
-                        "total": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "integer"
-                            }
-                          }
-                        },
-                        "byStatus": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "object"
-                            }
-                          }
-                        },
-                        "totalRevenue": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "number"
-                            }
-                          }
-                        },
-                        "lastOrderDate": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "example": "string"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "xml": {
-                    "name": "main"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/orders/status/{status}": {
-      "get": {
-        "tags": [
-          "Order"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "status",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Order status",
-            "enum": [
-              "pendente",
-              "confirmado",
-              "preparando",
-              "pronto",
-              "entregue",
-              "cancelado"
-            ]
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "orderBy",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "orderDirection",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Orders filtered by status retrieved successfully"
+            "description": "OK"
           }
         },
         "security": [
@@ -4488,6 +3232,452 @@
             "bearerAuth": []
           }
         ]
+      }
+    },
+    "/api/orders/{id}": {
+      "get": {
+        "tags": [
+          "Order"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found - Order not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/orders/{id}/status": {
+      "patch": {
+        "tags": [
+          "Order"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found - Order not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderStatusUpdate"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderStatusUpdate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders/{idOrder}/items": {
+      "post": {
+        "tags": [
+          "Order"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "idOrder",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found - Order not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderItens"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderItens"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders/{idOrder}/items/{idItem}": {
+      "delete": {
+        "tags": [
+          "Order"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "idOrder",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "idItem",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found - Order or item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/orders/{idOrder}/items/{idItem}/quantity": {
+      "patch": {
+        "tags": [
+          "Order"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "idOrder",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "idItem",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found - Order or item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemQuantity"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemQuantity"
+              }
+            }
+          }
+        }
       }
     },
     "/api/reviews": {
@@ -4910,6 +4100,34 @@
           "name": "Bag"
         }
       },
+      "Order": {
+        "type": "object",
+        "properties": {
+          "idBusiness": {
+            "type": "number",
+            "example": 1
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "idBag": {
+                  "type": "number",
+                  "example": 1
+                },
+                "quantity": {
+                  "type": "number",
+                  "example": 2
+                }
+              }
+            }
+          }
+        },
+        "xml": {
+          "name": "Order"
+        }
+      },
       "StatusUpdate": {
         "type": "object",
         "properties": {
@@ -5020,6 +4238,46 @@
         },
         "xml": {
           "name": "UpdateStatus"
+        }
+      },
+      "OrderStatusUpdate": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "pronto"
+          }
+        },
+        "xml": {
+          "name": "OrderStatusUpdate"
+        }
+      },
+      "OrderItens": {
+        "type": "object",
+        "properties": {
+          "idBag": {
+            "type": "number",
+            "example": 1
+          },
+          "quantity": {
+            "type": "number",
+            "example": 2
+          }
+        },
+        "xml": {
+          "name": "OrderItens"
+        }
+      },
+      "ItemQuantity": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "number",
+            "example": 3
+          }
+        },
+        "xml": {
+          "name": "ItemQuantity"
         }
       },
       "Client": {
@@ -5193,7 +4451,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1749599400538"
+            "example": "1750277759236"
           }
         },
         "xml": {
@@ -5217,7 +4475,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1749599400538"
+            "example": "1750277759236"
           }
         },
         "xml": {
@@ -5241,7 +4499,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1749599400538"
+            "example": "1750277759236"
           }
         },
         "xml": {
