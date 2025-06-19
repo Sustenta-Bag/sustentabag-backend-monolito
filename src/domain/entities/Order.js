@@ -1,5 +1,5 @@
 class Order {  
-  constructor(id = null, idClient, idBusiness, status = 'pendente', totalAmount = 0, createdAt = new Date(), updatedAt = new Date()) {
+  constructor({ id = null, idClient, idBusiness, status = 'pendente', totalAmount = 0, createdAt = new Date(), updatedAt = new Date() }) {
     this.id = id;
     this.idClient = idClient;
     this.idBusiness = idBusiness;

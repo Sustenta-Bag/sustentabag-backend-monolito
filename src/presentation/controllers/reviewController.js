@@ -4,6 +4,16 @@ class reviewController {
   }
 
   async createReview(req, res, next) {
+    /*
+    #swagger.tags = ["Reviews"]
+    #swagger.consumes = ['application/json']
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.requestBody = {
+        required: true,
+        schema: { $ref: '#/components/schemas/Review' },
+    }
+    #swagger.responses[201]
+    */
     try {
       const data = {
         ...req.body,
@@ -17,6 +27,12 @@ class reviewController {
   }
 
   async listReviews(req, res, next) {
+    /*
+    #swagger.tags = ["Reviews"]
+    #swagger.consumes = ['application/json']
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200]
+    */
     try {
       const { page, limit, idClient, idBusiness, rating } = req.query;
       const reviews = await this.reviewService.listReviews({
@@ -33,6 +49,18 @@ class reviewController {
   }
 
   async deleteReview(req, res, next) {
+    /*
+    #swagger.tags = ["Reviews"]
+    #swagger.consumes = ['application/json']
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['id'] = {
+        in: 'path',
+        description: 'ID of the review to delete',
+        required: true,
+        type: 'integer'
+    }
+    #swagger.responses[204]
+    */
     try {
       await this.reviewService.deleteReview(req.params.id);
       return res.no_content();

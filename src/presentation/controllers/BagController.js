@@ -6,6 +6,23 @@ class BagController {
     this.bagService = bagService;
   }
   async createBag(req, res, next) {
+    /*
+    #swagger.tags = ["Bag"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.requestBody = {
+      required: true,
+      schema: { $ref: '#components/schemas/Bag' }
+    }
+    #swagger.responses[201]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
+    }
+    */
     try {
       const bagData = {
         ...req.body,
@@ -68,6 +85,19 @@ class BagController {
   }
 
   async getBag(req, res, next) {
+    /*
+    #swagger.tags = ["Bag"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
+    }
+    #swagger.responses[404] = {
+      description: "Not Found - Bag not found",
+      schema: { $ref: "#/components/schemas/NotFoundError" }
+    }
+    */
     try {
       const bag = await this.bagService.getBag(req.params.id);
       return res.hateoasItem(bag);
@@ -77,6 +107,15 @@ class BagController {
   }
 
   async getAllBags(req, res, next) {
+    /*
+    #swagger.tags = ["Bag"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
+    }
+    */
     try {
       const filters = {
         idBusiness: req.query.idBusiness,
@@ -93,6 +132,27 @@ class BagController {
   }
 
   async updateBag(req, res, next) {
+    /*
+    #swagger.tags = ["Bag"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.requestBody = {
+      required: true,
+      schema: { $ref: '#components/schemas/Bag' },
+    }
+    #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
+    }
+    #swagger.responses[404] = {
+      description: "Not Found - Bag not found",
+      schema: { $ref: "#/components/schemas/NotFoundError" }
+    }
+    */
     try {
       const bagData = {
         ...req.body,
@@ -106,6 +166,23 @@ class BagController {
   }
 
   async deleteBag(req, res, next) {
+    /*
+    #swagger.tags = ["Bag"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[204]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
+    }
+    #swagger.responses[404] = {
+      description: "Not Found - Bag not found",
+      schema: { $ref: "#/components/schemas/NotFoundError" }
+    }
+    */
     try {
       const currentId = req.user.entityId;
       const bag = await this.bagService.getBag(req.params.id);
@@ -123,6 +200,23 @@ class BagController {
   }
 
   async changeBagStatus(req, res, next) {
+    /*
+    #swagger.tags = ["Bag"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.requestBody = {
+      required: true,
+      schema: { $ref: '#components/schemas/StatusUpdate' }
+    }
+    #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
+    }
+    */
     try {
       if (req.body.status === undefined) {
         throw new AppError("Status não fornecido", "MISSING_STATUS");
@@ -148,6 +242,21 @@ class BagController {
   }
 
   async getAllowedTags(req, res, next) {
+    /*
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.tags = ["Bag"]
+    #swagger.description = "Retorna a lista de tags permitidas para sacolas"
+    #swagger.responses[200] = {
+      description: "Lista de tags permitidas",
+      schema: {
+        type: "array",
+        items: {
+          type: "string"
+        },
+        example: ["PODE_CONTER_GLUTEN", "PODE_CONTER_LACTOSE"]
+      }
+    }
+    */
     try {
       const ALLOWED_TAGS = [
         "PODE_CONTER_GLUTEN",

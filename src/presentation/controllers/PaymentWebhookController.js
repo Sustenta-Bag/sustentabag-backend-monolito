@@ -8,6 +8,9 @@ class PaymentWebhookController {
     this.orderService = orderService;
   }
   async handlePaymentUpdate(req, res, next) {
+    /*
+    #swagger.ignore = true
+    */
     try {
       const { orderId, status, paymentId } = req.body;
 

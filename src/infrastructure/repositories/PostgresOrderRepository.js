@@ -260,15 +260,15 @@ class PostgresOrderRepository extends OrderRepository {
   }
 
   _mapToDomainEntity(record) {
-    return new Order(
-      record.id,
-      record.idClient,
-      record.idBusiness,
-      record.status,
-      record.totalAmount,
-      record.createdAt,
-      record.updatedAt
-    );
+    return new Order({
+      id: record.id,
+      idClient: record.idClient,
+      idBusiness: record.idBusiness,
+      status: record.status,
+      totalAmount: record.totalAmount,
+      createdAt: record.createdAt,
+      updatedAt: record.updatedAt
+    });
   }
 
   _mapToDomainItem(record) {

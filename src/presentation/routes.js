@@ -1,48 +1,28 @@
-import express from "express";
-import { setupModuleRouters } from "../application/bootstrap.js";
-import { sequelize } from "../infrastructure/database/connection.js";
-import PaymentWebhookController from "./controllers/PaymentWebhookController.js";
-import OrderService from "../application/services/OrderService.js";
-import { getOrderRepository } from "../application/modules/orderModule.js";
-import { getBagService } from "../application/modules/bagModule.js";
-import healthRoutes from "./routes/healthRoutes.js";
+import { Router } from 'express';
+import AddressRoutes from '../presentation/routes/addressRoutes.js';
+import BagRoutes from '../presentation/routes/bagRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+import clientRoutes from './routes/clientRoutes.js';
+import businessRoutes from './routes/businessRoutes.js';
+import locationRoutes from './routes/locationRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import favoriteRoutes from './routes/favoriteRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
+import healthRoutes from './routes/healthRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 
-const router = express.Router();
+const routes = Router();
 
-const {
-  bagRouter,
-  clientRouter,
-  addresRouter,
-  businessRouter,
-  authRouter,
-  locationRouter,
-  orderRouter,
-  favoriteRouter,
-  reviewRouter
-} = setupModuleRouters({
-  sequelizeInstance: sequelize,
-});
+routes.use(`/api/auth`, authRoutes());
+routes.use(`/api/addresses`, AddressRoutes());
+routes.use(`/api/businesses`, businessRoutes());
+routes.use(`/api/clients`, clientRoutes());
+routes.use(`/api/locations`, locationRoutes());
+routes.use(`/api/bags`, BagRoutes());
+routes.use(`/api/orders`, orderRoutes());
+routes.use(`/api/reviews`, reviewRoutes());
+routes.use(`/api/favorites`, favoriteRoutes());
+routes.use(`/api/payments`, paymentRoutes);
+routes.use(`/api/health`, healthRoutes());
 
-router.use("/api/health", healthRoutes);
-router.use("/api/addresses", addresRouter);
-router.use("/api/clients", clientRouter);
-router.use("/api/businesses", businessRouter);
-router.use("/api/bags", bagRouter);
-router.use("/api/auth", authRouter);
-router.use("/api/locations", locationRouter);
-router.use("/api/orders", orderRouter);
-router.use("/api/favorites", favoriteRouter);
-router.use("/api/reviews", reviewRouter);
-
-// Configurar webhook para receber notificações do payment-service
-const bagService = getBagService(sequelize);
-const orderRepository = getOrderRepository(sequelize);
-const orderService = new OrderService(orderRepository, bagService);
-const paymentWebhookController = new PaymentWebhookController(orderService);
-
-// Rota para receber callbacks do payment-service
-router.post("/api/payments/webhook", (req, res, next) =>
-  paymentWebhookController.handlePaymentUpdate(req, res, next)
-);
-
-export default router;
+export default routes;
