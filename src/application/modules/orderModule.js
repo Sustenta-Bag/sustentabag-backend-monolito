@@ -1,6 +1,6 @@
 import OrderModel from '../../domain/models/OrderModel.js';
 import OrderItemModel from '../../domain/models/OrderItemModel.js';
-import PostgresOrderRepository from '../../infrastructure/repositories/postgresOrderRepository.js';
+import PostgresOrderRepository from '../../infrastructure/repositories/PostgresOrderRepository.js';
 
 export const getOrderRepository = (sequelizeInstance) => {
   OrderModel.init(sequelizeInstance);

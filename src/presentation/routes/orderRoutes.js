@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import OrderController from '../controllers/OrderController.js';
 import OrderService from '../../application/services/OrderService.js';
-import PostgresOrderRepository from '../../infrastructure/repositories/postgresOrderRepository.js';
+import PostgresOrderRepository from '../../infrastructure/repositories/PostgresOrderRepository.js';
 import BagService from '../../application/services/BagService.js';
 import PostgresBagRepository from '../../infrastructure/repositories/PostgresBagRepository.js';
 import {

@@ -1,5 +1,5 @@
 import ReviewModel from "../../domain/models/ReviewModel.js";
-import PostgresReviewRepository from "../../infrastructure/repositories/postgresReviewRepository.js";
+import PostgresReviewRepository from "../../infrastructure/repositories/PostgresReviewRepository.js";
 
 export const getReviewRepository = (sequelizeInstance) => {
     ReviewModel.init(sequelizeInstance);

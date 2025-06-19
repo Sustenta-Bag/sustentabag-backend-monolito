@@ -1,5 +1,5 @@
 import FavoriteModel from '../../domain/models/FavoriteModel.js';
-import PostgresFavoriteRepository from '../../infrastructure/repositories/postgresFavoriteRepository.js';
+import PostgresFavoriteRepository from '../../infrastructure/repositories/PostgresFavoriteRepository.js';
 
 export const getFavoriteRepository = (sequelizeInstance) => {
     FavoriteModel.init(sequelizeInstance);
