@@ -395,10 +395,9 @@ class LocationService {
       }
 
       const allBags = [];
-      
-      for (const business of nearbyBusinesses) {
+        for (const business of nearbyBusinesses) {
         try {
-          const activeBags = await bagRepository.findAll({ idBusiness: business.id, status: true }, limit, 0);
+          const activeBags = await bagRepository.findAll({ idBusiness: business.id, status: 1 }, limit, 0);
           
           for (const bag of activeBags) {
             allBags.push({
