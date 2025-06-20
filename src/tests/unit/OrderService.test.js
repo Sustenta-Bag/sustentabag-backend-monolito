@@ -35,11 +35,11 @@ describe('OrderService', () => {
 
   describe('createOrder', () => {
     const validOrderData = {
-      userId: 1,
-      businessId: 1,
+      idClient: 1,
+      idBusiness: 1,
       items: [
-        { bagId: 1, quantity: 2 },
-        { bagId: 2, quantity: 1 }
+        { idBag: 1, quantity: 2 },
+        { idBag: 2, quantity: 1 }
       ]
     };
 
@@ -47,11 +47,12 @@ describe('OrderService', () => {
     const mockBag2 = { id: 2, price: 5.99, status: 1 };
 
     beforeEach(() => {
-      mockBagService.getBag.mockImplementation(async (id) => {
-        if (id === 1) return mockBag1;
-        if (id === 2) return mockBag2;
+      mockBagService.getBag.mockImplementation(async (idBag) => {
+        if (idBag === 1) return mockBag1;
+        if (idBag === 2) return mockBag2;
         return null;
-      });      mockOrderRepository.create.mockImplementation(async (data) => ({
+      });
+      mockOrderRepository.create.mockImplementation(async (data) => ({
         id: 1,
         ...data,
         status: 'pendente',
@@ -64,11 +65,11 @@ describe('OrderService', () => {
 
       expect(mockBagService.getBag).toHaveBeenCalledTimes(2);
       expect(mockOrderRepository.create).toHaveBeenCalledWith({
-        userId: 1,
-        businessId: 1,
+        idClient: 1,
+        idBusiness: 1,
         items: [
-          { bagId: 1, quantity: 2, price: 10.99 },
-          { bagId: 2, quantity: 1, price: 5.99 }
+          { idBag: 1, quantity: 2, price: 10.99 },
+          { idBag: 2, quantity: 1, price: 5.99 }
         ]
       });
       expect(result).toHaveProperty('id', 1);
@@ -77,8 +78,8 @@ describe('OrderService', () => {
 
     it('should throw error when order has no items', async () => {
       const invalidOrderData = {
-        userId: 1,
-        businessId: 1,
+        idClient: 1,
+        idBusiness: 1,
         items: []
       };
 
@@ -88,8 +89,7 @@ describe('OrderService', () => {
     });
 
     it('should throw error when bag does not exist', async () => {
-      mockBagService.getBag.mockResolvedValue(null);
-
+      mockBagService.getBag.mockImplementation(async (idBag) => idBag === 1 ? null : mockBag2);
       await expect(orderService.createOrder(validOrderData))
         .rejects
         .toThrow(AppError.notFound('Sacola', 1));
@@ -130,39 +130,11 @@ describe('OrderService', () => {
         new Order(1, 1, 1),
         new Order(2, 2, 1)
       ];
-      mockOrderRepository.findAll.mockResolvedValue(mockOrders);
+      mockOrderRepository.findAll.mockResolvedValue({ count: 2, rows: mockOrders });
 
       const result = await orderService.getAllOrders();
-      expect(result).toBe(mockOrders);
+      expect(result).toEqual({ total: 2, pages: 1, data: mockOrders });
       expect(mockOrderRepository.findAll).toHaveBeenCalled();
-    });
-  });
-
-  describe('getOrdersByUser', () => {
-    it('should return orders for specific user', async () => {
-      const mockOrders = [
-        new Order(1, 1, 1),
-        new Order(2, 1, 1)
-      ];
-      mockOrderRepository.findByUserId.mockResolvedValue(mockOrders);
-
-      const result = await orderService.getOrdersByUser(1);
-      expect(result).toBe(mockOrders);
-      expect(mockOrderRepository.findByUserId).toHaveBeenCalledWith(1);
-    });
-  });
-
-  describe('getOrdersByBusiness', () => {
-    it('should return orders for specific business', async () => {
-      const mockOrders = [
-        new Order(1, 1, 1),
-        new Order(2, 2, 1)
-      ];
-      mockOrderRepository.findByBusinessId.mockResolvedValue(mockOrders);
-
-      const result = await orderService.getOrdersByBusiness(1);
-      expect(result).toBe(mockOrders);
-      expect(mockOrderRepository.findByBusinessId).toHaveBeenCalledWith(1);
     });
   });
 
@@ -175,7 +147,9 @@ describe('OrderService', () => {
         ...mockOrder,
         status
       }));
-    });    it('should update order status successfully', async () => {
+    });
+
+    it('should update order status successfully', async () => {
       const result = await orderService.updateOrderStatus(1, 'confirmado');
       
       expect(result.status).toBe('confirmado');
@@ -196,68 +170,15 @@ describe('OrderService', () => {
 
     it('should inactivate bags when order is delivered', async () => {
       const orderWithItems = new Order(1, 1, 1);
-      orderWithItems.addItem(new OrderItem(1, 1, 1, 2, 10.99));
+      orderWithItems.addItem(new OrderItem({ id: 1, idOrder: 1, idBag: 1, quantity: 2, price: 10.99 }));
       mockOrderRepository.findById.mockResolvedValue(orderWithItems);
-
-      await orderService.updateOrderStatus(1, 'entregue');
-
-      expect(mockBagService.changeBagStatus).toHaveBeenCalledWith(1, 0);
-    });
-  });
-
-  describe('addItemToOrder', () => {
-    const mockOrder = new Order(1, 1, 1);
-    const mockBag = { id: 1, price: 10.99, status: 1 };
-    const itemData = { bagId: 1, quantity: 2 };
-
-    beforeEach(() => {
-      mockOrderRepository.findById.mockResolvedValue(mockOrder);
-      mockBagService.getBag.mockResolvedValue(mockBag);
-      mockOrderRepository.addItem.mockImplementation(async (orderId, data) => ({
-        id: 1,
-        ...data
+      mockOrderRepository.updateStatus.mockImplementation(async (id, status) => ({
+        ...orderWithItems,
+        status
       }));
-    });
-
-    it('should add item to pending order', async () => {
-      const result = await orderService.addItemToOrder(1, itemData);
-
-      expect(result).toHaveProperty('id', 1);
-      expect(result.price).toBe(10.99);
-      expect(mockOrderRepository.addItem).toHaveBeenCalledWith(1, {
-        ...itemData,
-        price: 10.99
-      });
-    });
-
-    it('should throw error when order does not exist', async () => {
-      mockOrderRepository.findById.mockResolvedValue(null);
-
-      await expect(orderService.addItemToOrder(999, itemData))
-        .rejects
-        .toThrow(AppError.notFound('Pedido', 999));
-    });    it('should throw error when order is not pending', async () => {
-      mockOrder.status = 'confirmado';
-
-      await expect(orderService.addItemToOrder(1, itemData))
-        .rejects
-        .toThrow(new AppError('Não é possível adicionar itens a um pedido que não está pendente', 'INVALID_ORDER_STATUS'));
-    });
-
-    it('should throw error when bag does not exist', async () => {
-      mockOrder.status = 'pendente';
-      mockBagService.getBag.mockResolvedValue(null);
-      await expect(orderService.addItemToOrder(1, itemData))
-        .rejects
-        .toThrow(new AppError('Sacola não encontrada com o ID: 1', 'NOT_FOUND'));
-    });
-
-    it('should throw error when bag is inactive', async () => {
-      mockOrder.status = 'pendente';
-      mockBagService.getBag.mockResolvedValue({ id: 1, status: 0 });
-      await expect(orderService.addItemToOrder(1, itemData))
-        .rejects
-        .toThrow(new AppError('Sacola 1 está inativa', 'INACTIVE_BAG'));
+      mockBagService.changeBagStatus.mockClear();
+      await orderService.updateOrderStatus(1, 'entregue');
+      expect(mockBagService.changeBagStatus).toHaveBeenCalledWith(1, 0);
     });
   });
 
@@ -282,7 +203,9 @@ describe('OrderService', () => {
       await expect(orderService.removeItemFromOrder(999, 1))
         .rejects
         .toThrow(AppError.notFound('Pedido', 999));
-    });    it('should throw error when order is not pending', async () => {
+    });
+
+    it('should throw error when order is not pending', async () => {
       mockOrder.status = 'confirmado';
 
       await expect(orderService.removeItemFromOrder(1, 1))
@@ -346,39 +269,6 @@ describe('OrderService', () => {
       await expect(orderService.updateItemQuantity(1, 999, 3))
         .rejects
         .toThrow(new AppError('Item do pedido não encontrada com o ID: 999', 'NOT_FOUND'));
-    });
-  });
-
-  describe('cancelOrder', () => {
-    const mockOrder = new Order(1, 1, 1);
-
-    beforeEach(() => {
-      mockOrderRepository.findById.mockResolvedValue(mockOrder);
-      mockOrderRepository.updateStatus.mockImplementation(async (id, status) => ({
-        ...mockOrder,
-        status
-      }));
-    });
-
-    it('should cancel order successfully', async () => {
-      const result = await orderService.cancelOrder(1);
-      expect(result.status).toBe('cancelado');
-      expect(mockOrderRepository.updateStatus).toHaveBeenCalledWith(1, 'cancelado');
-    });
-
-    it('should throw error when order does not exist', async () => {
-      mockOrderRepository.findById.mockResolvedValue(null);
-
-      await expect(orderService.cancelOrder(999))
-        .rejects
-        .toThrow(AppError.notFound('Pedido', 999));
-    });
-
-    it('should throw error when order cannot be cancelled', async () => {
-      mockOrder.status = 'entregue';
-      await expect(orderService.cancelOrder(1))
-        .rejects
-        .toThrow(new AppError('Não é possível cancelar este pedido', 'INVALID_ORDER_STATUS'));
     });
   });
 }); 

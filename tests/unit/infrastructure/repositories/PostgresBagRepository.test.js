@@ -98,9 +98,9 @@ describe('PostgresBagRepository', () => {
         rows: mockBagRecords
       });
       
-      const results = await repository.findAll();
+      const results = await repository.findAll(undefined, 10, 0);
       
-      expect(mockBagModel.findAndCountAll).toHaveBeenCalledWith({ where: undefined, offset: undefined, limit: undefined });
+      expect(mockBagModel.findAndCountAll).toHaveBeenCalledWith({ where: undefined, limit: 10, offset: 0 });
       expect(results.count).toBe(2);
       expect(results.rows).toHaveLength(2);
       expect(results.rows[0]).toBeInstanceOf(Bag);
@@ -115,9 +115,9 @@ describe('PostgresBagRepository', () => {
         rows: []
       });
       
-      const results = await repository.findAll();
+      const results = await repository.findAll(undefined, 10, 0);
       
-      expect(mockBagModel.findAndCountAll).toHaveBeenCalledWith({ where: undefined, offset: undefined, limit: undefined });
+      expect(mockBagModel.findAndCountAll).toHaveBeenCalledWith({ where: undefined, limit: 10, offset: 0 });
       expect(results.count).toBe(0);
       expect(results.rows).toEqual([]);
     });

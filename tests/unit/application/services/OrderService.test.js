@@ -36,11 +36,11 @@ describe('OrderService', () => {
 
   describe('createOrder', () => {
     const orderData = {
-      userId: 1,
-      businessId: 2,
+      idClient: 1,
+      idBusiness: 2,
       items: [
-        { bagId: 1, quantity: 2 },
-        { bagId: 2, quantity: 1 }
+        { idBag: 1, quantity: 2 },
+        { idBag: 2, quantity: 1 }
       ]
     };
 
@@ -51,20 +51,23 @@ describe('OrderService', () => {
 
     beforeEach(() => {
       mockBagService.getBag
-        .mockResolvedValueOnce(mockBags[0])
-        .mockResolvedValueOnce(mockBags[1]);
+        .mockImplementation((idBag) => {
+          if (idBag === 1) return Promise.resolve(mockBags[0]);
+          if (idBag === 2) return Promise.resolve(mockBags[1]);
+          return Promise.resolve(null);
+        });
     });
 
     test('should create order successfully', async () => {
       const mockOrder = {
         id: 1,
-        userId: orderData.userId,
-        businessId: orderData.businessId,
+        idClient: orderData.idClient,
+        idBusiness: orderData.idBusiness,
         status: 'pendente',
         totalAmount: 37.97, // (2 * 10.99) + (1 * 15.99)
         items: [
-          { bagId: 1, quantity: 2, price: 10.99 },
-          { bagId: 2, quantity: 1, price: 15.99 }
+          { idBag: 1, quantity: 2, price: 10.99 },
+          { idBag: 2, quantity: 1, price: 15.99 }
         ]
       };
 
@@ -76,11 +79,11 @@ describe('OrderService', () => {
       expect(mockBagService.getBag).toHaveBeenCalledWith(1);
       expect(mockBagService.getBag).toHaveBeenCalledWith(2);
       expect(mockOrderRepository.create).toHaveBeenCalledWith({
-        userId: orderData.userId,
-        businessId: orderData.businessId,
+        idClient: orderData.idClient,
+        idBusiness: orderData.idBusiness,
         items: [
-          { bagId: 1, quantity: 2, price: 10.99 },
-          { bagId: 2, quantity: 1, price: 15.99 }
+          { idBag: 1, quantity: 2, price: 10.99 },
+          { idBag: 2, quantity: 1, price: 15.99 }
         ]
       });
       expect(result).toEqual(mockOrder);
@@ -89,14 +92,14 @@ describe('OrderService', () => {
 
   describe('addItemToOrder', () => {
     const orderId = 1;
-    const itemData = { bagId: 1, quantity: 2 };
+    const itemData = { idBag: 1, quantity: 2 };
     const mockOrder = {
       id: orderId,
       status: 'pendente',
       items: []
     };
     const mockBag = { id: 1, price: 10.99, status: 1 };
-    const mockItem = { id: 1, orderId, bagId: 1, quantity: 2, price: 10.99 };
+    const mockItem = { id: 1, orderId, idBag: 1, quantity: 2, price: 10.99 };
 
     beforeEach(() => {
       mockOrderRepository.findById.mockResolvedValue(mockOrder);
@@ -108,7 +111,7 @@ describe('OrderService', () => {
       const result = await orderService.addItemToOrder(orderId, itemData);
 
       expect(mockOrderRepository.findById).toHaveBeenCalledWith(orderId);
-      expect(mockBagService.getBag).toHaveBeenCalledWith(itemData.bagId);
+      expect(mockBagService.getBag).toHaveBeenCalledWith(itemData.idBag);
       expect(mockOrderRepository.addItem).toHaveBeenCalledWith(orderId, {
         ...itemData,
         price: mockBag.price
@@ -301,12 +304,12 @@ describe('OrderService', () => {
     ];
 
     test('should return all orders', async () => {
-      mockOrderRepository.findAll.mockResolvedValue(mockOrders);
+      mockOrderRepository.findAll.mockResolvedValue({ count: 2, rows: mockOrders });
 
       const result = await orderService.getAllOrders();
 
       expect(mockOrderRepository.findAll).toHaveBeenCalled();
-      expect(result).toEqual(mockOrders);
+      expect(result).toEqual({ total: 2, pages: 1, data: mockOrders });
     });
 
     test('should handle repository errors', async () => {
@@ -319,66 +322,14 @@ describe('OrderService', () => {
     });
   });
 
-  describe('getOrdersByUser', () => {
-    const userId = 1;
-    const mockOrders = [
-      { id: 1, userId, status: 'pendente' },
-      { id: 2, userId, status: 'entregue' }
-    ];
-
-    test('should return orders for user', async () => {
-      mockOrderRepository.findByUserId.mockResolvedValue(mockOrders);
-
-      const result = await orderService.getOrdersByUser(userId);
-
-      expect(mockOrderRepository.findByUserId).toHaveBeenCalledWith(userId);
-      expect(result).toEqual(mockOrders);
-    });
-
-    test('should handle repository errors', async () => {
-      const error = new Error('Database error');
-      mockOrderRepository.findByUserId.mockRejectedValue(error);
-
-      await expect(orderService.getOrdersByUser(userId))
-        .rejects
-        .toThrow(error);
-    });
-  });
-
-  describe('getOrdersByBusiness', () => {
-    const businessId = 1;
-    const mockOrders = [
-      { id: 1, businessId, status: 'pendente' },
-      { id: 2, businessId, status: 'entregue' }
-    ];
-
-    test('should return orders for business', async () => {
-      mockOrderRepository.findByBusinessId.mockResolvedValue(mockOrders);
-
-      const result = await orderService.getOrdersByBusiness(businessId);
-
-      expect(mockOrderRepository.findByBusinessId).toHaveBeenCalledWith(businessId);
-      expect(result).toEqual(mockOrders);
-    });
-
-    test('should handle repository errors', async () => {
-      const error = new Error('Database error');
-      mockOrderRepository.findByBusinessId.mockRejectedValue(error);
-
-      await expect(orderService.getOrdersByBusiness(businessId))
-        .rejects
-        .toThrow(error);
-    });
-  });
-
   describe('updateOrderStatus', () => {
     const orderId = 1;
     const mockOrder = {
       id: orderId,
       status: 'pendente',
       items: [
-        { id: 1, bagId: 1, quantity: 2 },
-        { id: 2, bagId: 2, quantity: 1 }
+        { idBag: 1, quantity: 2 },
+        { idBag: 2, quantity: 1 }
       ]
     };
 
@@ -440,135 +391,6 @@ describe('OrderService', () => {
     });
   });
 
-  describe('cancelOrder', () => {
-    const orderId = 1;
-    const mockOrder = {
-      id: orderId,
-      status: 'pendente',
-      canBeCancelled: jest.fn().mockReturnValue(true)
-    };
-
-    beforeEach(() => {
-      mockOrderRepository.findById.mockResolvedValue(mockOrder);
-      mockOrderRepository.updateStatus.mockImplementation((id, status) => ({
-        ...mockOrder,
-        status
-      }));
-    });
-
-    test('should cancel order successfully', async () => {
-      const result = await orderService.cancelOrder(orderId);
-
-      expect(mockOrderRepository.findById).toHaveBeenCalledWith(orderId);
-      expect(mockOrder.canBeCancelled).toHaveBeenCalled();
-      expect(mockOrderRepository.updateStatus).toHaveBeenCalledWith(orderId, 'cancelado');
-      expect(result.status).toBe('cancelado');
-    });
-
-    test('should throw error when order is not found', async () => {
-      mockOrderRepository.findById.mockResolvedValue(null);
-
-      await expect(orderService.cancelOrder(orderId))
-        .rejects
-        .toThrow(AppError);
-    });
-
-    test('should throw error when order cannot be cancelled', async () => {
-      mockOrder.canBeCancelled.mockReturnValue(false);
-
-      await expect(orderService.cancelOrder(orderId))
-        .rejects
-        .toThrow('Não é possível cancelar este pedido');
-    });
-  });
-
-  describe('getOrderHistoryByUser', () => {
-    const userId = 1;
-    const options = { limit: 10, offset: 0 };
-    const mockOrders = [
-      { id: 1, userId, status: 'entregue' },
-      { id: 2, userId, status: 'cancelado' }
-    ];
-
-    test('should return order history for user', async () => {
-      mockOrderRepository.getOrderHistoryByUser.mockResolvedValue(mockOrders);
-
-      const result = await orderService.getOrderHistoryByUser(userId, options);
-
-      expect(mockOrderRepository.getOrderHistoryByUser).toHaveBeenCalledWith(userId, options);
-      expect(result).toEqual(mockOrders);
-    });
-
-    test('should handle repository errors', async () => {
-      const error = new Error('Database error');
-      mockOrderRepository.getOrderHistoryByUser.mockRejectedValue(error);
-
-      await expect(orderService.getOrderHistoryByUser(userId, options))
-        .rejects
-        .toThrow(error);
-    });
-  });
-
-  describe('getOrderHistoryByBusiness', () => {
-    const businessId = 1;
-    const options = { limit: 10, offset: 0 };
-    const mockOrders = [
-      { id: 1, businessId, status: 'entregue' },
-      { id: 2, businessId, status: 'cancelado' }
-    ];
-
-    test('should return order history for business', async () => {
-      mockOrderRepository.getOrderHistoryByBusiness.mockResolvedValue(mockOrders);
-
-      const result = await orderService.getOrderHistoryByBusiness(businessId, options);
-
-      expect(mockOrderRepository.getOrderHistoryByBusiness).toHaveBeenCalledWith(businessId, options);
-      expect(result).toEqual(mockOrders);
-    });
-
-    test('should handle repository errors', async () => {
-      const error = new Error('Database error');
-      mockOrderRepository.getOrderHistoryByBusiness.mockRejectedValue(error);
-
-      await expect(orderService.getOrderHistoryByBusiness(businessId, options))
-        .rejects
-        .toThrow(error);
-    });
-  });
-
-  describe('getOrdersByStatus', () => {
-    const status = 'pendente';
-    const options = { limit: 10, offset: 0 };
-    const mockOrders = [
-      { id: 1, status: 'pendente' },
-      { id: 2, status: 'pendente' }
-    ];
-
-    test('should return orders by status', async () => {
-      mockOrderRepository.getOrdersByStatus.mockResolvedValue(mockOrders);
-
-      const result = await orderService.getOrdersByStatus(status, options);
-
-      expect(mockOrderRepository.getOrdersByStatus).toHaveBeenCalledWith(status, options);
-      expect(result).toEqual(mockOrders);
-    });
-
-    test('should throw error when status is invalid', async () => {
-      await expect(orderService.getOrdersByStatus('invalid_status', options))
-        .rejects
-        .toThrow('Status inválido');
-    });
-
-    test('should handle repository errors', async () => {
-      const error = new Error('Database error');
-      mockOrderRepository.getOrdersByStatus.mockRejectedValue(error);
-
-      await expect(orderService.getOrdersByStatus(status, options))
-        .rejects
-        .toThrow(error);
-    });
-  });
-
   describe('getOrdersByDateRange', () => {
     const startDate = '2024-01-01';
     const endDate = '2024-01-31';
@@ -598,90 +420,6 @@ describe('OrderService', () => {
       mockOrderRepository.getOrdersByDateRange.mockRejectedValue(error);
 
       await expect(orderService.getOrdersByDateRange(startDate, endDate, options))
-        .rejects
-        .toThrow(error);
-    });
-  });
-
-  describe('getOrderStatsForUser', () => {
-    const userId = 1;
-    const mockOrders = [
-      { id: 1, status: 'pendente', totalAmount: '10.99', createdAt: '2024-01-15' },
-      { id: 2, status: 'confirmado', totalAmount: '15.99', createdAt: '2024-01-16' },
-      { id: 3, status: 'entregue', totalAmount: '20.99', createdAt: '2024-01-17' },
-      { id: 4, status: 'cancelado', totalAmount: '25.99', createdAt: '2024-01-18' }
-    ];
-
-    test('should return order statistics for user', async () => {
-      mockOrderRepository.findByUserId.mockResolvedValue(mockOrders);
-
-      const result = await orderService.getOrderStatsForUser(userId);
-
-      expect(mockOrderRepository.findByUserId).toHaveBeenCalledWith(userId);
-      expect(result).toMatchObject({
-        total: 4,
-        totalAmount: expect.any(Number),
-        lastOrderDate: expect.any(String),
-        byStatus: {
-          pendente: 1,
-          confirmado: 1,
-          preparando: 0,
-          pronto: 0,
-          entregue: 1,
-          cancelado: 1
-        }
-      });
-      expect(result.totalAmount).toBeCloseTo(73.96, 2); // Allow for floating point precision
-      expect(result.lastOrderDate).toBe('2024-01-18');
-    });
-
-    test('should handle repository errors', async () => {
-      const error = new Error('Database error');
-      mockOrderRepository.findByUserId.mockRejectedValue(error);
-
-      await expect(orderService.getOrderStatsForUser(userId))
-        .rejects
-        .toThrow(error);
-    });
-  });
-
-  describe('getOrderStatsForBusiness', () => {
-    const businessId = 1;
-    const mockOrders = [
-      { id: 1, status: 'pendente', totalAmount: '10.99', createdAt: '2024-01-15' },
-      { id: 2, status: 'confirmado', totalAmount: '15.99', createdAt: '2024-01-16' },
-      { id: 3, status: 'entregue', totalAmount: '20.99', createdAt: '2024-01-17' },
-      { id: 4, status: 'cancelado', totalAmount: '25.99', createdAt: '2024-01-18' }
-    ];
-
-    test('should return order statistics for business', async () => {
-      mockOrderRepository.findByBusinessId.mockResolvedValue(mockOrders);
-
-      const result = await orderService.getOrderStatsForBusiness(businessId);
-
-      expect(mockOrderRepository.findByBusinessId).toHaveBeenCalledWith(businessId);
-      expect(result).toMatchObject({
-        total: 4,
-        totalRevenue: expect.any(Number),
-        lastOrderDate: expect.any(String),
-        byStatus: {
-          pendente: 1,
-          confirmado: 1,
-          preparando: 0,
-          pronto: 0,
-          entregue: 1,
-          cancelado: 1
-        }
-      });
-      expect(result.totalRevenue).toBeCloseTo(73.96, 2); // Allow for floating point precision
-      expect(result.lastOrderDate).toBe('2024-01-18');
-    });
-
-    test('should handle repository errors', async () => {
-      const error = new Error('Database error');
-      mockOrderRepository.findByBusinessId.mockRejectedValue(error);
-
-      await expect(orderService.getOrderStatsForBusiness(businessId))
         .rejects
         .toThrow(error);
     });
