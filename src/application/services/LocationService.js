@@ -180,20 +180,20 @@ class LocationService {
 
   /**
    * Busca estabelecimentos próximos a um endereço
-   * @param {number} addressId - ID do endereço de referência
+   * @param {number} idAddress - ID do endereço de referência
    * @param {Object} options - Opções de busca como raio e limite
    * @returns {Promise<Array>} - Lista de estabelecimentos próximos
-   */  async findNearbyBusinesses(addressId, { radius = 10, limit = 10 } = {}) {
+   */  async findNearbyBusinesses(idAddress, { radius = 10, limit = 10 } = {}) {
     try {
-      if (!addressId || isNaN(parseInt(addressId))) {
+      if (!idAddress || isNaN(parseInt(idAddress))) {
         throw new AppError('ID de endereço inválido', 'INVALID_ADDRESS_ID', 400);
       }
       
-      console.log(`Buscando endereço com ID: ${addressId}`);
-      const address = await this.addressRepository.findById(parseInt(addressId));
+      console.log(`Buscando endereço com ID: ${idAddress}`);
+      const address = await this.addressRepository.findById(parseInt(idAddress));
       
       if (!address) {
-        throw new AppError(`Endereço não encontrado com o ID ${addressId}`, 'ADDRESS_NOT_FOUND', 404);
+        throw new AppError(`Endereço não encontrado com o ID ${idAddress}`, 'ADDRESS_NOT_FOUND', 404);
       }
       
       console.log(`Endereço encontrado: ${JSON.stringify({
@@ -215,7 +215,7 @@ class LocationService {
           
           if (updatedAddress.latitude && updatedAddress.longitude) {
             console.log(`Coordenadas obtidas: ${updatedAddress.latitude}, ${updatedAddress.longitude}`);
-            await this.addressRepository.update(addressId, { 
+            await this.addressRepository.update(idAddress, { 
               latitude: updatedAddress.latitude, 
               longitude: updatedAddress.longitude 
             });
@@ -349,14 +349,14 @@ class LocationService {
 
       console.log(`Cliente encontrado com endereço: ${JSON.stringify({
         id: client.id,
-        addressId: client.address.id,
+        idAddress: client.address.id,
         street: client.address.street,
         city: client.address.city,
         hasCoordinates: Boolean(client.address.latitude) && Boolean(client.address.longitude)
       })}`);
 
       // Add log here to show the address ID being passed to findNearbyBusinesses
-      console.log(`Passando addressId ${client.address.id} para findNearbyBusinesses`);
+      console.log(`Passando idAddress ${client.address.id} para findNearbyBusinesses`);
 
       return this.findNearbyBusinesses(client.address.id, { radius, limit });
     } catch (error) {

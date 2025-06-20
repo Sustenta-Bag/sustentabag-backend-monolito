@@ -5,11 +5,18 @@ import AuthService from '../services/AuthService.js';
 import AuthController from '../../presentation/controllers/authController.js';
 import authRoutes from '../../presentation/routes/authRoutes.js';
 
-export const initializeModels = (sequelize) => {
-  const userModel = UserModel.init(sequelize);
-  
+export const getAuthRepository = (sequelizeInstance) => {
+  UserModel.init(sequelizeInstance);
+  return new UserRepository(UserModel);
+};
+
+export const initializeModels = (sequelizeInstance) => {
+  if (!sequelizeInstance) {
+    throw new Error('Sequelize instance is required to initialize models');
+  }
+  UserModel.init(sequelizeInstance);
   return {
-    UserModel: userModel
+    UserModel
   };
 };
 
@@ -47,13 +54,4 @@ export const setupAuthModule = (options = {}) => {
   authRoutes(authController)(router);
   
   return router;
-};
-
-export const getUserRepository = (sequelizeInstance) => {
-  if (!sequelizeInstance) {
-    throw new Error('Sequelize instance is required to get user repository');
-  }
-  
-  UserModel.init(sequelizeInstance);
-  return new UserRepository(UserModel);
 };

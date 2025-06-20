@@ -35,7 +35,7 @@ class BusinessService {
     return await this.businessRepository.create(data);
   }
 
-  async getBusiness(id, includeAddress = {}) {
+  async getBusiness(id, includeAddress) {
     let business;
     if (includeAddress) {
       business = await this.businessRepository.findByIdWithAddress(id);

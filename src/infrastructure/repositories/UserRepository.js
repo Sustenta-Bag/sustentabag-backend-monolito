@@ -1,7 +1,8 @@
 import User from '../../domain/entities/User.js';
+import UserModel from '../../domain/models/UserModel.js';
 
 class UserRepository {
-  constructor(userModel) {
+  constructor(userModel = UserModel) {
     this.userModel = userModel;
   }
 

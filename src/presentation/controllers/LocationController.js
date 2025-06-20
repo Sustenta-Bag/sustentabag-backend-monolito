@@ -4,8 +4,31 @@ class LocationController {
   }
 
   async findNearbyBusinesses(req, res, next) {
+    /*
+    #swagger.tags = ["Location"]
+    #swagger.summary = "Find businesses near an address"
+    #swagger.description = "Returns a list of nearby businesses based on an address ID"
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required",
+      content: {
+        "application/json": {
+          schema: { $ref: "#/components/schemas/UnauthorizedError" }
+        }
+      }
+    }
+    #swagger.responses[404] = {
+      description: "Address not found", 
+      content: {
+        "application/json": {
+          schema: { $ref: "#/components/schemas/NotFoundError" }
+        }
+      }
+    }
+    */
     try {
-      const { addressId } = req.params;
+      const { idAddress } = req.params;
       const { radius, limit } = req.query;
 
       const options = {
@@ -14,7 +37,7 @@ class LocationController {
       };
 
       const businesses = await this.locationService.findNearbyBusinesses(
-        parseInt(addressId),
+        parseInt(idAddress),
         options
       );
 
@@ -41,6 +64,37 @@ class LocationController {
   }
 
   async findNearbyBusinessesByClient(req, res, next) {
+    /*
+    #swagger.tags = ["Location"]
+    #swagger.summary = "Find businesses near the logged-in client's address"
+    #swagger.description = "Returns a list of nearby businesses based on the address of the authenticated client."
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200]
+    #swagger.responses[400] = {
+      description: "Client has no address",
+      content: {
+        "application/json": {
+          schema: { $ref: "#/components/schemas/NotFoundError" }
+        }
+      }
+    }
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      content: {
+        "application/json": {
+          schema: { $ref: "#/components/schemas/UnauthorizedError" }
+        }
+      }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Access allowed only for clients",
+      content: {
+        "application/json": {
+          schema: { $ref: "#/components/schemas/ForbiddenError" }
+        }
+      }
+    }
+    */
     console.log('Entrou em findNearbyBusinessesByClient no LocationController');
     try {
       const { radius, limit } = req.query;
@@ -87,6 +141,25 @@ class LocationController {
   }
 
   async geocodeAddress(req, res, next) {
+      /*
+    #swagger.tags = ["Location"]
+    #swagger.summary = "Geocode an address"
+    #swagger.description = "Convert an address to geographic coordinates"
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.requestBody = {
+      required: true,
+      schema: { $ref: "#/components/schemas/Address" }
+    }
+    #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required",
+      content: {
+        "application/json": {
+          schema: { $ref: "#/components/schemas/UnauthorizedError" }
+        }
+      }
+    }
+    */
     try {
       const address = req.body;
       
@@ -103,6 +176,29 @@ class LocationController {
   }
 
   async findNearbyAvailableBagsByClient(req, res, next) {
+    /*
+    #swagger.tags = ["Location"]
+    #swagger.summary = "Find available bags from businesses near the logged-in client's address"
+    #swagger.description = "Returns a list of available bags from nearby businesses based on the address of the authenticated client."
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      content: {
+        "application/json": {
+          schema: { $ref: "#/components/schemas/UnauthorizedError" }
+        }
+      }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Access allowed only for clients",
+      content: {
+        "application/json": {
+          schema: { $ref: "#/components/schemas/ForbiddenError" }
+        }
+      }
+    }
+    */
     console.log('Entrou em findNearbyAvailableBagsByClient no LocationController');
     try {
       const { radius, limit } = req.query;
