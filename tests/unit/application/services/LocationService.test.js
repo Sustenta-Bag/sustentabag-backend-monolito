@@ -1630,7 +1630,8 @@ describe('LocationService', () => {
           address: {
             latitude: -23.5678,
             longitude: -46.6489
-          }
+          },
+          distance: 1 // garantir que está dentro do raio
         }
       ];
 
@@ -1650,9 +1651,9 @@ describe('LocationService', () => {
       mockAddressRepository.findById.mockResolvedValue(mockClient.address);
       mockBusinessRepository.findAllWithAddress.mockResolvedValue(mockBusinesses);
 
-      // Mock the bagRepository parameter
+      // Corrigir aqui: findAll deve retornar um array de bags
       const mockBagRepository = {
-        findActiveByBusinessId: jest.fn().mockResolvedValue(mockBags)
+        findAll: jest.fn().mockResolvedValue(mockBags)
       };
 
       const result = await locationService.findNearbyAvailableBagsByClient(1, mockBagRepository);

@@ -13,7 +13,7 @@ describe('BagService', () => {
     mockBagRepository = {
       create: jest.fn(),
       findById: jest.fn(),
-      findAll: jest.fn(),
+      findAll: jest.fn((where = {}, limit = 10, offset = 0) => Promise.resolve({ count: 0, rows: [] })),
       update: jest.fn(),
       delete: jest.fn(),
       findByBusinessId: jest.fn(),
@@ -112,7 +112,7 @@ describe('BagService', () => {
       
       const result = await bagService.getAllBags(1, 10);
       
-      expect(mockBagRepository.findAll).toHaveBeenCalledWith(0, 10, {});
+      expect(mockBagRepository.findAll).toHaveBeenCalledWith({}, 10, 0);
       expect(result).toEqual({
         total: 2,
         pages: 1,
@@ -136,7 +136,7 @@ describe('BagService', () => {
 
       const result = await bagService.getAllBags(0, 10, {});
 
-      expect(mockBagRepository.findAll).toHaveBeenCalledWith(0, 10, {}); // offset = (1-1) * 10 = 0
+      expect(mockBagRepository.findAll).toHaveBeenCalledWith({}, 10, 0);
       expect(result).toEqual({
         total: 20,
         pages: 2,
@@ -153,7 +153,7 @@ describe('BagService', () => {
 
       const result = await bagService.getAllBags(1, undefined, {});
 
-      expect(mockBagRepository.findAll).toHaveBeenCalledWith(0, 10, {}); // default limit = 10
+      expect(mockBagRepository.findAll).toHaveBeenCalledWith({}, 10, 0);
       expect(result).toEqual({
         total: 20,
         pages: 2,
@@ -170,7 +170,7 @@ describe('BagService', () => {
 
       const result = await bagService.getAllBags(undefined, undefined, {});
 
-      expect(mockBagRepository.findAll).toHaveBeenCalledWith(0, 10, {}); // default pagination
+      expect(mockBagRepository.findAll).toHaveBeenCalledWith({}, 10, 0);
       expect(result).toEqual({
         total: 20,
         pages: 2,

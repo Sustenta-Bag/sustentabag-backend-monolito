@@ -12,8 +12,8 @@ describe('Order Entity', () => {
     it('should create an order with default values', () => {
       const defaultOrder = new Order(1, 1, 1);
       expect(defaultOrder.id).toBe(1);
-      expect(defaultOrder.userId).toBe(1);
-      expect(defaultOrder.businessId).toBe(1);
+      expect(defaultOrder.idClient).toBe(1);
+      expect(defaultOrder.idBusiness).toBe(1);
       expect(defaultOrder.status).toBe('pendente');
       expect(defaultOrder.totalAmount).toBe(0);
       expect(defaultOrder.items).toEqual([]);
@@ -21,19 +21,20 @@ describe('Order Entity', () => {
     });
 
     it('should create an order with custom values', () => {
-      expect(order.id).toBe(1);
-      expect(order.userId).toBe(1);
-      expect(order.businessId).toBe(1);
-      expect(order.status).toBe('pendente');
-      expect(order.totalAmount).toBe(0);
-      expect(order.createdAt).toBe(mockDate);
-      expect(order.items).toEqual([]);
+      const customOrder = new Order(1, 1, 1, 'pendente', 0, mockDate);
+      expect(customOrder.id).toBe(1);
+      expect(customOrder.idClient).toBe(1);
+      expect(customOrder.idBusiness).toBe(1);
+      expect(customOrder.status).toBe('pendente');
+      expect(customOrder.totalAmount).toBe(0);
+      expect(customOrder.createdAt).toBe(mockDate);
+      expect(customOrder.items).toEqual([]);
     });
   });
 
   describe('addItem', () => {
     it('should add an item and update total amount', () => {
-      const item = new OrderItem(1, 1, 1, 2, 10.99);
+      const item = new OrderItem({ id: 1, idOrder: 1, idBag: 1, quantity: 2, price: 10.99 });
       order.addItem(item);
       
       expect(order.items).toHaveLength(1);
@@ -42,8 +43,8 @@ describe('Order Entity', () => {
     });
 
     it('should handle multiple items correctly', () => {
-      const item1 = new OrderItem(1, 1, 1, 2, 10.99);
-      const item2 = new OrderItem(2, 1, 2, 1, 5.99);
+      const item1 = new OrderItem({ id: 1, idOrder: 1, idBag: 1, quantity: 2, price: 10.99 });
+      const item2 = new OrderItem({ id: 2, idOrder: 1, idBag: 2, quantity: 1, price: 5.99 });
       
       order.addItem(item1);
       order.addItem(item2);
@@ -55,8 +56,8 @@ describe('Order Entity', () => {
 
   describe('removeItem', () => {
     it('should remove an item and update total amount', () => {
-      const item1 = new OrderItem(1, 1, 1, 2, 10.99);
-      const item2 = new OrderItem(2, 1, 2, 1, 5.99);
+      const item1 = new OrderItem({ id: 1, idOrder: 1, idBag: 1, quantity: 2, price: 10.99 });
+      const item2 = new OrderItem({ id: 2, idOrder: 1, idBag: 2, quantity: 1, price: 5.99 });
       
       order.addItem(item1);
       order.addItem(item2);
@@ -68,7 +69,7 @@ describe('Order Entity', () => {
     });
 
     it('should do nothing when removing non-existent item', () => {
-      const item = new OrderItem(1, 1, 1, 2, 10.99);
+      const item = new OrderItem({ id: 1, idOrder: 1, idBag: 1, quantity: 2, price: 10.99 });
       order.addItem(item);
       order.removeItem(999);
       
