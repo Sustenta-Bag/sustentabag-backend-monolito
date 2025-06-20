@@ -5,9 +5,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import compression from "compression";
-import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 
 import swaggerFile from "./config/swagger.json" with { type: "json" };
 
@@ -16,9 +14,8 @@ import handlers from './presentation/middleware/handlers.js';
 
 import { connectDatabase, syncDatabase, sequelize } from './infrastructure/database/connection.js';
 import { errorHandler } from './presentation/middleware/errorHandler.js';
-import { initializeModules } from './application/bootstrap.js';
+import { initializeModels } from './application/bootstrap.js';
 import routes from "./presentation/routes.js";
-// import routes2 from "./presentation/routes2.js";
 
 dotenv.config();
 
@@ -28,7 +25,7 @@ if (!process.env.MAPBOX_ACCESS_TOKEN) {
   console.warn("You can get a Mapbox token at https://account.mapbox.com/access-tokens/");
 }
 
-initializeModules(sequelize);
+initializeModels(sequelize);
 
 const app = express();
 

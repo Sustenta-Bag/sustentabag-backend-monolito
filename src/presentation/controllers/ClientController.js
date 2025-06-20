@@ -6,6 +6,14 @@ class ClientController {
   }
 
   async createClient(req, res, next) {
+    /*
+    #swagger.tags = ["Client"]
+    #swagger.requestBody = {
+      required: true,
+      schema: { $ref: '#components/schemas/Client' },
+    }
+    #swagger.responses[201]
+    */
     try {
       await this.clientService.createClient(req.body);
       return res.created();
@@ -15,6 +23,19 @@ class ClientController {
   }  
   
   async getClient(req, res, next) {
+    /*
+    #swagger.tags = ["Client"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
+    }
+    */
     try {
       let includeAddress = req.query.includeAddress;
       includeAddress === true || 'true' ? includeAddress = true : includeAddress = false;
@@ -31,6 +52,19 @@ class ClientController {
   }
 
   async getAllClients(req, res, next) {
+    /*
+    #swagger.tags = ["Client"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
+    }
+    */
     try {
       const { page, limit } = req.query;
       const filters = {
@@ -55,6 +89,23 @@ class ClientController {
   }  
   
   async updateClient(req, res, next) {
+    /*
+    #swagger.tags = ["Client"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.requestBody = {
+      required: true,
+      schema: { $ref: '#components/schemas/Client' },
+    }
+    #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
+    }
+    */
     try {
       req.params.id = req.user.entityId;
       if (req.params.id !== req.user.entityId) {
@@ -73,6 +124,19 @@ class ClientController {
   }
 
   async deleteClient(req, res, next) {
+    /*
+    #swagger.tags = ["Client"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
+    }
+    */
     try {
       req.params.id = req.user.entityId;
       if (req.params.id !== req.user.entityId) {
@@ -86,6 +150,23 @@ class ClientController {
   }  
   
   async updateStatus(req, res, next) {
+    /*
+    #swagger.tags = ["Client"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.requestBody = {
+      required: true,
+      schema: { $ref: '#components/schemas/UpdateStatus' },
+    }
+    #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
+    }
+    */
     try {
       if (parseInt(req.params.id) !== req.user.entityId) {
         return next(new AppError('Você não tem permissão para atualizar o status deste cliente', 'UNAUTHORIZED', 403));

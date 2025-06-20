@@ -1,44 +1,17 @@
-import dotenv from 'dotenv';
-import express from 'express';
-import { setupBusinessRoutes } from '../../presentation/routes/businessRoutes.js';
-import { errorHandler } from '../../presentation/middleware/errorHandler.js';
 import BusinessModel from '../../domain/models/BusinessModel.js';
 import PostgresBusinessRepository from '../../infrastructure/repositories/PostgresBusinessRepository.js';
 
-dotenv.config();
-
-export const setupBusinessModule = (options = {}) => {
-  const router = express.Router();
-  
-  setupBusinessRoutes(router, options);
-  
-  router.use(errorHandler);
-  
-  return router;
-};
-
-export const getBusinessRepository = (sequelize) => {
-  BusinessModel.init(sequelize);
+export const getBusinessRepository = (sequelizeInstance) => {
+  BusinessModel.init(sequelizeInstance);
   return new PostgresBusinessRepository(BusinessModel);
-};
+}
 
 export const initializeModels = (sequelizeInstance) => {
-  if (!sequelizeInstance) {
-    throw new Error('É necessário fornecer uma instância do Sequelize para inicializar os modelos');
+  if(!sequelizeInstance) {
+    throw new Error('Sequelize instance is required to initialize models');
   }
-  
   BusinessModel.init(sequelizeInstance);
-  
   return {
     BusinessModel
   };
-};
-
-export const businessModuleConfig = {
-  name: 'business',
-  routePrefix: '/api/businesses',
-  description: 'Módulo de gerenciamento das empresas',
-  dependencies: [
-    'sequelize'
-  ]
-};
+}

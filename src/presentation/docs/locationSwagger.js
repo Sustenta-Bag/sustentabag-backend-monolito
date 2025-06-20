@@ -4,7 +4,7 @@
  *   - name: Location
  *     description: Location-based operations
  * 
- * /api/location/nearby/{addressId}:
+ * /api/location/nearby/{idAddress}:
  *   get:
  *     summary: Find businesses near an address
  *     description: Returns a list of nearby businesses based on an address ID
@@ -12,7 +12,7 @@
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: addressId
+ *       - name: idAddress
  *         in: path
  *         description: ID of the reference address
  *         required: true

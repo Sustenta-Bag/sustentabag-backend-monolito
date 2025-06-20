@@ -28,10 +28,10 @@ class OrderService {
       item.price = bag.price;
     }
 
-    const order = new Order(
-      orderFields.idClient,
-      orderFields.idBusiness
-    );
+    const order = new Order({
+      idClient: orderFields.idClient,
+      idBusiness: orderFields.idBusiness
+    });
     
     items.forEach(item => {
       order.addItem(new OrderItem({

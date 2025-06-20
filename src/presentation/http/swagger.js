@@ -9,7 +9,6 @@ const doc = {
     contact: {
       name: "Equipe Sustenta Bag",
       url: "https://github.com/Sustenta-Bag",
-      email: "contato@sustentabag.com",
     },
     license: {
       name: "ISC",
@@ -21,15 +20,6 @@ const doc = {
       url: "/",
       description: "Servidor de API",
     },
-  ],  tags: [
-    {
-      name: "Base",
-      description: "General API routes"
-    },
-    {
-      name: "Location",
-      description: "Operações relacionadas a localização geográfica"
-    }
   ],
   components: {
     schemas: {
@@ -253,8 +243,7 @@ const doc = {
 
 const outputFile = "../../config/swagger.json";
 const endpointsFiles = [
-  // "../routes2.js",
-  "../routes/*.js",
+  "../routes.js",
   "../docs/*.js",
 ];
 

@@ -4,6 +4,24 @@ class OrderController {
   }
 
   async createOrder(req, res, next) {
+    /*
+    #swagger.path = '/api/orders'
+    #swagger.tags = ["Order"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.requestBody = {
+      required: true,
+      schema: { $ref: "#/components/schemas/Order" }
+    }
+    #swagger.responses[201]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
+    }
+    */
     try {
       const idClient = req.user.entityId;
       const data = {
@@ -21,6 +39,20 @@ class OrderController {
   }
 
   async getOrder(req, res, next) {
+    /*
+    #swagger.path = '/api/orders/{id}'
+    #swagger.tags = ["Order"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
+    }
+    #swagger.responses[404] = {
+      description: "Not Found - Order not found",
+      schema: { $ref: "#/components/schemas/NotFoundError" }
+    }
+    */
     try {
       const order = await this.orderService.getOrder(req.params.id);
       return res.hateoasItem(order);
@@ -30,6 +62,20 @@ class OrderController {
   }
 
   async getAllOrders(req, res, next) {
+    /*
+    #swagger.path = '/api/orders'
+    #swagger.tags = ["Order"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
+    }
+    */
     try {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
@@ -46,6 +92,28 @@ class OrderController {
   }
 
   async updateOrderStatus(req, res, next) {
+    /*
+    #swagger.path = '/api/orders/{id}/status'
+    #swagger.tags = ["Order"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.requestBody = {
+      required: true,
+      schema: { $ref: "#/components/schemas/OrderStatusUpdate" }
+    }
+    #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
+    }
+    #swagger.responses[404] = {
+      description: "Not Found - Order not found",
+      schema: { $ref: "#/components/schemas/NotFoundError" }
+    }
+    */
     try {
       const order = await this.orderService.updateOrderStatus(
         req.params.id,
@@ -58,6 +126,28 @@ class OrderController {
   }
 
   async addItemToOrder(req, res, next) {
+    /*
+    #swagger.path = '/api/orders/{idOrder}/items'
+    #swagger.tags = ["Order"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.requestBody = {
+      required: true,
+      schema: { $ref: "#/components/schemas/OrderItens" }
+    }
+    #swagger.responses[201]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
+    }
+    #swagger.responses[404] = {
+      description: "Not Found - Order not found",
+      schema: { $ref: "#/components/schemas/NotFoundError" }
+    }
+    */
     try {
       const item = await this.orderService.addItemToOrder(
         req.params.idOrder,
@@ -70,6 +160,24 @@ class OrderController {
   }
 
   async removeItemFromOrder(req, res, next) {
+    /*
+    #swagger.path = '/api/orders/{idOrder}/items/{idItem}'
+    #swagger.tags = ["Order"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[204]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
+    }
+    #swagger.responses[404] = {
+      description: "Not Found - Order or item not found",
+      schema: { $ref: "#/components/schemas/NotFoundError" }
+    }
+    */
     try {
       await this.orderService.removeItemFromOrder(
         req.params.idOrder,
@@ -82,6 +190,28 @@ class OrderController {
   }
 
   async updateItemQuantity(req, res, next) {
+    /*
+    #swagger.path = '/api/orders/{idOrder}/items/{idItem}/quantity'
+    #swagger.tags = ["Order"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.requestBody = {
+      required: true,
+      schema: { $ref: "#/components/schemas/ItemQuantity" }
+    }
+    #swagger.responses[200]
+    #swagger.responses[401] = {
+      description: "Unauthorized - Authentication required or invalid token",
+      schema: { $ref: "#/components/schemas/UnauthorizedError" }
+    }
+    #swagger.responses[403] = {
+      description: "Forbidden - Insufficient permissions",
+      schema: { $ref: "#/components/schemas/ForbiddenError" }
+    }
+    #swagger.responses[404] = {
+      description: "Not Found - Order or item not found",
+      schema: { $ref: "#/components/schemas/NotFoundError" }
+    }
+    */
     try {
       const item = await this.orderService.updateItemQuantity(
         req.params.idOrder,
@@ -95,6 +225,12 @@ class OrderController {
   }
 
   async getOrderHistory(req, res, next) {
+    /*
+    #swagger.path = '/api/orders/history'
+    #swagger.tags = ["Order History"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200]
+    */
     try {
       const entityId = req.user.entityId;
       const entityType = req.user.role;
@@ -125,6 +261,12 @@ class OrderController {
   }
 
   async getOrderStats(req, res, next) {
+    /*
+    #swagger.path = '/api/orders/stats'
+    #swagger.tags = ["Order Statistics"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200]
+    */
     try {
       const entityId = req.user.entityId;
       const entityType = req.user.role;
@@ -136,6 +278,12 @@ class OrderController {
   }
 
   async getOrdersByDateRange(req, res, next) {
+    /*
+    #swagger.path = '/api/orders/date-range'
+    #swagger.tags = ["Order"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200]
+    */
     try {
       const { startDate, endDate } = req.query;
       const { limit, offset, orderBy, orderDirection } = req.query;

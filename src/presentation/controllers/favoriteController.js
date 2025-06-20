@@ -4,6 +4,16 @@ class FavoriteController {
     }
 
     async createFavorite(req, res, next) {
+        /*
+        #swagger.tags = ["Favorites"]
+        #swagger.consumes = ['application/json']
+        #swagger.security = [{ "bearerAuth": [] }]
+        #swagger.requestBody = {
+            required: true,
+            schema: { $ref: '#/components/schemas/Favorite' },
+        }
+        #swagger.responses[201]
+        */
         try {
             const data = {
                 ...req.body,
@@ -17,6 +27,12 @@ class FavoriteController {
     }
 
     async listFavorites(req, res, next) {
+        /*
+        #swagger.tags = ["Favorites"]
+        #swagger.consumes = ['application/json']
+        #swagger.security = [{ "bearerAuth": [] }]
+        #swagger.responses[201]
+        */
         try {
             const { page, limit, idClient } = req.query;
             const favorites = await this.favoriteService.listFavorites({
@@ -31,6 +47,18 @@ class FavoriteController {
     }
 
     async deleteFavorite(req, res, next) {
+        /*
+        #swagger.tags = ["Favorites"]
+        #swagger.consumes = ['application/json']
+        #swagger.security = [{ "bearerAuth": [] }]
+        #swagger.parameters['id'] = {
+            in: 'path',
+            description: 'ID of the favorite to delete',
+            required: true,
+            type: 'integer'
+        }
+        #swagger.responses[204]
+        */
         try {
             await this.favoriteService.deleteFavorite(req.params.id);
             return res.no_content();
@@ -40,6 +68,17 @@ class FavoriteController {
     }
 
     async deleteFavoriteByBusiness(req, res, next) {
+        /*
+        #swagger.tags = ["Favorites"]
+        #swagger.security = [{ "bearerAuth": [] }]
+        #swagger.parameters['idBusiness'] = {
+            in: 'path',
+            description: 'ID of the business to delete',
+            required: true,
+            type: 'integer'
+        }
+        #swagger.responses[204]
+        */
         try {
             const idBusiness = parseInt(req.params.idBusiness, 10);
             const idClient = req.user.entityId;
