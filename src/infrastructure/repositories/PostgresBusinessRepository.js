@@ -122,8 +122,12 @@ class PostgresBusinessRepository extends BusinessRepository {
     }
   }
 
-  async findAll(options) {
-    const { count, rows } = await this.BusinessModel.findAndCountAll(options);
+  async findAll(offset, limit, where) {
+    const { count, rows } = await this.BusinessModel.findAndCountAll({
+      where,
+      offset,
+      limit
+    });
     return {
       count,
       rows: rows.map(r => this._mapToDomainEntity(r))

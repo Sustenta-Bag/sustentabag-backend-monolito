@@ -1,5 +1,6 @@
 import AppError from "../../infrastructure/errors/AppError.js";
 import bcrypt from 'bcrypt';
+import { Op } from 'sequelize';
 
 class BusinessService {
   constructor(businessRepository, addressRepository, diskRepository) {
@@ -48,15 +49,27 @@ class BusinessService {
     return business;
   }
 
-  async listBusinesses(page, limit, onlyActive) {
+  async listBusinesses(page, limit, filters) {
     const offset = (page - 1) * limit;
-    const options = { offset, limit };
+    const where = {};
 
-    if (onlyActive === true) {
-      options.where = { status: true };
+    if (filters.appName) {
+      where.appName = { [Op.iLike]: `%${filters.appName}%` };
+    }
+    if (filters.cnpj) {
+      where.cnpj = { [Op.iLike]: `%${filters.cnpj}%` };
+    }
+    if (filters.legalName) {
+      where.legalName = { [Op.iLike]: `%${filters.legalName}%` };
+    }
+    if (filters.cellphone) {
+      where.cellphone = { [Op.iLike]: `%${filters.cellphone}%` };
+    }
+    if (filters.onlyActive) {
+      where.status = 1;
     }
 
-    const result = await this.businessRepository.findAll(options);
+    const result = await this.businessRepository.findAll(offset, limit, where);
 
     return {
       total: result.count,

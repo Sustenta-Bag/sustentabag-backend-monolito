@@ -883,6 +883,41 @@
         "description": "",
         "parameters": [
           {
+            "name": "onlyActive",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "appName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cnpj",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "legalName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cellphone",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "schema": {
@@ -891,13 +926,6 @@
           },
           {
             "name": "limit",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "onlyActive",
             "in": "query",
             "schema": {
               "type": "string"
@@ -4109,7 +4137,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1750374560197"
+            "example": "1750452724139"
           }
         },
         "xml": {
@@ -4133,7 +4161,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1750374560197"
+            "example": "1750452724139"
           }
         },
         "xml": {
@@ -4157,7 +4185,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1750374560197"
+            "example": "1750452724139"
           }
         },
         "xml": {
