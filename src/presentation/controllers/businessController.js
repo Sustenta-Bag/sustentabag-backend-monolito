@@ -70,11 +70,19 @@ class BusinessController {
       #swagger.responses[200]
       */
       try {
-        const { page, limit, onlyActive } = req.query;
+        const { page, limit } = req.query;
+        const filters = {
+          onlyActive: req.query.onlyActive === 'true' || req.query.onlyActive === true || req.query.onlyActive === 1,
+          appName: req.query.appName || '',
+          cnpj: req.query.cnpj || '',
+          legalName: req.query.legalName || '',
+          cellphone: req.query.cellphone || '',
+        }
+        
         const businesses = await this.businessService.listBusinesses(
           page ? parseInt(page) : 1,
           limit ? parseInt(limit) : 10,
-          onlyActive === true || 'true' || 1 ? true : false, 
+          filters 
         );
         return res.hateoasList(businesses.data, businesses.pages);
       } catch (error) {
