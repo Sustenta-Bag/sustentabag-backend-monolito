@@ -383,6 +383,10 @@ class LocationService {
         throw new AppError('ID do cliente inválido', 'INVALID_CLIENT_ID', 400);
       }
 
+      if (!bagRepository) {
+        throw new AppError('Repositório de bags não foi fornecido', 'BAG_REPOSITORY_NOT_PROVIDED', 500);
+      }
+
       console.log(`Buscando bags disponíveis próximas para cliente com ID: ${clientId}`);
       
       const nearbyBusinesses = await this.findNearbyBusinessesByClient(clientId, { radius, limit: 100 });
@@ -393,11 +397,11 @@ class LocationService {
         console.log('Nenhuma empresa próxima encontrada');
         return [];
       }
-
       const allBags = [];
-        for (const business of nearbyBusinesses) {
+      for (const business of nearbyBusinesses) {
         try {
-          const activeBags = await bagRepository.findAll({ idBusiness: business.id, status: 1 }, limit, 0);
+          const activeBagsResult = await bagRepository.findAll({ idBusiness: business.id, status: 1 }, limit, 0);
+          const activeBags = activeBagsResult.rows || [];
           
           for (const bag of activeBags) {
             allBags.push({

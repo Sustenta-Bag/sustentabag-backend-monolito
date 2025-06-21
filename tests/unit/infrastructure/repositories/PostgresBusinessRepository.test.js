@@ -354,11 +354,20 @@ describe('PostgresBusinessRepository', () => {
     });
     
     test('should pass options to findAll', async () => {
-      const options = { where: { status: true } };
+      const where = { status: true };
+      const offset = 0;
+      const limit = 10;
       
-      await repository.findAll(options);
+      // Clear the mock to ensure clean state
+      mockBusinessModel.findAndCountAll.mockClear();
       
-      expect(mockBusinessModel.findAndCountAll).toHaveBeenCalledWith(options);
+      await repository.findAll(offset, limit, where);
+      
+      expect(mockBusinessModel.findAndCountAll).toHaveBeenCalledWith({
+        where,
+        offset,
+        limit
+      });
     });
   });
   

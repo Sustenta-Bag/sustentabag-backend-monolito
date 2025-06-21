@@ -1,3 +1,5 @@
+import AppError from '../../infrastructure/errors/AppError.js';
+
 class LocationController {
   constructor(locationService) {
     this.locationService = locationService;
