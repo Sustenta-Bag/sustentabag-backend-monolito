@@ -14,49 +14,58 @@ export default async (data) => {
   try {
     const RABBITMQ = process.env.RABBITMQ;
     console.log(colors.yellow(`Conectando ao RabbitMQ: ${RABBITMQ}`));
-    
+
     connection = await amqp.connect(RABBITMQ);
     const channel = await connection.createChannel();
-
     await channel.assertExchange(exchange, "direct", { durable: true });
-    
-    const messageId = v4();
+
+    const correlationId = v4();
     const timestamp = new Date();
-    
+
     const message = {
-      to: data.to,
-      notification: {
-        title: data.notification.title,
-        body: data.notification.body,
-      },
+      eventType: "NotificationRequested",
+      version: "1.0",
+      producer: "sustentabag-backend",
+      timestamp: timestamp,
+      correlationId: correlationId,
       data: {
-        type: "bulk",
-        payload: {
-          ...data.payload,
-          timestamp: timestamp,
-          correlationId: messageId,
+        to: data.to,
+        notification: {
+          title: data.notification.title,
+          body: data.notification.body,
         },
-      }
+        type: data.type || "bulk",
+        data: data.payload || {},
+        userId: data.userId,
+        timestamp: timestamp.toISOString(),
+      },
     };
-    
-    console.log(colors.blue("Publicando mensagem:"), JSON.stringify(message, null, 2));
-    
+
+    console.log(
+      colors.blue("Publicando mensagem:"),
+      JSON.stringify(message, null, 2)
+    );
+
     channel.publish(
       exchange,
       routingKey,
       Buffer.from(JSON.stringify(message)),
       {
-        messageId: messageId,
-        contentType: 'application/json',
+        messageId: correlationId,
+        contentType: "application/json",
         timestamp: timestamp.getTime(),
-        persistent: true
+        persistent: true,
       }
     );
 
-    console.log(colors.green(`Mensagem publicada com sucesso! ID: ${messageId}`));
-    
+    console.log(
+      colors.green(
+        `Mensagem publicada com sucesso! Correlation ID: ${correlationId}`
+      )
+    );
+
     await channel.close();
-    return { success: true, messageId };
+    return { success: true, correlationId };
   } catch (err) {
     console.error(colors.red("Erro ao publicar mensagem:"), err.message);
     throw new Error(`Falha ao publicar mensagem no RabbitMQ: ${err.message}`);
@@ -65,7 +74,10 @@ export default async (data) => {
       try {
         await connection.close();
       } catch (closeErr) {
-        console.error(colors.yellow("Erro ao fechar conexão:"), closeErr.message);
+        console.error(
+          colors.yellow("Erro ao fechar conexão:"),
+          closeErr.message
+        );
       }
     }
   }
