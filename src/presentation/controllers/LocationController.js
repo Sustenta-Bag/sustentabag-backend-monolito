@@ -1,8 +1,9 @@
-import AppError from '../../infrastructure/errors/AppError.js';
+import AppError from "../../infrastructure/errors/AppError.js";
 
 class LocationController {
-  constructor(locationService) {
+  constructor(locationService, bagRepository) {
     this.locationService = locationService;
+    this.bagRepository = bagRepository;
   }
 
   async findNearbyBusinesses(req, res, next) {
@@ -35,7 +36,7 @@ class LocationController {
 
       const options = {
         radius: radius ? parseFloat(radius) : 10,
-        limit: limit ? parseInt(limit) : 10
+        limit: limit ? parseInt(limit) : 10,
       };
 
       const businesses = await this.locationService.findNearbyBusinesses(
@@ -45,20 +46,22 @@ class LocationController {
 
       return res.ok({
         count: businesses.length,
-        data: businesses.map(business => ({
+        data: businesses.map((business) => ({
           id: business.id,
           name: business.appName,
           legalName: business.legalName,
           logo: business.logo,
           distance: parseFloat(business.distance.toFixed(2)),
-          address: business.address ? {
-            street: business.address.street,
-            number: business.address.number,
-            city: business.address.city,
-            state: business.address.state,
-            zipCode: business.address.zipCode
-          } : null
-        }))
+          address: business.address
+            ? {
+                street: business.address.street,
+                number: business.address.number,
+                city: business.address.city,
+                state: business.address.state,
+                zipCode: business.address.zipCode,
+              }
+            : null,
+        })),
       });
     } catch (error) {
       next(error);
@@ -97,45 +100,56 @@ class LocationController {
       }
     }
     */
-    console.log('Entrou em findNearbyBusinessesByClient no LocationController');
+    console.log("Entrou em findNearbyBusinessesByClient no LocationController");
     try {
       const { radius, limit } = req.query;
       const clientId = req.user.entityId;
 
       if (!clientId) {
-        throw new AppError('ID do cliente não encontrado no token', 'CLIENT_ID_NOT_FOUND', 401);
+        throw new AppError(
+          "ID do cliente não encontrado no token",
+          "CLIENT_ID_NOT_FOUND",
+          401
+        );
       }
 
-      if (req.user.role !== 'client') {
-        throw new AppError('Acesso permitido apenas para clientes', 'ACCESS_DENIED', 403);
+      if (req.user.role !== "client") {
+        throw new AppError(
+          "Acesso permitido apenas para clientes",
+          "ACCESS_DENIED",
+          403
+        );
       }
 
       const options = {
         radius: radius ? parseFloat(radius) : 10,
-        limit: limit ? parseInt(limit) : 10
+        limit: limit ? parseInt(limit) : 10,
       };
 
-      const businesses = await this.locationService.findNearbyBusinessesByClient(
-        clientId,
-        options
-      );
+      const businesses =
+        await this.locationService.findNearbyBusinessesByClient(
+          clientId,
+          options
+        );
 
       return res.ok({
         count: businesses.length,
-        data: businesses.map(business => ({
+        data: businesses.map((business) => ({
           id: business.id,
           name: business.appName,
           legalName: business.legalName,
           logo: business.logo,
           distance: parseFloat(business.distance.toFixed(2)),
-          address: business.address ? {
-            street: business.address.street,
-            number: business.address.number,
-            city: business.address.city,
-            state: business.address.state,
-            zipCode: business.address.zipCode
-          } : null
-        }))
+          address: business.address
+            ? {
+                street: business.address.street,
+                number: business.address.number,
+                city: business.address.city,
+                state: business.address.state,
+                zipCode: business.address.zipCode,
+              }
+            : null,
+        })),
       });
     } catch (error) {
       next(error);
@@ -143,7 +157,7 @@ class LocationController {
   }
 
   async geocodeAddress(req, res, next) {
-      /*
+    /*
     #swagger.tags = ["Location"]
     #swagger.summary = "Geocode an address"
     #swagger.description = "Convert an address to geographic coordinates"
@@ -164,13 +178,15 @@ class LocationController {
     */
     try {
       const address = req.body;
-      
-      const processedAddress = await this.locationService.processAddress(address);
-      
+
+      const processedAddress = await this.locationService.processAddress(
+        address
+      );
+
       return res.ok({
         latitude: processedAddress.latitude,
         longitude: processedAddress.longitude,
-        fullAddress: `${processedAddress.street}, ${processedAddress.number}, ${processedAddress.city}, ${processedAddress.state}, ${processedAddress.zipCode}`
+        fullAddress: `${processedAddress.street}, ${processedAddress.number}, ${processedAddress.city}, ${processedAddress.state}, ${processedAddress.zipCode}`,
       });
     } catch (error) {
       next(error);
@@ -201,33 +217,39 @@ class LocationController {
       }
     }
     */
-    console.log('Entrou em findNearbyAvailableBagsByClient no LocationController');
     try {
       const { radius, limit } = req.query;
       const clientId = req.user.entityId;
 
       if (!clientId) {
-        throw new AppError('ID do cliente não encontrado no token', 'CLIENT_ID_NOT_FOUND', 401);
+        throw new AppError(
+          "ID do cliente não encontrado no token",
+          "CLIENT_ID_NOT_FOUND",
+          401
+        );
       }
 
-      if (req.user.role !== 'client') {
-        throw new AppError('Acesso permitido apenas para clientes', 'ACCESS_DENIED', 403);
+      if (req.user.role !== "client") {
+        throw new AppError(
+          "Acesso permitido apenas para clientes",
+          "ACCESS_DENIED",
+          403
+        );
       }
-
       const options = {
         radius: radius ? parseFloat(radius) : 10,
-        limit: limit ? parseInt(limit) : 50
+        limit: limit ? parseInt(limit) : 50,
       };
 
       const bags = await this.locationService.findNearbyAvailableBagsByClient(
         clientId,
-        req.bagRepository,
+        this.bagRepository,
         options
       );
 
       return res.ok({
         count: bags.length,
-        data: bags.map(bag => ({
+        data: bags.map((bag) => ({
           id: bag.id,
           type: bag.type,
           price: bag.price,
@@ -239,15 +261,17 @@ class LocationController {
             legalName: bag.business.legalName,
             logo: bag.business.logo,
             distance: parseFloat(bag.business.distance.toFixed(2)),
-            address: bag.business.address ? {
-              street: bag.business.address.street,
-              number: bag.business.address.number,
-              city: bag.business.address.city,
-              state: bag.business.address.state,
-              zipCode: bag.business.address.zipCode
-            } : null
-          }
-        }))
+            address: bag.business.address
+              ? {
+                  street: bag.business.address.street,
+                  number: bag.business.address.number,
+                  city: bag.business.address.city,
+                  state: bag.business.address.state,
+                  zipCode: bag.business.address.zipCode,
+                }
+              : null,
+          },
+        })),
       });
     } catch (error) {
       next(error);
