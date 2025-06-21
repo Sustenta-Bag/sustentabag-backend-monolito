@@ -5,12 +5,12 @@ describe('Order Entity', () => {
   let order;
   const mockDate = new Date('2024-01-01');
   beforeEach(() => {
-    order = new Order(1, 1, 1, 'pendente', 0, mockDate);
+    order = new Order({ id: 1, idClient: 1, idBusiness: 1, status: 'pendente', totalAmount: 0, createdAt: mockDate });
   });
 
   describe('Constructor', () => {
     it('should create an order with default values', () => {
-      const defaultOrder = new Order(1, 1, 1);
+      const defaultOrder = new Order({ id: 1, idClient: 1, idBusiness: 1 });
       expect(defaultOrder.id).toBe(1);
       expect(defaultOrder.idClient).toBe(1);
       expect(defaultOrder.idBusiness).toBe(1);
@@ -21,7 +21,7 @@ describe('Order Entity', () => {
     });
 
     it('should create an order with custom values', () => {
-      const customOrder = new Order(1, 1, 1, 'pendente', 0, mockDate);
+      const customOrder = new Order({ id: 1, idClient: 1, idBusiness: 1, status: 'pendente', totalAmount: 0, createdAt: mockDate });
       expect(customOrder.id).toBe(1);
       expect(customOrder.idClient).toBe(1);
       expect(customOrder.idBusiness).toBe(1);

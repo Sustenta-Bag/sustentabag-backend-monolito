@@ -1651,9 +1651,13 @@ describe('LocationService', () => {
       mockAddressRepository.findById.mockResolvedValue(mockClient.address);
       mockBusinessRepository.findAllWithAddress.mockResolvedValue(mockBusinesses);
 
-      // Corrigir aqui: findAll deve retornar um array de bags
+      // Mock findNearbyBusinessesByClient to return the businesses
+      jest.spyOn(locationService, 'findNearbyBusinessesByClient')
+        .mockResolvedValue(mockBusinesses);
+
+      // Corrigir aqui: findAll deve retornar um objeto com rows
       const mockBagRepository = {
-        findAll: jest.fn().mockResolvedValue(mockBags)
+        findAll: jest.fn().mockResolvedValue({ rows: mockBags })
       };
 
       const result = await locationService.findNearbyAvailableBagsByClient(1, mockBagRepository);
