@@ -5,25 +5,28 @@ import PostgresAddressRepository from '../../infrastructure/repositories/Postgre
 import PostgresBusinessRepository from '../../infrastructure/repositories/PostgresBusinessRepository.js';
 import PostgresClientRepository from '../../infrastructure/repositories/PostgresClientRepository.js';
 import PostgresBagRepository from '../../infrastructure/repositories/PostgresBagRepository.js';
+import AddressModel from '../../domain/models/AddressModel.js';
+import BusinessModel from '../../domain/models/BusinessModel.js';
+import ClientModel from '../../domain/models/ClientModel.js';
+import BagModel from '../../domain/models/BagModel.js';
 import {
   authenticate,
   requireClientRole
 } from '../middleware/authMiddleware.js';
 
 export default (options = {}) => {
-  const addressRepository = options.addressRepository || new PostgresAddressRepository();
-  const businessRepository = options.businessRepository || new PostgresBusinessRepository();
-  const clientRepository = options.clientRepository || new PostgresClientRepository();
-  const bagRepository = options.bagRepository || new PostgresBagRepository();
+  const addressRepository = options.addressRepository || new PostgresAddressRepository(AddressModel);
+  const businessRepository = options.businessRepository || new PostgresBusinessRepository(BusinessModel, AddressModel);
+  const clientRepository = options.clientRepository || new PostgresClientRepository(ClientModel, AddressModel);
+  const bagRepository = options.bagRepository || new PostgresBagRepository(BagModel);
   const mapboxToken = process.env.MAPBOX_ACCESS_TOKEN;
-
   const locationService = options.locationService || new LocationService(
     businessRepository,
     addressRepository,
     clientRepository,
     mapboxToken
   );
-  const locationController = new LocationController(locationService);
+  const locationController = new LocationController(locationService, bagRepository);
 
   const router = Router();
 
