@@ -2446,9 +2446,6 @@
           }
         ],
         "responses": {
-          "201": {
-            "description": "Created"
-          },
           "401": {
             "description": "Unauthorized - Authentication required or invalid token",
             "content": {
@@ -2478,6 +2475,9 @@
                 }
               }
             }
+          },
+          "2001": {
+            "description": ""
           }
         },
         "security": [
@@ -4137,7 +4137,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1750452724139"
+            "example": "1750633028299"
           }
         },
         "xml": {
@@ -4161,7 +4161,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1750452724139"
+            "example": "1750633028299"
           }
         },
         "xml": {
@@ -4185,7 +4185,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1750452724139"
+            "example": "1750633028299"
           }
         },
         "xml": {
