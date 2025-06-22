@@ -12,7 +12,7 @@ class OrderController {
       required: true,
       schema: { $ref: "#/components/schemas/Order" }
     }
-    #swagger.responses[201]
+    #swagger.responses[2001]
     #swagger.responses[401] = {
       description: "Unauthorized - Authentication required or invalid token",
       schema: { $ref: "#/components/schemas/UnauthorizedError" }
@@ -31,8 +31,8 @@ class OrderController {
       if(idClient !== req.user.entityId) {
         return res.forbidden();
       }
-      await this.orderService.createOrder(data);
-      return res.created();
+      const order = await this.orderService.createOrder(data);
+      return res.ok(order);
     } catch (error) {
       next(error);
     }

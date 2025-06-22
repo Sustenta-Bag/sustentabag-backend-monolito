@@ -48,14 +48,19 @@ class PostgresReviewRepository extends reviewRepository {
     }
 
     async _findAllByBusiness(idBusiness) {
-        const orders = await this.orderRepository.findByBusinessId(idBusiness);
-        const orderIds = orders.map(order => order.id);
+        const orders = await this.orderRepository.findAll({ idBusiness: idBusiness });
+        const orderIds = orders.rows.map(order => order.id);
 
-        if(orderIds.length === 0) 
+        if (orderIds.length === 0) 
             return { reviews: [], total: 0, message: 'Empresa sem pedidos' };
 
         const reviews = await this.ReviewModel.findAll({
-            where: { idOrder: orderIds }
+            where: { idOrder: orderIds },
+            include: [{
+                model: this.ClientModel,
+                as: 'client',
+                attributes: ['name']
+            }]
         });
 
         if (reviews.length === 0) {
@@ -65,7 +70,10 @@ class PostgresReviewRepository extends reviewRepository {
         const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
 
         return {
-            reviews: reviews.map(r => this._mapToDomainEntity(r)),
+            reviews: reviews.map(r => ({
+                clientName: r.client ? r.client.name : null,
+                ...this._mapToDomainEntity(r)
+            })),
             total: reviews.length,
             avgRating: avgRating.toFixed(2),
         };
@@ -73,7 +81,6 @@ class PostgresReviewRepository extends reviewRepository {
 
     async _findBusinessesByRating(rating) {
         const businesses = await this.orderRepository.findAllBusinessWithOrders();
-        const businessIds = businesses.map(order => order.businessId);
 
         const result = [];
 
