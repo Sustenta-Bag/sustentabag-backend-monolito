@@ -254,6 +254,7 @@ class LocationController {
           type: bag.type,
           price: bag.price,
           description: bag.description,
+          tags: bag.tags,
           createdAt: bag.createdAt,
           business: {
             id: bag.business.id,

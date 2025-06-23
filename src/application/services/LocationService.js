@@ -411,6 +411,7 @@ class LocationService {
               description: bag.description,
               idBusiness: bag.idBusiness,
               status: bag.status,
+              tags: bag.tags,
               createdAt: bag.createdAt,
               business: {
                 id: business.id,
