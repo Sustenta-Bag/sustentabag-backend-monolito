@@ -5,7 +5,6 @@ class OrderController {
 
   async createOrder(req, res, next) {
     /*
-    #swagger.path = '/api/orders'
     #swagger.tags = ["Order"]
     #swagger.security = [{ "bearerAuth": [] }]
     #swagger.requestBody = {
@@ -40,7 +39,6 @@ class OrderController {
 
   async getOrder(req, res, next) {
     /*
-    #swagger.path = '/api/orders/{id}'
     #swagger.tags = ["Order"]
     #swagger.security = [{ "bearerAuth": [] }]
     #swagger.responses[200]
@@ -63,7 +61,6 @@ class OrderController {
 
   async getAllOrders(req, res, next) {
     /*
-    #swagger.path = '/api/orders'
     #swagger.tags = ["Order"]
     #swagger.security = [{ "bearerAuth": [] }]
     #swagger.responses[200]
@@ -93,7 +90,6 @@ class OrderController {
 
   async updateOrderStatus(req, res, next) {
     /*
-    #swagger.path = '/api/orders/{id}/status'
     #swagger.tags = ["Order"]
     #swagger.security = [{ "bearerAuth": [] }]
     #swagger.requestBody = {
@@ -127,7 +123,6 @@ class OrderController {
 
   async addItemToOrder(req, res, next) {
     /*
-    #swagger.path = '/api/orders/{idOrder}/items'
     #swagger.tags = ["Order"]
     #swagger.security = [{ "bearerAuth": [] }]
     #swagger.requestBody = {
@@ -161,7 +156,6 @@ class OrderController {
 
   async removeItemFromOrder(req, res, next) {
     /*
-    #swagger.path = '/api/orders/{idOrder}/items/{idItem}'
     #swagger.tags = ["Order"]
     #swagger.security = [{ "bearerAuth": [] }]
     #swagger.responses[204]
@@ -191,7 +185,6 @@ class OrderController {
 
   async updateItemQuantity(req, res, next) {
     /*
-    #swagger.path = '/api/orders/{idOrder}/items/{idItem}/quantity'
     #swagger.tags = ["Order"]
     #swagger.security = [{ "bearerAuth": [] }]
     #swagger.requestBody = {
@@ -226,7 +219,6 @@ class OrderController {
 
   async getOrderHistory(req, res, next) {
     /*
-    #swagger.path = '/api/orders/history'
     #swagger.tags = ["Order History"]
     #swagger.security = [{ "bearerAuth": [] }]
     #swagger.responses[200]
@@ -262,7 +254,6 @@ class OrderController {
 
   async getOrderStats(req, res, next) {
     /*
-    #swagger.path = '/api/orders/stats'
     #swagger.tags = ["Order Statistics"]
     #swagger.security = [{ "bearerAuth": [] }]
     #swagger.responses[200]
@@ -279,7 +270,6 @@ class OrderController {
 
   async getOrdersByDateRange(req, res, next) {
     /*
-    #swagger.path = '/api/orders/date-range'
     #swagger.tags = ["Order"]
     #swagger.security = [{ "bearerAuth": [] }]
     #swagger.responses[200]

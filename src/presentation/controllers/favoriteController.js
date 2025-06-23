@@ -51,12 +51,6 @@ class FavoriteController {
         #swagger.tags = ["Favorites"]
         #swagger.consumes = ['application/json']
         #swagger.security = [{ "bearerAuth": [] }]
-        #swagger.parameters['id'] = {
-            in: 'path',
-            description: 'ID of the favorite to delete',
-            required: true,
-            type: 'integer'
-        }
         #swagger.responses[204]
         */
         try {
@@ -71,12 +65,6 @@ class FavoriteController {
         /*
         #swagger.tags = ["Favorites"]
         #swagger.security = [{ "bearerAuth": [] }]
-        #swagger.parameters['idBusiness'] = {
-            in: 'path',
-            description: 'ID of the business to delete',
-            required: true,
-            type: 'integer'
-        }
         #swagger.responses[204]
         */
         try {

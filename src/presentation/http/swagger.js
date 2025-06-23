@@ -189,13 +189,6 @@ const doc = {
         token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
       },
       
-      Error: {
-        statusCode: 400,
-        errorCode: "BAG_NOT_FOUND",
-        message: "Sacola não encontrada com o ID fornecido",
-        timestamp: "2023-01-01T00:00:00Z"
-      },
-
       UnauthorizedError: {
         statusCode: 401,
         errorCode: "UNAUTHORIZED",
@@ -221,13 +214,7 @@ const doc = {
         statusCode: 400,
         errorCode: "VALIDATION_ERROR",
         message: "Erro de validação dos dados de entrada",
-        errors: [
-          {
-            field: "type",
-            message: "Tipo da sacola deve ser Doce, Salgada ou Mista"
-          }
-        ],
-        timestamp: "2023-01-01T00:00:00Z"
+        timestamp: Date.now().toString()
       }
     },
     securitySchemes: {

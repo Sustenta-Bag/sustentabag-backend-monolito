@@ -246,15 +246,7 @@ class BagController {
     #swagger.security = [{ "bearerAuth": [] }]
     #swagger.tags = ["Bag"]
     #swagger.description = "Retorna a lista de tags permitidas para sacolas"
-    #swagger.responses[200] = {
-      description: "Lista de tags permitidas",
-      schema: {
-        type: "array",
-        items: {
-          type: "string"
-        },
-        example: ["PODE_CONTER_GLUTEN", "PODE_CONTER_LACTOSE"]
-      }
+    #swagger.responses[200]
     }
     */
     try {

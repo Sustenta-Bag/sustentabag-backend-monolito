@@ -53,12 +53,6 @@ class reviewController {
     #swagger.tags = ["Reviews"]
     #swagger.consumes = ['application/json']
     #swagger.security = [{ "bearerAuth": [] }]
-    #swagger.parameters['id'] = {
-        in: 'path',
-        description: 'ID of the review to delete',
-        required: true,
-        type: 'integer'
-    }
     #swagger.responses[204]
     */
     try {
