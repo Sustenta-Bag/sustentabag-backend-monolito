@@ -205,11 +205,20 @@ class PostgresOrderRepository extends OrderRepository {
       offset
     });
 
+    const reviews = await this.ReviewModel.findAll({
+      where: {
+        idOrder: orderRecords.rows.map(record => record.id)
+      },
+      attributes: ['idOrder']
+    });
+    const reviewedOrderIds = new Set(reviews.map(r => r.idOrder));
+
     return {
       orders: orderRecords.rows.map(record => {
         const order = this._mapToDomainEntity(record);
         order.items = record.items.map(item => this._mapToDomainItem(item));
         order.calculateTotal();
+        order.reviewed = reviewedOrderIds.has(order.id);
         return order;
       }),
       total: orderRecords.count,
