@@ -47,7 +47,6 @@ class BusinessController {
     async getBusiness(req, res, next) {
       /*
       #swagger.tags = ["Business"]
-      #swagger.parameters['id'] = { description: 'ID da empresa' }
       #swagger.responses[200]
       #swagger.responses[404] = {
         description: "Empresa não encontrada",

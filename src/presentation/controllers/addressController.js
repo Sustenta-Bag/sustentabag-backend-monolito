@@ -36,7 +36,7 @@ class AddressController {
     }
     #swagger.responses[404] = {
         description: "Not Found - Address not found",
-        schema: { $ref: "#/components/schemas/Error" }
+        schema: { $ref: "#/components/schemas/NotFoundError" }
     }
     */
     try {
@@ -54,7 +54,7 @@ class AddressController {
         #swagger.responses[200]
     #swagger.responses[401] = {
     description: "Unauthorized - Authentication required or invalid token",
-    schema: { $ref: "#/components/schemas/Error" }
+    schema: { $ref: "#/components/schemas/UnauthorizedError" }
     }
     */
     try {

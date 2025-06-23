@@ -326,21 +326,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Token FCM recuperado com sucesso",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "token": {
-                      "type": "string",
-                      "example": "fcm-token-example",
-                      "description": "Token FCM do usuário ou null se não encontrado"
-                    }
-                  }
-                }
-              }
-            }
+            "description": "OK"
           },
           "400": {
             "description": "ID do usuário inválido",
@@ -473,12 +459,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/UnauthorizedError"
                 }
               },
               "application/xml": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/UnauthorizedError"
                 }
               }
             }
@@ -531,12 +517,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/NotFoundError"
                 }
               },
               "application/xml": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/NotFoundError"
                 }
               }
             }
@@ -952,8 +938,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "ID da empresa"
+            }
           },
           {
             "name": "includeAddress",
@@ -2036,75 +2021,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Lista de tags permitidas",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "example": "array"
-                    },
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "example": {
-                      "type": "array",
-                      "example": [
-                        "PODE_CONTER_GLUTEN",
-                        "PODE_CONTER_LACTOSE"
-                      ],
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "xml": {
-                    "name": "main"
-                  }
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "example": "array"
-                    },
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "example": "string"
-                        }
-                      }
-                    },
-                    "example": {
-                      "type": "array",
-                      "example": [
-                        "PODE_CONTER_GLUTEN",
-                        "PODE_CONTER_LACTOSE"
-                      ],
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "xml": {
-                    "name": "main"
-                  }
-                }
-              }
-            }
+            "description": "OK"
           }
         },
         "security": [
@@ -3325,8 +3242,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "ID of the review to delete"
+            }
           },
           {
             "name": "authorization",
@@ -3449,8 +3365,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "ID of the favorite to delete"
+            }
           },
           {
             "name": "authorization",
@@ -3485,8 +3400,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "ID of the business to delete"
+            }
           },
           {
             "name": "authorization",
@@ -4096,30 +4010,6 @@
           "name": "AuthResponse"
         }
       },
-      "Error": {
-        "type": "object",
-        "properties": {
-          "statusCode": {
-            "type": "number",
-            "example": 400
-          },
-          "errorCode": {
-            "type": "string",
-            "example": "BAG_NOT_FOUND"
-          },
-          "message": {
-            "type": "string",
-            "example": "Sacola não encontrada com o ID fornecido"
-          },
-          "timestamp": {
-            "type": "string",
-            "example": "2023-01-01T00:00:00Z"
-          }
-        },
-        "xml": {
-          "name": "Error"
-        }
-      },
       "UnauthorizedError": {
         "type": "object",
         "properties": {
@@ -4137,7 +4027,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1750698047299"
+            "example": "1750706251562"
           }
         },
         "xml": {
@@ -4161,7 +4051,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1750698047299"
+            "example": "1750706251562"
           }
         },
         "xml": {
@@ -4185,7 +4075,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1750698047299"
+            "example": "1750706251562"
           }
         },
         "xml": {
@@ -4207,25 +4097,9 @@
             "type": "string",
             "example": "Erro de validação dos dados de entrada"
           },
-          "errors": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "field": {
-                  "type": "string",
-                  "example": "type"
-                },
-                "message": {
-                  "type": "string",
-                  "example": "Tipo da sacola deve ser Doce, Salgada ou Mista"
-                }
-              }
-            }
-          },
           "timestamp": {
             "type": "string",
-            "example": "2023-01-01T00:00:00Z"
+            "example": "1750706251562"
           }
         },
         "xml": {
