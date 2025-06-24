@@ -4,12 +4,13 @@
  * sobre atualizações no status de pagamentos.
  */
 class PaymentWebhookController {
-  constructor(orderService) {
+  constructor(orderService, bagService) {
     this.orderService = orderService;
+    this.bagService = bagService;
   }
   async handlePaymentUpdate(req, res, next) {
     /*
-    #swagger.ignore = true
+    
     */
     try {
       const { orderId, status, paymentId } = req.body;
@@ -49,7 +50,19 @@ class PaymentWebhookController {
       if (status === "approved" || status === "completed") {
         console.log(`Processando pagamento aprovado para pedido ${orderIdInt}`);
 
-        await this.orderService.updateOrderStatus(orderIdInt, "entregue");
+        await this.orderService.updateOrderStatus(orderIdInt, "pago");
+        
+        for (const item of order.items) {
+            await this.bagService.changeBagStatus(item.idBag, 0);
+        }
+
+        setTimeout(async () => {
+          await this.orderService.updateOrderStatus(orderIdInt, "pronto");
+          setTimeout(async () => {
+            await this.orderService.updateOrderStatus(orderIdInt, "entregue");
+          }, 20000);
+        }, 20000);
+
 
         console.log(
           `✅ Pedido ${orderIdInt} finalizado e sacolas inativadas após pagamento aprovado`
@@ -58,7 +71,7 @@ class PaymentWebhookController {
         console.log(
           `Cancelando pedido ${orderIdInt} devido ao pagamento ${status}`
         );
-        await this.orderService.cancelOrder(orderIdInt);
+        await this.orderService.updateOrderStatus(orderIdInt, "cancelado");
       } else {
         console.log(
           `Status de pagamento desconhecido: ${status} para pedido ${orderIdInt}`

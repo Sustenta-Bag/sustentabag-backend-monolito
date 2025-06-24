@@ -91,7 +91,7 @@ class OrderService {
       throw AppError.notFound('Pedido', id);
     }
     
-    const validStatuses = ['pendente', 'confirmado', 'preparando', 'pronto', 'entregue', 'cancelado'];
+    const validStatuses = ['pendente', 'confirmado', 'pago', 'preparando', 'pronto', 'entregue', 'cancelado'];
     if (!validStatuses.includes(status)) {
       throw new AppError('Status inválido', 'INVALID_STATUS');
     }

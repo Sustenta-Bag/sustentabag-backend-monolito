@@ -3421,6 +3421,36 @@
           }
         ]
       }
+    },
+    "/api/payments/webhook": {
+      "post": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "orderId": {
+                    "example": "any"
+                  },
+                  "status": {
+                    "example": "any"
+                  },
+                  "paymentId": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4027,7 +4057,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1750709888900"
+            "example": "1750726635326"
           }
         },
         "xml": {
@@ -4051,7 +4081,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1750709888900"
+            "example": "1750726635326"
           }
         },
         "xml": {
@@ -4075,7 +4105,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1750709888900"
+            "example": "1750726635326"
           }
         },
         "xml": {
@@ -4099,7 +4129,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1750709888900"
+            "example": "1750726635326"
           }
         },
         "xml": {

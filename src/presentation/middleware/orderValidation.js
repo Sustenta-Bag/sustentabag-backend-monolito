@@ -41,7 +41,7 @@ export const validateOrderStatus = [
     .isInt({ min: 1 })
     .withMessage('ID do pedido deve ser um número inteiro positivo'),
   body('status')
-    .isIn(['pendente', 'confirmado', 'preparando', 'pronto', 'entregue', 'cancelado'])
+    .isIn(['pendente', 'confirmado', 'pago', 'preparando', 'pronto', 'entregue', 'cancelado'])
     .withMessage('Status inválido'),
 
   handleValidationErrors
