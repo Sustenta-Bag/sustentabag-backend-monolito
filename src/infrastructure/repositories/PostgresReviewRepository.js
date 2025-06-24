@@ -85,17 +85,17 @@ class PostgresReviewRepository extends reviewRepository {
         const result = [];
 
         for (const business of businesses) {
-            const { avgRating } = await this._findAllByBusiness(business.businessId);
+            const { avgRating } = await this._findAllByBusiness(business.idBusiness);
             if (avgRating !== null && avgRating >= rating) {
                 result.push({
-                    businessId: business.businessId,
+                    business: business.appName,
                     avgRating
                 });
             }
         }
 
         return result;
-}
+    }
 
     _mapToDomainEntity(record) {
         return new Review(
