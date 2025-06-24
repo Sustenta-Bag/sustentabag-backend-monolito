@@ -37,7 +37,7 @@ class OrderModel extends Model {
         defaultValue: 'pendente',
         field: 'status',
         validate: {
-          isIn: [['pendente', 'confirmado', 'preparando', 'pronto', 'entregue', 'cancelado']]
+          isIn: [['pendente', 'confirmado', 'pago', 'preparando', 'pronto', 'entregue', 'cancelado']]
         }
       },
       totalAmount: {
