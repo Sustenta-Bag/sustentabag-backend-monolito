@@ -27,7 +27,7 @@ class Order {
     return this;
   }
   updateStatus(newStatus) {
-    const validStatuses = ['pendente', 'confirmado', 'preparando', 'pronto', 'entregue', 'cancelado'];
+    const validStatuses = ['pendente', 'confirmado', 'pago', 'preparando', 'pronto', 'entregue', 'cancelado'];
     if (!validStatuses.includes(newStatus)) {
       throw new Error('Status inválido');
     }
