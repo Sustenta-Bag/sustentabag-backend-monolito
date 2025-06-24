@@ -4,6 +4,7 @@ import OrderItem from '../../domain/entities/OrderItem.js';
 import OrderModel from '../../domain/models/OrderModel.js';
 import OrderItemModel from '../../domain/models/OrderItemModel.js';
 import ReviewModel from '../../domain/models/ReviewModel.js';
+import BusinessModel from '../../domain/models/BusinessModel.js';
 import { Op, or } from 'sequelize';
 
 class PostgresOrderRepository extends OrderRepository {
@@ -124,13 +125,28 @@ class PostgresOrderRepository extends OrderRepository {
   async findAllBusinessWithOrders() {
     const orderRecords = await this.OrderModel.findAll({
         attributes: [
-            [this.OrderModel.sequelize.col('idEmpresa'), 'idBusiness']
+            [this.OrderModel.sequelize.col('OrderModel.idEmpresa'), 'idBusiness']
         ],
-        group: ['idEmpresa'],
+        include: [{
+            model: BusinessModel,
+            as: 'business', 
+            attributes: [
+                ['idEmpresa', 'idBusiness'],
+                ['nomeApp', 'appName']
+            ]
+        }],
+        group: [
+            'OrderModel.idEmpresa',
+            'business.idEmpresa',
+            'business.nomeApp'
+        ],
         raw: true
     });
-    return orderRecords;
-  }
+    return orderRecords.map(record => ({
+      idBusiness: record.idBusiness,
+      appName: record['business.appName']
+    }));
+}
 
   async updateStatus(id, status) {
     await this.OrderModel.update({ status }, {
