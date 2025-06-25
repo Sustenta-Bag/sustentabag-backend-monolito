@@ -284,7 +284,7 @@ describe('BagService', () => {
         .toThrow(AppError);
       await expect(bagService.getUsersFavoritesByBusinessId(businessId))
         .rejects
-        .toThrow('Favoritos não encontrada com o ID: para o negócio 1');
+        .toThrow('Favoritos não encontrada com o ID: para a empresa 1');
     });
 
     test('should throw error when no users found', async () => {
@@ -296,7 +296,7 @@ describe('BagService', () => {
         .toThrow(AppError);
       await expect(bagService.getUsersFavoritesByBusinessId(businessId))
         .rejects
-        .toThrow('Usuários não encontrada com o ID: favoritados para o negócio 1');
+        .toThrow('Usuários não encontrada com o ID: favoritados para a empresa 1');
     });
 
     test('should handle repository errors during getUsersFavoritesByBusinessId', async () => {
