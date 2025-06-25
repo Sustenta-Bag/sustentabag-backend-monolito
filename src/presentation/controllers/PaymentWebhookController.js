@@ -10,7 +10,7 @@ class PaymentWebhookController {
   }
   async handlePaymentUpdate(req, res, next) {
     /*
-    
+    #swagger.ignore = true
     */
     try {
       const { orderId, status, paymentId } = req.body;
@@ -55,14 +55,6 @@ class PaymentWebhookController {
         for (const item of order.items) {
             await this.bagService.changeBagStatus(item.idBag, 0);
         }
-
-        setTimeout(async () => {
-          await this.orderService.updateOrderStatus(orderIdInt, "pronto");
-          setTimeout(async () => {
-            await this.orderService.updateOrderStatus(orderIdInt, "entregue");
-          }, 20000);
-        }, 20000);
-
 
         console.log(
           `✅ Pedido ${orderIdInt} finalizado e sacolas inativadas após pagamento aprovado`
