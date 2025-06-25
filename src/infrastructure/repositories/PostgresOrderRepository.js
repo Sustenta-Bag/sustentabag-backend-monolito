@@ -5,6 +5,7 @@ import OrderModel from '../../domain/models/OrderModel.js';
 import OrderItemModel from '../../domain/models/OrderItemModel.js';
 import ReviewModel from '../../domain/models/ReviewModel.js';
 import BusinessModel from '../../domain/models/BusinessModel.js';
+import ClientModel from '../../domain/models/ClientModel.js';
 import { Op, or } from 'sequelize';
 
 class PostgresOrderRepository extends OrderRepository {
@@ -59,10 +60,17 @@ class PostgresOrderRepository extends OrderRepository {
   async findAll(where, limit, offset) {
     const { count, rows } = await this.OrderModel.findAndCountAll({
       where,
-      include: [{
-        model: this.OrderItemModel,
-        as: 'items'
-      }],
+      include: [
+        {
+          model: this.OrderItemModel,
+          as: 'items'
+        },
+        {
+          model: ClientModel,
+          as: 'client',
+          attributes: ['name']
+        }
+      ],
       offset,
       limit
     });
@@ -80,13 +88,10 @@ class PostgresOrderRepository extends OrderRepository {
       count,
       rows: rows.map(record => {
         const order = this._mapToDomainEntity(record);
-        order.items = record.items.map(item => {
-          const domainItem = this._mapToDomainItem(item);
-          return domainItem;
-        });
-        
+        order.items = record.items.map(item => this._mapToDomainItem(item));
         order.calculateTotal();
         order.reviewed = reviewedOrderIds.has(order.id);
+        order.clientName = record.client ? record.client.name : null;
         return order;
       })
     };

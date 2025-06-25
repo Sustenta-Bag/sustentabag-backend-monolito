@@ -57,15 +57,15 @@ const setupAssociations = (models) => {
     console.warn('Não foi possível configurar associação entre Order e OrderItem. Modelos não disponíveis.');
   }
 
-  if (models.OrderModel && models.UserModel) {
+  if (models.OrderModel && models.ClientModel) {
     console.log('Configurando associação entre Order e Client');
     
-    models.OrderModel.belongsTo(models.UserModel, {
+    models.OrderModel.belongsTo(models.ClientModel, {
       foreignKey: 'idClient',
       as: 'client'
     });
     
-    models.UserModel.hasMany(models.OrderModel, {
+    models.ClientModel.hasMany(models.OrderModel, {
       foreignKey: 'idClient',
       as: 'orders'
     });
