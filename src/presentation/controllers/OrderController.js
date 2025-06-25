@@ -11,7 +11,7 @@ class OrderController {
       required: true,
       schema: { $ref: "#/components/schemas/Order" }
     }
-    #swagger.responses[2001]
+    #swagger.responses[200]
     #swagger.responses[401] = {
       description: "Unauthorized - Authentication required or invalid token",
       schema: { $ref: "#/components/schemas/UnauthorizedError" }
@@ -292,6 +292,21 @@ class OrderController {
       );
       return res.ok(orders);
     } catch (error) {
+      next(error);
+    }
+  }
+
+  async cancelOrder(req, res, next) {
+    /*
+    #swagger.tags = ["Order"]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[204]
+    */
+    try {
+      const idClient = req.user.entityId;
+      await this.orderService.cancelOrder(req.params.idOrder, idClient);
+      return res.no_content();
+    } catch(error) {
       next(error);
     }
   }
