@@ -38,6 +38,7 @@ export default (options = {}) => {
   router.post('/:idOrder/items', authenticate, requireClientRole, validateAddItem, orderController.addItemToOrder.bind(orderController));
   router.delete('/:idOrder/items/:idItem', authenticate, requireClientRole, validateRemoveItem, orderController.removeItemFromOrder.bind(orderController));
   router.patch('/:idOrder/items/:idItem/quantity', authenticate, requireClientRole, validateUpdateItemQuantity, orderController.updateItemQuantity.bind(orderController));
+  router.patch('/:idOrder/cancel', authenticate, requireClientRole, orderController.cancelOrder.bind(orderController));
 
   return router;
 };

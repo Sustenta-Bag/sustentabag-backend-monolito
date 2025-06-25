@@ -253,6 +253,20 @@ class OrderService {
 
     return stats;
   }
+
+  async cancelOrder(idOrder, idClient) {
+    const order = await this.orderRepository.findById(idOrder);
+    if (!order) {
+      throw AppError.notFound('Pedido', idOrder);
+    }
+    if (order.idClient !== idClient) {
+      throw new AppError('Você não tem permissão para cancelar este pedido', 'UNAUTHORIZED');
+    }
+    if (order.status !== 'pendente') {
+      throw new AppError('Não é possível cancelar um pedido que não está pendente', 'INVALID_ORDER_STATUS');
+    }
+    this.orderRepository.updateStatus(idOrder, 'cancelado');
+  }
 }
 
 export default OrderService;
