@@ -2363,6 +2363,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "401": {
             "description": "Unauthorized - Authentication required or invalid token",
             "content": {
@@ -2392,9 +2395,6 @@
                 }
               }
             }
-          },
-          "2001": {
-            "description": ""
           }
         },
         "security": [
@@ -3125,6 +3125,41 @@
             }
           }
         }
+      }
+    },
+    "/api/orders/{idOrder}/cancel": {
+      "patch": {
+        "tags": [
+          "Order"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "idOrder",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/reviews/": {
@@ -4027,7 +4062,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1750822978494"
+            "example": "1750823174142"
           }
         },
         "xml": {
@@ -4051,7 +4086,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1750822978494"
+            "example": "1750823174142"
           }
         },
         "xml": {
@@ -4075,7 +4110,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1750822978494"
+            "example": "1750823174142"
           }
         },
         "xml": {
@@ -4099,7 +4134,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "1750822978494"
+            "example": "1750823174142"
           }
         },
         "xml": {
